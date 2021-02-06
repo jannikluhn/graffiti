@@ -1,5 +1,5 @@
 <template>
-  <article class="panel is-primary" style="pointer-events: auto;">
+  <article class="panel is-outlined" style="pointer-events: auto;">
     <p class="panel-heading">
       Account
     </p>
@@ -17,10 +17,19 @@
             Address
           </label>
           <div v-if="account" class="control">
-            <p>{{ account }}</p>
+            <p>{{ shortAddress }}</p>
           </div>
           <div v-else class="control">
             <p>No connected accounts.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">
+            Total Pixels
+          </label>
+          <div class="control">
+            <p>1 Million</p>
           </div>
         </div>
 
@@ -39,6 +48,15 @@
           </label>
           <div class="control">
             <p>{{ taxBaseStr }}</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">
+            Deposit Expiry
+          </label>
+          <div class="control">
+            <p>6:30pm, 03.06.2024</p>
           </div>
         </div>
 
@@ -65,7 +83,7 @@
 import { ethers } from 'ethers'
 import DepositField from './Deposit.vue'
 import WithdrawField from './Withdraw.vue'
-import { gWeiToWei } from '../../utils.js'
+import { gWeiToWei, shortenAddress } from '../../utils.js'
 
 export default {
   name: 'AccountPanel',
@@ -77,6 +95,7 @@ export default {
     return {
       waitingForAccount: false,
       account: null,
+      shortenAddress: null,
       balance: null,
       taxBase: null,
     }
@@ -96,6 +115,7 @@ export default {
         this.$emit('error', 'Failed to requests accounts: ' + err.message)
       }
       this.account = accounts[0]
+      this.shortAddress = shortenAddress(accounts[0])
       this.waitingForAccount = false
     },
 
