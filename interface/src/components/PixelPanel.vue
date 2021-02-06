@@ -45,7 +45,7 @@
         </div>
 
       </div>
-        <div class="panel-block">
+        <div v-if="!userIsOwner" class="panel-block">
           <button
             class="button is-dark is-fullwidth"
             v-on:click="buyModalActive = true"
@@ -113,7 +113,10 @@ export default {
         return "You"
       }
       return this.owner
-    }
+    },
+    userIsOwner() {
+        return this.account == this.owner
+    },
   },
 
   watch: {
