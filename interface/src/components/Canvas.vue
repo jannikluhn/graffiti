@@ -7,6 +7,7 @@
 import { ethers } from 'ethers'
 import gql from 'graphql-tag'
 import { idToPixelCoords } from '../utils'
+import { gridSize } from '../config'
 
 const pixelQuery = gql`
   {
@@ -15,8 +16,6 @@ const pixelQuery = gql`
     }
   }
 `
-
-const gridSize = [10, 10];
 
 export default {
   name: "Canvas",

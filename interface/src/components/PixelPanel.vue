@@ -68,6 +68,7 @@
 import { ethers } from 'ethers'
 import { pixelCoordsToID, gWeiToWei } from '../utils.js'
 import BuyModal from './BuyModal.vue'
+import { gridSize } from '../config.js'
 
 export default {
   name: "PixelPanel",
@@ -90,7 +91,7 @@ export default {
 
   computed: {
     pixelID() {
-      return pixelCoordsToID(this.selectedPixel)
+      return pixelCoordsToID(this.selectedPixel, gridSize[0])
     },
     priceStr() {
       if (this.price) {
