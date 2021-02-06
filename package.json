@@ -1,0 +1,30 @@
+{
+  "name": "graffiti",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jannikluhn/graffiti.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jannikluhn/graffiti/issues"
+  },
+  "homepage": "https://github.com/jannikluhn/graffiti#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.4.0",
+    "hardhat": "^2.0.8"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.1",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "chai": "^4.3.0",
+    "ethereum-waffle": "^3.2.2",
+    "ethers": "^5.0.29"
+  }
+}
