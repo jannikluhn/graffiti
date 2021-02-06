@@ -1,0 +1,4 @@
+type Graffiti @entity {
+  id: ID!
+  pixels: Bytes!
+}
