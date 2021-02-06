@@ -4,6 +4,20 @@
 </template>
 
 <script>
+import { ethers } from 'ethers'
+import gql from 'graphql-tag'
+import { idToPixelCoords } from '../utils'
+
+const pixelQuery = gql`
+  {
+    graffiti(id: "") {
+      pixels
+    }
+  }
+`
+
+const gridSize = [10, 10];
+
 export default {
   name: "Canvas",
 
@@ -14,11 +28,7 @@ export default {
       pixelSize: 20,
       canvasOffset: [0, 0],
       selectedPixel: null,
-      pixels: [
-        [[0, 0], [1, 0, 1]],
-        [[10, 0], [0, 0, 1]],
-        [[20, 10], [0, 0, 1]],
-      ],
+      pixels: null,
     }
   },
 
@@ -29,6 +39,11 @@ export default {
     this.ctx = this.$refs.canvas.getContext('2d')
     this.resizeCanvas()
     this.draw()
+
+    this.$apolloClient.query({query: pixelQuery}).then((result) => {
+      this.setPixelsFromGraph(result.data)
+      this.draw()
+    })
   },
   destroyed() {
     window.removeEventListener('resize', this.onResize)
@@ -53,10 +68,6 @@ export default {
       this.$emit('pixelSelected', this.selectedPixel)
     },
 
-    onMouseMove() {
-      console.log("move")
-    },
-
     canvasToPixelCoords(c) {
       return [
         Math.floor((c[0] - this.canvasOffset[0]) / this.pixelSize + 0.5),
@@ -78,21 +89,35 @@ export default {
     },
 
     draw() {
-      this.ctx.fillStyle = "rgb(255,255,255)"
+      this.ctx.fillStyle = 'rgb(255,255,255)'
       this.ctx.fillRect(0, 0, this.canvasSize[0], this.canvasSize[1])
 
-      for (const pixel of this.pixels) {
-          const pixelCoords = pixel[0];
-          const canvasCoords = this.pixelToCanvasCoords(pixelCoords);
+      if (this.pixels === null ) {
+        return
+      }
 
-          this.ctx.fillStyle = "rgb(255,0,0)"
-          this.ctx.fillRect(
-            canvasCoords[0] - this.pixelSize / 2,
-            canvasCoords[1] - this.pixelSize / 2,
-            this.pixelSize,
-            this.pixelSize,
+      for (let i = 0; i < this.pixels.length; i++) {
+        const pixelCoords = idToPixelCoords(i, gridSize[0])
+        const canvasCoords = this.pixelToCanvasCoords(pixelCoords)
+
+        if (this.pixels[i] == 0) {
+          this.ctx.fillStyle = 'rgb(255,255,255)'
+        } else {
+          this.ctx.fillStyle = 'rgb(255,0,0)'
+        }
+        this.ctx.fillRect(
+          canvasCoords[0] - this.pixelSize / 2,
+          canvasCoords[1] - this.pixelSize / 2,
+          this.pixelSize,
+          this.pixelSize,
         )
       }
+    },
+
+    setPixelsFromGraph(data) {
+      let pixelsHex = data.graffiti.pixels
+      let pixelsUint8Array = ethers.utils.arrayify(pixelsHex)
+      this.pixels = pixelsUint8Array
     },
   },
 }

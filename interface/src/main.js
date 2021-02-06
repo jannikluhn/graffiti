@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import { ethers } from 'ethers'
 import GraffitiMetadata from './assets/Graffiti.json'
+import { ApolloClient, InMemoryCache } from '@apollo/client/core'
 
 import '@/assets/main.scss'
 
@@ -18,8 +19,14 @@ if (window.ethereum) {
   Vue.prototype.$graffitiContract = null
 }
 
+const apolloClient = new ApolloClient({
+  uri: 'https://api.thegraph.com/subgraphs/name/jannikluhn/graffiti-goerli',
+  cache: new InMemoryCache(),
+})
+Vue.prototype.$apolloClient = apolloClient
+
 Vue.config.productionTip = false
 
 new Vue({
-  render: h => h(App),
+  render: h => h(App)
 }).$mount('#app')
