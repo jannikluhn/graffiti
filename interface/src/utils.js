@@ -24,10 +24,17 @@ function intToNatural(n) {
   function weiToEth(wei) {
     return wei.div("1000000000000000000")
   }
+
+  function shortenAddress(address) {
+      const address1 = address.substring(1, 6)
+      const address2 = address.substring(38)
+      return address1.concat('…', address2)
+  }
   
   export {
     pixelCoordsToID,
     weiToGWei,
     gWeiToWei,
     weiToEth,
+    shortenAddress
   }
