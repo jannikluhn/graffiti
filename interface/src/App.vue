@@ -1,22 +1,31 @@
 <template>
   <div id="app">
-    <section class="hero is-primary">
-      <div class="hero-body">
-        <h1 class="title">
-          Graffiti
-        </h1>
-        <h2 class="subtitle">
-          subtitle
-        </h2>
-      </div>
-    </section>
+    <Canvas v-on:pixelSelected="onPixelSelected" />
+    <Panels v-bind:selectedPixel="selectedPixel" />
   </div>
 </template>
 
 <script>
+import Canvas from './components/Canvas.vue'
+import Panels from './components/Panels.vue'
+
 export default {
   name: 'App',
   components: {
-  }
+    Canvas,
+    Panels,
+  },
+
+  data() {
+    return {
+      selectedPixel: null,
+    }
+  },
+
+  methods: {
+    onPixelSelected(coords) {
+      this.selectedPixel = coords
+    },
+  },
 }
 </script>
