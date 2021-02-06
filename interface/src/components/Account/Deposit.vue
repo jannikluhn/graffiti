@@ -42,7 +42,7 @@ export default {
       }
     },
     amountInvalid() {
-      return this.amount === null || this.amount <= 0
+      return this.amount === null || this.amount <= 0 || this.amount % 1e9 != 0
     },
   },
 
