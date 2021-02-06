@@ -60,7 +60,9 @@ export default {
       let x = e.clientX - rect.left
       let y = e.clientY - rect.top
       let pixelCoords = this.canvasToPixelCoords([x, y])
-      if (this.selectedPixel === null || this.selectedPixel[0] != pixelCoords[0] || this.selectedPixel[1] != pixelCoords[1]) {
+      if (pixelCoords[0] < 0 || pixelCoords[1] < 0 || pixelCoords[0] >= gridSize[0] || pixelCoords[1] >= gridSize[1]) {
+        this.selectedPixel = null
+      } else if (this.selectedPixel === null || this.selectedPixel[0] != pixelCoords[0] || this.selectedPixel[1] != pixelCoords[1]) {
         this.selectedPixel = pixelCoords
       } else {
         this.selectedPixel = null
