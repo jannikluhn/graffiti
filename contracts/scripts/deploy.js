@@ -6,7 +6,8 @@ async function main() {
 
   await graffiti.deployed();
 
-  console.log("Contract deployed to:", graffiti.address);
+  console.log("Deploy tx:", graffiti.deployTransaction.hash);
+  console.log("Contract adddress:", graffiti.address);
 }
 
 main()
