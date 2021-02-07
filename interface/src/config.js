@@ -1,4 +1,4 @@
-const gridSize = [10, 10]  // grid width and height in pixels
+const gridSize = [333, 333]  // grid width and height in pixels
 
 export {
     gridSize,
