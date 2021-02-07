@@ -95,7 +95,7 @@ export default {
     },
     priceStr() {
       if (this.price) {
-        return ethers.utils.formatEther(this.price) + " ETH"
+        return ethers.utils.formatEther(this.price) + " DAI"
       } else {
         return "Unknown"
       }

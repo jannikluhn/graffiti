@@ -20,15 +20,6 @@
 
         <div class="field">
           <label class="label">
-            Total Pixels
-          </label>
-          <div class="control">
-            <p>1 Million</p>
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="label">
             Balance
           </label>
           <div class="control">
@@ -42,15 +33,6 @@
           </label>
           <div class="control">
             <p>{{ taxBaseStr }}</p>
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="label">
-            Deposit Expiry
-          </label>
-          <div class="control">
-            <p>6:30pm, 03.06.2024</p>
           </div>
         </div>
 
@@ -94,32 +76,22 @@ export default {
     }
   },
   props: [
-    "account"
+    "account",
   ],
 
-  created() {
-    window.ethereum.on('accountsChanged', this.onAccountsChanged)
-  },
-
-  methods: {
-    async connect() {
-      this.waitingForAccount = true
-      let accounts
-      try {
-        accounts = await window.ethereum.request({method: 'eth_requestAccounts'})
-      } catch(err) {
-        this.$emit('error', 'Failed to requests accounts: ' + err.message)
+  mounted() {
+    const filters = [
+      this.$contract.filters.Deposit(),
+      this.$contract.filters.Withdraw(),
+    ];
+    const updateBalance = (account, amount, balance) => {
+      if (this.account !== null && this.account == account) {
+        this.balance = gWeiToWei(balance)
       }
-      this.$emit("accountChanged", accounts[0])
-      this.waitingForAccount = false
-    },
-
-    onAccountsChanged(accounts) {
-      if (accounts.length >= 0) {
-        this.$emit("accountChanged", accounts[0])
-      } else {
-        this.$emit('error', 'No connected account.')
-      }
+      console.log((account, amount, balance))
+    }
+    for (let f of filters) {
+      this.$contract.on(f, updateBalance)
     }
   },
 
@@ -140,27 +112,28 @@ export default {
         this.balance = null
         this.taxBase = null
       }
+
     },
   },
 
   computed: {
     balanceStr() {
       if (this.balance) {
-        return ethers.utils.formatEther(this.balance) + " ETH"
+        return ethers.utils.formatEther(this.balance) + " DAI"
       } else {
         return "Unknown"
       }
     },
     taxBaseStr() {
       if (this.taxBase) {
-        return ethers.utils.formatEther(this.taxBase) + " ETH"
+        return ethers.utils.formatEther(this.taxBase) + " DAI"
       } else {
         return "Unknown"
       }
     },
     shortAddress() {
       return shortenAddress(this.account)
-    }
+    },
   },
 }
 </script>
