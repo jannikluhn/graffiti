@@ -28,6 +28,14 @@ function weiToEth(wei) {
   return wei.div("1000000000000000000")
 }
 
+function byteToColor(b) {
+  if (b == 0) {
+    return [255, 255, 255, 255]
+  } else {
+    return [255, 0, 0, 255]
+  }
+}
+
 export {
   pixelCoordsToID,
   idToPixelCoords,
@@ -35,4 +43,5 @@ export {
   gWeiToWei,
   weiToEth,
   shortenAddress,
+  byteToColor,
 }
