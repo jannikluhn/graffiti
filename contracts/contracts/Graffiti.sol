@@ -32,7 +32,13 @@ contract Graffiti is ERC721 {
         uint8 color
     );
 
-    constructor() ERC721("Pixel", "PIX") {}
+    constructor(uint128 width, uint128 height) ERC721("Pixel", "PIX") {
+        require(width > 0, "Graffiti: width must not be zero");
+        require(height > 0, "Graffiti: height must not be zero");
+        _maxPixelID = width * height - 1;
+    }
+
+    uint256 private _maxPixelID;
 
     mapping(uint256 => uint64) private _pixelPrices;
     mapping(address => Account) private _accounts;
@@ -59,6 +65,10 @@ contract Graffiti is ERC721 {
         }
 
         return _pixelPrices[pixelID];
+    }
+
+    function getMaxPixelID() view public returns (uint256) {
+        return _maxPixelID;
     }
 
     //
@@ -112,6 +122,7 @@ contract Graffiti is ERC721 {
             _accounts[owner] = seller;
             _transfer(owner, msg.sender, pixelID);
         } else {
+            require(pixelID <= _maxPixelID, "Graffiti: max pixel ID exceeded");
             _mint(msg.sender, pixelID);
         }
 
