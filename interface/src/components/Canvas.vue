@@ -31,6 +31,8 @@ export default {
     }
   },
 
+  props: ["wrongNetwork"],
+
   created() {
     window.addEventListener('resize', this.onResize)
   },

@@ -4,12 +4,6 @@
       Account
     </p>
 
-    <div v-if="!account" class="panel-block">
-      <button class="button is-fullwidth" v-bind:class="{'is-loading': waitingForAccount}" v-on:click="connect">
-        Connect account
-      </button>
-    </div>
-
     <div v-if="account" class="panel-block">
       <form>
         <div class="field">
@@ -94,12 +88,14 @@ export default {
   data() {
     return {
       waitingForAccount: false,
-      account: null,
       shortenAddress: null,
       balance: null,
       taxBase: null,
     }
   },
+  props: [
+    "account"
+  ],
 
   created() {
     window.ethereum.on('accountsChanged', this.onAccountsChanged)
@@ -114,14 +110,13 @@ export default {
       } catch(err) {
         this.$emit('error', 'Failed to requests accounts: ' + err.message)
       }
-      this.account = accounts[0]
-      this.shortAddress = shortenAddress(accounts[0])
+      this.$emit("accountChanged", accounts[0])
       this.waitingForAccount = false
     },
 
     onAccountsChanged(accounts) {
       if (accounts.length >= 0) {
-        this.account = accounts[0]
+        this.$emit("accountChanged", accounts[0])
       } else {
         this.$emit('error', 'No connected account.')
       }
@@ -163,6 +158,9 @@ export default {
         return "Unknown"
       }
     },
+    shortAddress() {
+      return shortenAddress(this.account)
+    }
   },
 }
 </script>

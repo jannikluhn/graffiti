@@ -66,7 +66,7 @@
 
 <script>
 import { ethers } from 'ethers'
-import { pixelCoordsToID, gWeiToWei } from '../utils.js'
+import { pixelCoordsToID, gWeiToWei, shortenAddress } from '../utils.js'
 import BuyModal from './BuyModal.vue'
 import { gridSize } from '../config.js'
 
@@ -113,7 +113,7 @@ export default {
       if (this.owner == this.account) {
         return "You"
       }
-      return this.owner
+      return shortenAddress(this.owner)
     },
     userIsOwner() {
         return this.account == this.owner
