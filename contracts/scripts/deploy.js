@@ -2,7 +2,8 @@ const hre = require("hardhat");
 
 async function main() {
   const Graffiti = await hre.ethers.getContractFactory("Graffiti");
-  const graffiti = await Graffiti.deploy();
+  const size = 333;
+  const graffiti = await Graffiti.deploy(size, size);
 
   await graffiti.deployed();
 
