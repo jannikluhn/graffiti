@@ -13,7 +13,7 @@ function idToPixelCoords(id, width) {
 function shortenAddress(address) {
     const address1 = address.substring(0, 6)
     const address2 = address.substring(38)
-    return address1.concat('…', address2)
+    return address1.concat('…', address2).toLowerCase()
 }
 
 function weiToGWei(wei) {
