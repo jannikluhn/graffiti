@@ -6,7 +6,7 @@
 <script>
 import { ethers } from 'ethers'
 import gql from 'graphql-tag'
-import { idToPixelCoords } from '../utils'
+import { idToPixelCoords, byteToColor } from '../utils'
 import { gridSize } from '../config'
 
 const pixelQuery = gql`
@@ -27,7 +27,10 @@ export default {
       pixelSize: 20,
       canvasOffset: [0, 0],
       selectedPixel: null,
-      pixels: null,
+
+      offscreenCanvas: null,
+      offscreenCtx: null,
+      imageData: null,
     }
   },
 
@@ -37,6 +40,14 @@ export default {
   mounted() {
     this.ctx = this.$refs.canvas.getContext('2d')
     this.resizeCanvas()
+
+    this.offscreenCanvas = document.createElement('canvas')
+    this.offscreenCanvas.width = gridSize[0]
+    this.offscreenCanvas.height = gridSize[1]
+    this.offscreenCtx = this.offscreenCanvas.getContext('2d')
+    this.offscreenCtx.imageSmoothingEnabled = false
+    this.imageData = this.offscreenCtx.createImageData(gridSize[0], gridSize[1])
+
     this.draw()
 
     this.$apolloClient.query({query: pixelQuery}).then((result) => {
@@ -68,11 +79,10 @@ export default {
       }
       this.$emit('pixelSelected', this.selectedPixel)
     },
-
     canvasToPixelCoords(c) {
       return [
-        Math.floor((c[0] - this.canvasOffset[0]) / this.pixelSize + 0.5),
-        Math.floor((c[1] - this.canvasOffset[1]) / this.pixelSize + 0.5),
+        Math.floor((c[0] - this.canvasOffset[0]) / this.pixelSize),
+        Math.floor((c[1] - this.canvasOffset[1]) / this.pixelSize),
       ]
     },
     pixelToCanvasCoords(c) {
@@ -90,35 +100,37 @@ export default {
     },
 
     draw() {
-      this.ctx.fillStyle = 'rgb(255,255,255)'
-      this.ctx.fillRect(0, 0, this.canvasSize[0], this.canvasSize[1])
-
-      if (this.pixels === null ) {
+      if (this.redrawRequested) {
         return
       }
+      this.redrawRequested = true
+      window.requestAnimationFrame(() => {
+        this.redrawRequested = false
 
-      for (let i = 0; i < this.pixels.length; i++) {
-        const pixelCoords = idToPixelCoords(i, gridSize[0])
-        const canvasCoords = this.pixelToCanvasCoords(pixelCoords)
+        this.ctx.fillStyle = '#eeeeee'
+        this.ctx.fillRect(0, 0, this.canvasSize[0], this.canvasSize[1])
 
-        if (this.pixels[i] == 0) {
-          this.ctx.fillStyle = 'rgb(255,255,255)'
-        } else {
-          this.ctx.fillStyle = 'rgb(255,0,0)'
-        }
-        this.ctx.fillRect(
-          canvasCoords[0] - this.pixelSize / 2,
-          canvasCoords[1] - this.pixelSize / 2,
-          this.pixelSize,
-          this.pixelSize,
-        )
-      }
+        this.ctx.save()
+        this.ctx.imageSmoothingEnabled = false
+        this.ctx.translate(this.canvasOffset[0], this.canvasOffset[1])
+        this.ctx.scale(this.pixelSize, this.pixelSize)
+        this.ctx.drawImage(this.offscreenCanvas, 0, 0)
+        this.ctx.restore()
+      })
     },
 
     setPixelsFromGraph(data) {
       let pixelsHex = data.graffiti.pixels
       let pixelsUint8Array = ethers.utils.arrayify(pixelsHex)
-      this.pixels = pixelsUint8Array
+      for (let i = 0; i < pixelsUint8Array.length; i++) {
+        const color = byteToColor(pixelsUint8Array[i]);
+        const pixelCoords = idToPixelCoords(i, gridSize[0]);
+        const redIndex = (pixelCoords[0] + pixelCoords[1] * gridSize[1]) * 4
+        for (let i = 0; i < 4; i++) {
+          this.imageData.data[redIndex + i] = color[i]
+        }
+      }
+      this.offscreenCtx.putImageData(this.imageData, 0, 0)
     },
   },
 }
