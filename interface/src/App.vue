@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <Canvas v-on:pixelSelected="onPixelSelected" />
-    <Panels v-bind:selectedPixel="selectedPixel" />
+    <Canvas v-on:pixelSelected="onPixelSelected" v-bind:wrongNetwork="wrongNetwork" />
+    <Panels v-bind:selectedPixel="selectedPixel" v-bind:wrongNetwork="wrongNetwork" />
   </div>
 </template>
 
@@ -19,6 +19,22 @@ export default {
   data() {
     return {
       selectedPixel: null,
+      network: null
+    }
+  },
+
+  mounted() { 
+      this.$provider.getNetwork().then((network) => {
+        this.network = network
+      })
+  },
+
+  computed: {
+    wrongNetwork() {
+      if (!this.network) {
+        return null
+      }
+      return this.network.chainId != 5 
     }
   },
 
