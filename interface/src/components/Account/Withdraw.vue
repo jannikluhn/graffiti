@@ -1,7 +1,7 @@
 <template>
   <div class="field has-addons">
     <div class="control">
-      <input class="input" type="text" placeholder="ETH" v-model="amountInput">
+      <input class="input" type="text" placeholder="DAI" v-model="amountInput">
     <p v-if="amountInput && amountInvalid" class="help is-danger">Invalid withdraw amount</p>
     </div>
     <div class="control">
@@ -44,7 +44,7 @@ export default {
       }
     },
     amountInvalid() {
-      return this.amount === null || this.amount <= 0 || (this.balance !== null && this.amount > this.balance)
+      return this.amount === null || this.amount <= 0 || (this.balance !== null && this.balance.lt(this.amount))
     },
   },
 

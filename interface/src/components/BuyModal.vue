@@ -32,7 +32,7 @@
                 New Price
               </label>
               <div class="control">
-                <input class="input" type="text" placeholder="ETH" v-model="newPriceInput">
+                <input class="input" type="text" placeholder="DAI" v-model="newPriceInput">
                 <p v-if="newPriceInput && newPriceInvalid" class="help is-danger">Invalid price</p>
               </div>
             </div>
@@ -84,7 +84,7 @@ export default {
   computed: {
     priceStr() {
       if (this.price) {
-        return ethers.utils.formatEther(this.price) + " ETH"
+        return ethers.utils.formatEther(this.price) + " DAI"
       } else {
         return "Unknown"
       }
