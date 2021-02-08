@@ -120,7 +120,7 @@ export default {
       try {
         let signer = this.$provider.getSigner(this.account)
         let contract = this.$contract.connect(signer)
-        await contract.buyPixel(this.pixelID, weiToGWei(this.price), weiToGWei(this.newPrice), this.color)
+        await contract.buy(this.pixelID, weiToGWei(this.price), weiToGWei(this.newPrice), this.color)
         this.newPriceInput = ""
       } catch(err) {
         this.$emit('error', 'Failed to send withdraw transaction: ' + err.message)
