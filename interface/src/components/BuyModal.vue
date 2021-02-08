@@ -123,7 +123,7 @@ export default {
         await contract.buy(this.pixelID, weiToGWei(this.price), weiToGWei(this.newPrice), this.color)
         this.newPriceInput = ""
       } catch(err) {
-        this.$emit('error', 'Failed to send withdraw transaction: ' + err.message)
+        this.$emit('error', 'Failed to send buy transaction: ' + err.message)
       }
       this.waitingForTx = false
       this.$emit('close')

@@ -73,6 +73,14 @@ export default {
       this.setPixelsFromGraph(result.data)
       this.draw()
     })
+
+    this.$contract.on("ColorChange", (id, color) => {
+      if (this.imageData) {
+        this.setPixel(id.toNumber(), color)
+        this.offscreenCtx.putImageData(this.imageData, 0, 0)
+        this.draw()
+      }
+    })
   },
   destroyed() {
     window.removeEventListener('resize', this.onResize)
@@ -141,14 +149,18 @@ export default {
       let pixelsHex = data.graffiti.pixels
       let pixelsUint8Array = ethers.utils.arrayify(pixelsHex)
       for (let i = 0; i < pixelsUint8Array.length; i++) {
-        const color = byteToColor(pixelsUint8Array[i]);
-        const pixelCoords = idToPixelCoords(i, gridSize[0]);
-        const redIndex = (pixelCoords[0] + pixelCoords[1] * gridSize[1]) * 4
-        for (let i = 0; i < 4; i++) {
-          this.imageData.data[redIndex + i] = color[i]
-        }
+        this.setPixel(i, pixelsUint8Array[i])
       }
       this.offscreenCtx.putImageData(this.imageData, 0, 0)
+    },
+
+    setPixel(id, colorByte) {
+      const color = byteToColor(colorByte);
+      const pixelCoords = idToPixelCoords(id, gridSize[0]);
+      const redIndex = (pixelCoords[0] + pixelCoords[1] * gridSize[1]) * 4
+      for (let i = 0; i < 4; i++) {
+        this.imageData.data[redIndex + i] = color[i]
+      }
     },
 
     zoom(factor) {
