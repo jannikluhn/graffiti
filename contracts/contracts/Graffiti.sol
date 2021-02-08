@@ -12,24 +12,28 @@ struct Account {
 contract Graffiti is ERC721 {
 
     event Deposit(
-        address indexed account,
+        address account,
         uint64 amount,
         int128 balance
     );
     event Withdraw(
-        address indexed account,
-        uint64 amount,
-        int128 balance
-    );
-    event TaxPayment(
-        address indexed account,
+        address account,
         uint64 amount,
         int128 balance
     );
     event ColorChange(
-        uint256 indexed pixelID,
-        address indexed owner,
+        uint256 pixelID,
         uint8 color
+    );
+    event PriceChange(
+        uint256 pixelID,
+        uint64 price
+    );
+    event Buy(
+        uint256 pixelID,
+        address seller,
+        address buyer,
+        uint64 price
     );
 
     constructor(uint128 width, uint128 height) ERC721("Pixel", "PIX") {
@@ -108,8 +112,10 @@ contract Graffiti is ERC721 {
 
         _accounts[msg.sender] = buyer;
 
+        address owner;
         if (_exists(pixelID)) {
-            address owner = ownerOf(pixelID);
+            owner = ownerOf(pixelID);
+            require(owner != msg.sender, "Graffiti: cannot buy pixel from yourself");
 
             // pay tax for seller so that balance is up to date
             payTax(owner);
@@ -122,16 +128,26 @@ contract Graffiti is ERC721 {
             _accounts[owner] = seller;
             _transfer(owner, msg.sender, pixelID);
         } else {
+            owner = address(0);
             require(pixelID <= _maxPixelID, "Graffiti: max pixel ID exceeded");
             _mint(msg.sender, pixelID);
         }
 
         _pixelPrices[pixelID] = newPrice;
 
+        emit Buy({
+            pixelID: pixelID,
+            seller: owner,
+            buyer: msg.sender,
+            price: price
+        });
         emit ColorChange({
             pixelID: pixelID,
-            owner: msg.sender,
             color: color
+        });
+        emit PriceChange({
+            pixelID: pixelID,
+            price: newPrice
         });
     }
 
@@ -141,7 +157,6 @@ contract Graffiti is ERC721 {
         require(msg.sender == owner, "Graffiti: only pixel owner can set color");
         emit ColorChange({
             pixelID: pixelID,
-            owner: owner,
             color: color
         });
     }
@@ -159,6 +174,11 @@ contract Graffiti is ERC721 {
 
         _pixelPrices[pixelID] = newPrice;
         _accounts[msg.sender] = account;
+
+        emit PriceChange({
+            pixelID: pixelID,
+            price: newPrice
+        });
     }
 
     function payTax(address account) public {
@@ -171,12 +191,6 @@ contract Graffiti is ERC721 {
 
             _accounts[account] = acc;
             _taxBalance += unaccountedTax;
-
-            emit TaxPayment({
-                account: account,
-                amount: unaccountedTax,
-                balance: acc.balance
-            });
         }
     }
 
