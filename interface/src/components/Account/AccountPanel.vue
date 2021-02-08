@@ -29,10 +29,10 @@
 
         <div class="field">
           <label class="label">
-            Tax Base
+            Monthly tax
           </label>
           <div class="control">
-            <p>{{ taxBaseStr }}</p>
+            <p>{{ taxPerMonthStr }}</p>
           </div>
         </div>
 
@@ -60,6 +60,7 @@ import { ethers } from 'ethers'
 import DepositField from './Deposit.vue'
 import WithdrawField from './Withdraw.vue'
 import { gWeiToWei, shortenAddress } from '../../utils.js'
+import { taxRate } from '../../config.js'
 
 export default {
   name: 'AccountPanel',
@@ -123,9 +124,11 @@ export default {
         return "Unknown"
       }
     },
-    taxBaseStr() {
+    taxPerMonthStr() {
       if (this.taxBase) {
-        return ethers.utils.formatEther(this.taxBase) + " DAI"
+        const taxPerYear = this.taxBase.mul(Math.round(taxRate * 100000)).div(100000)
+        const taxPerDay = taxPerYear.div(12)
+        return ethers.utils.formatEther(taxPerDay) + " DAI"
       } else {
         return "Unknown"
       }
