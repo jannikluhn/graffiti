@@ -36,6 +36,10 @@ contract Graffiti is ERC721, Ownable {
         address buyer,
         uint64 price
     );
+    event TaxWithdraw(
+        uint256 amount,
+        address receiver
+    );
 
     constructor(uint128 width, uint128 height) ERC721("Pixel", "PIX") {
         require(width > 0, "Graffiti: width must not be zero");
@@ -277,6 +281,10 @@ contract Graffiti is ERC721, Ownable {
         _taxBalance -= amount;
         (bool success,) = receiver.call{value: amount * (1 gwei)}("");
         require(success, "Graffiti: withdraw taxes call reverted");
+        emit TaxWithdraw({
+            amount: amount,
+            receiver: receiver
+        });
     }
 
     function withdrawTaxesTo(uint256 amount, address receiver) public onlyOwner {
