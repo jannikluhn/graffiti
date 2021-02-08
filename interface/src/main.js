@@ -8,7 +8,7 @@ import '@/assets/main.scss'
 
 if (window.ethereum) {
   const provider = new ethers.providers.Web3Provider(window.ethereum)
-  const address = '0x6f46691c07bdeC184Dc6669d02D9167632D6a06d'
+  const address = '0x86B6200E8A90603D20fb11C457ec6b8C4265C314'
   const contract = new ethers.Contract(address, GraffitiMetadata.abi, provider)
   // todo: check we're on the right network
 
