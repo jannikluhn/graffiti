@@ -88,7 +88,6 @@ export default {
       if (this.account !== null && this.account == account) {
         this.balance = gWeiToWei(balance)
       }
-      console.log((account, amount, balance))
     }
     for (let f of filters) {
       this.$contract.on(f, updateBalance)
