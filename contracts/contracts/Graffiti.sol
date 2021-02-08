@@ -194,36 +194,48 @@ contract Graffiti is ERC721 {
         }
     }
 
-    function deposit() payable public {
+    function depositFor(address account) payable public {
         payTax(msg.sender);
-        Account memory account = _accounts[msg.sender];
+        Account memory acc = _accounts[account];
 
         require(msg.value % (1 gwei) == 0, "Graffiti: deposit amount must be multiple of 1 GWei");
         uint64 amount = uint64(msg.value / (1 gwei));
-        account.balance = _addInt128(account.balance, amount);
+        acc.balance = _addInt128(acc.balance, amount);
 
-        _accounts[msg.sender] = account;
+        _accounts[account] = acc;
         emit Deposit({
-            account: msg.sender,
+            account: account,
             amount: amount,
-            balance: account.balance
+            balance: acc.balance
         });
     }
 
+    function deposit() payable public {
+        depositFor(msg.sender);
+    }
+
+    function withdrawTo(uint64 amount, address receiver) public {
+        _withdraw(msg.sender, amount, receiver);
+    }
+
     function withdraw(uint64 amount) public {
-        payTax(msg.sender);
-        Account memory account = _accounts[msg.sender];
+        _withdraw(msg.sender, amount, msg.sender);
+    }
 
-        require(account.balance >= amount);
-        account.balance = _subInt128(account.balance, amount);
+    function _withdraw(address account, uint64 amount, address receiver) internal {
+        payTax(account);
+        Account memory acc = _accounts[account];
 
-        (bool success,) = msg.sender.call{value: amount * (1 gwei)}("");
+        require(acc.balance >= amount, "Graffiti: cannot withdraw more than balance");
+        acc.balance = _subInt128(acc.balance, amount);
+
+        (bool success,) = receiver.call{value: amount * (1 gwei)}("");
         require(success, "Graffiti: withdraw call reverted");
-        _accounts[msg.sender] = account;
+        _accounts[account] = acc;
         emit Withdraw({
-            account: msg.sender,
+            account: account,
             amount: amount,
-            balance: account.balance
+            balance: acc.balance
         });
     }
 
