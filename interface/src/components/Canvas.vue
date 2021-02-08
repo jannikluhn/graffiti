@@ -1,5 +1,11 @@
 <template>
-  <canvas ref="canvas" v-on:click="onClick">
+  <canvas
+    ref="canvas"
+    v-on:click="onClick"
+    v-on:mousedown="onMouseDown"
+    v-on:mousemove="onMouseMove"
+    v-on:mouseup="onMouseUp"
+  >
   </canvas>
 </template>
 
@@ -31,6 +37,9 @@ export default {
       offscreenCanvas: null,
       offscreenCtx: null,
       imageData: null,
+
+      dragging: false,
+      cursorPos: [0, 0],
     }
   },
 
@@ -98,7 +107,6 @@ export default {
       this.canvasSize = [window.innerWidth, window.innerHeight];
       this.$refs.canvas.width = this.canvasSize[0]
       this.$refs.canvas.height = this.canvasSize[1]
-      this.canvasOffset = [this.canvasSize[0] / 2, this.canvasSize[1] / 2]
     },
 
     draw() {
@@ -133,6 +141,27 @@ export default {
         }
       }
       this.offscreenCtx.putImageData(this.imageData, 0, 0)
+    },
+
+    onMouseDown() {
+      this.dragging = true
+    },
+    onMouseMove(event) {
+      let rect = event.target.getBoundingClientRect()
+      let x = event.clientX - rect.left
+      let y = event.clientY - rect.top
+      this.cursorPos = [x, y]
+
+      if (this.dragging) {
+        this.canvasOffset = [
+          this.canvasOffset[0] + event.movementX,
+          this.canvasOffset[1] + event.movementY,
+        ]
+        this.draw()
+      }
+    },
+    onMouseUp() {
+      this.dragging = false
     },
   },
 }
