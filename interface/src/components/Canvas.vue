@@ -5,6 +5,7 @@
     v-on:mousedown="onMouseDown"
     v-on:mousemove="onMouseMove"
     v-on:mouseup="onMouseUp"
+    v-on:wheel="onWheel"
   >
   </canvas>
 </template>
@@ -22,6 +23,9 @@ const pixelQuery = gql`
     }
   }
 `
+
+const minPixelSize = 1
+const maxPixelSize = 50
 
 export default {
   name: "Canvas",
@@ -143,6 +147,33 @@ export default {
       this.offscreenCtx.putImageData(this.imageData, 0, 0)
     },
 
+    zoom(factor) {
+      const diff = [
+        this.canvasOffset[0] - this.cursorPos[0],
+        this.canvasOffset[1] - this.cursorPos[1],
+      ]
+      const pixelSizeBefore = this.pixelSize
+      this.pixelSize = this.pixelSize * factor
+
+      if (this.pixelSize < minPixelSize) {
+        this.pixelSize = minPixelSize
+      } else if (this.pixelSize > maxPixelSize) {
+        this.pixelSize = maxPixelSize
+      }
+
+      const realFactor = this.pixelSize / pixelSizeBefore
+      const diffScaled = [
+        diff[0] * realFactor,
+        diff[1] * realFactor,
+      ]
+      this.canvasOffset = [
+        this.cursorPos[0] + diffScaled[0],
+        this.cursorPos[1] + diffScaled[1],
+      ]
+
+      this.draw()
+    },
+
     onMouseDown() {
       this.dragging = true
     },
@@ -162,6 +193,9 @@ export default {
     },
     onMouseUp() {
       this.dragging = false
+    },
+    onWheel(event) {
+      this.zoom(1 - event.deltaY / 10)
     },
   },
 }
