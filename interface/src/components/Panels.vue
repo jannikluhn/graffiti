@@ -20,6 +20,13 @@
             v-on:error="onError($event)"
           />
         </div>
+        <div class="column is-narrow">
+          <OwnedPixelPanel
+            v-if="account"
+            v-bind:account="account"
+            v-on:error="onError($event)"
+          />
+        </div>
         <div v-if="wrongNetwork !== null && wrongNetwork">
           <div class="notification is-dark" style="pointer-events: auto;">
               Wrong Network ☹️ Please change to Goerli Testnet and refresh the page.
@@ -40,6 +47,7 @@
 import ConnectPanel from './ConnectPanel.vue'
 import AccountPanel from './Account/AccountPanel.vue'
 import PixelPanel from './PixelPanel.vue'
+import OwnedPixelPanel from './OwnedPixelPanel.vue'
 
 export default {
   name: "Panels",
@@ -47,6 +55,7 @@ export default {
     ConnectPanel,
     AccountPanel,
     PixelPanel,
+    OwnedPixelPanel,
   },
   props: [
     "selectedPixel",
