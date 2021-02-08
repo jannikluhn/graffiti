@@ -2,6 +2,7 @@
 pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 struct Account {
     int128 balance;
@@ -9,7 +10,7 @@ struct Account {
     uint64 lastTaxPayment;
 }
 
-contract Graffiti is ERC721 {
+contract Graffiti is ERC721, Ownable {
 
     event Deposit(
         address account,
@@ -90,6 +91,10 @@ contract Graffiti is ERC721 {
         Account memory acc = _accounts[account];
         uint64 unaccountedTax = _computeTax(acc.taxBase, acc.lastTaxPayment, uint64(block.timestamp));
         return _subInt128(acc.balance, unaccountedTax);
+    }
+
+    function getTaxBalance() view public returns (uint256) {
+        return _taxBalance;
     }
 
     //
@@ -262,6 +267,28 @@ contract Graffiti is ERC721 {
     function depositAndBuy(uint256 pixelID, uint64 maxPrice, uint64 newPrice, uint8 color) payable public {
         depositFor(msg.sender);
         _buy(msg.sender, pixelID, maxPrice, newPrice, color);
+    }
+
+    //
+    // Tax withdrawal
+    //
+    function _withdrawTaxes(uint256 amount, address receiver) internal {
+        require(amount <= _taxBalance, "Graffiti: not enough taxes to withdraw");
+        _taxBalance -= amount;
+        (bool success,) = receiver.call{value: amount * (1 gwei)}("");
+        require(success, "Graffiti: withdraw taxes call reverted");
+    }
+
+    function withdrawTaxesTo(uint256 amount, address receiver) public onlyOwner {
+        _withdrawTaxes(amount, receiver);
+    }
+
+    function withdrawTaxes(uint256 amount) public onlyOwner {
+        _withdrawTaxes(amount, msg.sender);
+    }
+
+    function withdrawAllTaxes() public onlyOwner {
+        _withdrawTaxes(_taxBalance, msg.sender);
     }
 
     //
