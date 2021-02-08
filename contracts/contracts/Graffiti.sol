@@ -190,11 +190,19 @@ contract Graffiti is ERC721 {
 
         uint64 unaccountedTax = _computeTax(acc.taxBase, acc.lastTaxPayment, uint64(block.timestamp));
         if (unaccountedTax > 0 || acc.lastTaxPayment == 0) {
+            uint64 taxPayed;
+            if (acc.balance >= unaccountedTax) {
+                taxPayed = unaccountedTax;
+            } else if (acc.balance >= 0) {
+                taxPayed = uint64(acc.balance);
+            } else {
+                taxPayed = 0;
+            }
             acc.balance = _subInt128(acc.balance, unaccountedTax);
             acc.lastTaxPayment = uint64(block.timestamp);
 
             _accounts[account] = acc;
-            _taxBalance += unaccountedTax;
+            _taxBalance += taxPayed;
         }
     }
 
@@ -204,6 +212,14 @@ contract Graffiti is ERC721 {
 
         require(msg.value % (1 gwei) == 0, "Graffiti: deposit amount must be multiple of 1 GWei");
         uint64 amount = uint64(msg.value / (1 gwei));
+        if (acc.balance < 0) {
+            // the account owes taxes
+            if (amount <= -acc.balance) {
+                _taxBalance += amount;
+            } else {
+                _taxBalance += uint64(-acc.balance);
+            }
+        }
         acc.balance = _addInt128(acc.balance, amount);
 
         _accounts[account] = acc;
