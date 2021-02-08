@@ -12,6 +12,7 @@
           <AccountPanel
             v-on:error="onError($event)"
             v-bind:account="account"
+            v-if="account"
           />
           <PixelPanel
             v-bind:selectedPixel="selectedPixel"

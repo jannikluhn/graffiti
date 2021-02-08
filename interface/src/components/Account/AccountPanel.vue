@@ -96,23 +96,25 @@ export default {
   },
 
   watch: {
-    async account() {
-      if (this.account) {
-        try {
-          let balanceGWei = await this.$contract.getBalance(this.account)
-          let taxBaseGWei = await this.$contract.getTaxBase(this.account)
-          this.balance = gWeiToWei(balanceGWei)
-          this.taxBase = gWeiToWei(taxBaseGWei)
-        } catch(err) {
+    account: {
+      handler: async function () {
+        if (this.account) {
+          try {
+            let balanceGWei = await this.$contract.getBalance(this.account)
+            let taxBaseGWei = await this.$contract.getTaxBase(this.account)
+            this.balance = gWeiToWei(balanceGWei)
+            this.taxBase = gWeiToWei(taxBaseGWei)
+          } catch(err) {
+            this.balance = null
+            this.taxBase = null
+            this.$emit('error', 'Failed to query account state: ' + err.message)
+          }
+        } else {
           this.balance = null
           this.taxBase = null
-          this.$emit('error', 'Failed to query account state: ' + err.message)
         }
-      } else {
-        this.balance = null
-        this.taxBase = null
-      }
-
+      },
+      immediate: true,
     },
   },
 
