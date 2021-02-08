@@ -95,13 +95,17 @@ contract Graffiti is ERC721 {
     //
     // State updates
     //
-    function buyPixel(uint256 pixelID, uint64 maxPrice, uint64 newPrice, uint8 color) public {
+    function buy(uint256 pixelID, uint64 maxPrice, uint64 newPrice, uint8 color) public {
+        _buy(msg.sender, pixelID, maxPrice, newPrice, color);
+    }
+
+    function _buy(address buyerAddress, uint256 pixelID, uint64 maxPrice, uint64 newPrice, uint8 color) internal {
         uint64 price = getPrice(pixelID);
         require(price <= maxPrice, "Graffiti: pixel price exceeds max price");
 
         // pay taxes for buyer so that balance is up to date
-        payTax(msg.sender);
-        Account memory buyer = _accounts[msg.sender];
+        payTax(buyerAddress);
+        Account memory buyer = _accounts[buyerAddress];
 
         // check that buyer has enough money to buy
         require(buyer.balance >= price, "Graffiti: balance too low");
@@ -110,12 +114,12 @@ contract Graffiti is ERC721 {
         buyer.balance = _subInt128(buyer.balance, price);
         buyer.taxBase = _addUint64(buyer.taxBase, newPrice);
 
-        _accounts[msg.sender] = buyer;
+        _accounts[buyerAddress] = buyer;
 
         address owner;
         if (_exists(pixelID)) {
             owner = ownerOf(pixelID);
-            require(owner != msg.sender, "Graffiti: cannot buy pixel from yourself");
+            require(owner != buyerAddress, "Graffiti: cannot buy pixel from yourself");
 
             // pay tax for seller so that balance is up to date
             payTax(owner);
@@ -126,11 +130,11 @@ contract Graffiti is ERC721 {
             seller.taxBase = _subUint64(seller.taxBase, price);
 
             _accounts[owner] = seller;
-            _transfer(owner, msg.sender, pixelID);
+            _transfer(owner, buyerAddress, pixelID);
         } else {
             owner = address(0);
             require(pixelID <= _maxPixelID, "Graffiti: max pixel ID exceeded");
-            _mint(msg.sender, pixelID);
+            _mint(buyerAddress, pixelID);
         }
 
         _pixelPrices[pixelID] = newPrice;
@@ -138,7 +142,7 @@ contract Graffiti is ERC721 {
         emit Buy({
             pixelID: pixelID,
             seller: owner,
-            buyer: msg.sender,
+            buyer: buyerAddress,
             price: price
         });
         emit ColorChange({
@@ -237,6 +241,11 @@ contract Graffiti is ERC721 {
             amount: amount,
             balance: acc.balance
         });
+    }
+
+    function depositAndBuy(uint256 pixelID, uint64 maxPrice, uint64 newPrice, uint8 color) payable public {
+        depositFor(msg.sender);
+        _buy(msg.sender, pixelID, maxPrice, newPrice, color);
     }
 
     //
