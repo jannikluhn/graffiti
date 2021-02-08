@@ -116,7 +116,7 @@ export default {
       return shortenAddress(this.owner)
     },
     userIsOwner() {
-        return (this.owner != null && this.account.toUpperCase() == this.owner.toUpperCase()) 
+        return this.owner !== null && this.account == this.owner
     },
   },
 
