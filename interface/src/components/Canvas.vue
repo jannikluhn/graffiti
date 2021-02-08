@@ -55,7 +55,10 @@ export default {
   mounted() {
     this.ctx = this.$refs.canvas.getContext('2d')
     this.resizeCanvas()
-    this.canvasOffset = [-this.pixelSize * gridSize[0] / 2, -this.pixelSize * gridSize[1] / 2]
+    this.canvasOffset = [
+      -this.pixelSize * gridSize[0] / 2 + this.canvasSize[0] / 2,
+      -this.pixelSize * gridSize[1] / 2 + this.canvasSize[1] / 2,
+    ]
 
     this.offscreenCanvas = document.createElement('canvas')
     this.offscreenCanvas.width = gridSize[0]
