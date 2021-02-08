@@ -66,7 +66,9 @@ contract Graffiti is ERC721, Ownable {
     mapping(uint256 => uint64) private _pixelPrices;
     mapping(address => Account) private _accounts;
     mapping(uint256 => Earmark) private _earmarks;
-    uint256 private _taxBalance;
+    mapping(address => uint256) private _totalTaxesPayedBy;
+    uint256 private _totalTaxesPayed;
+    uint256 private _totalTaxesWithdrawn;
 
     uint256 constant taxRateDenominator = 10;
     uint256 constant taxRateNumerator = 1;
@@ -112,8 +114,16 @@ contract Graffiti is ERC721, Ownable {
         return _subInt128(acc.balance, unaccountedTax);
     }
 
-    function getTaxBalance() view public returns (uint256) {
-        return _taxBalance;
+    function getTotalTaxesWithdrawn() view public returns (uint256) {
+        return _totalTaxesWithdrawn;
+    }
+
+    function getTotalTaxesPayed() view public returns (uint256) {
+        return _totalTaxesPayed;
+    }
+
+    function getTotalTaxesPayedBy(address account) view public returns (uint256) {
+        return _totalTaxesPayedBy[account];
     }
 
     //
@@ -227,7 +237,8 @@ contract Graffiti is ERC721, Ownable {
             acc.lastTaxPayment = uint64(block.timestamp);
 
             _accounts[account] = acc;
-            _taxBalance += taxPayed;
+            _totalTaxesPayed += taxPayed;
+            _totalTaxesPayedBy[account] += taxPayed;
         }
     }
 
@@ -239,11 +250,14 @@ contract Graffiti is ERC721, Ownable {
         uint64 amount = uint64(msg.value / (1 gwei));
         if (acc.balance < 0) {
             // the account owes taxes
+            uint64 tax;
             if (amount <= -acc.balance) {
-                _taxBalance += amount;
+                tax = amount;
             } else {
-                _taxBalance += uint64(-acc.balance);
+                tax = uint64(-acc.balance);
             }
+            _totalTaxesPayed += tax;
+            _totalTaxesPayedBy[account] += tax;
         }
         acc.balance = _addInt128(acc.balance, amount);
 
@@ -293,8 +307,9 @@ contract Graffiti is ERC721, Ownable {
     // Tax withdrawal
     //
     function _withdrawTaxes(uint256 amount, address receiver) internal {
-        require(amount <= _taxBalance, "Graffiti: not enough taxes to withdraw");
-        _taxBalance -= amount;
+        uint256 taxBalance = _totalTaxesPayed - _totalTaxesWithdrawn;
+        require(amount <= taxBalance, "Graffiti: not enough taxes to withdraw");
+        _totalTaxesWithdrawn += amount;
         (bool success,) = receiver.call{value: amount * (1 gwei)}("");
         require(success, "Graffiti: withdraw taxes call reverted");
         emit TaxWithdraw({
@@ -312,7 +327,7 @@ contract Graffiti is ERC721, Ownable {
     }
 
     function withdrawAllTaxes() public onlyOwner {
-        _withdrawTaxes(_taxBalance, msg.sender);
+        _withdrawTaxes(_totalTaxesPayed - _totalTaxesWithdrawn, msg.sender);
     }
 
     //
