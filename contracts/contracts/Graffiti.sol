@@ -10,6 +10,11 @@ struct Account {
     uint64 lastTaxPayment;
 }
 
+struct Earmark {
+    address receiver;
+    uint64 amount;
+}
+
 contract Graffiti is ERC721, Ownable {
 
     event Deposit(
@@ -40,6 +45,15 @@ contract Graffiti is ERC721, Ownable {
         uint256 amount,
         address receiver
     );
+    event EarmarkUpdate(
+        uint256 pixelID,
+        address receiver,
+        uint64 amount
+    );
+    event PixelClaim(
+        uint256 pixelID,
+        uint64 amount
+    );
 
     constructor(uint128 width, uint128 height) ERC721("Pixel", "PIX") {
         require(width > 0, "Graffiti: width must not be zero");
@@ -51,6 +65,7 @@ contract Graffiti is ERC721, Ownable {
 
     mapping(uint256 => uint64) private _pixelPrices;
     mapping(address => Account) private _accounts;
+    mapping(uint256 => Earmark) private _earmarks;
     uint256 private _taxBalance;
 
     uint256 constant taxRateDenominator = 10;
@@ -140,6 +155,7 @@ contract Graffiti is ERC721, Ownable {
 
             _accounts[owner] = seller;
             _transfer(owner, buyerAddress, pixelID);
+            _earmark(pixelID, address(0), 0); // cancel any earmark
         } else {
             owner = address(0);
             require(pixelID <= _maxPixelID, "Graffiti: max pixel ID exceeded");
@@ -297,6 +313,81 @@ contract Graffiti is ERC721, Ownable {
 
     function withdrawAllTaxes() public onlyOwner {
         _withdrawTaxes(_taxBalance, msg.sender);
+    }
+
+    //
+    // Earmarks
+    //
+    function earmark(uint256 pixelID, address receiver, uint64 amount) public {
+        require(_exists(pixelID), "Graffiti: pixel does not exist");
+        address owner = ownerOf(pixelID);
+        require(msg.sender == owner, "Graffiti: only owner can earmark pixel");
+        require(receiver != owner, "Graffiti: cannot earmark for owner");
+        
+        _earmark(pixelID, receiver, amount);
+    }
+
+    function _earmark(uint256 pixelID, address receiver, uint64 amount) internal {
+        _earmarks[pixelID] = Earmark({
+            receiver: receiver,
+            amount: amount
+        });
+        emit EarmarkUpdate({
+            pixelID: pixelID,
+            receiver: receiver,
+            amount: amount
+        });
+    }
+
+    function claim(uint256 pixelID, uint64 maxPrice, uint64 minAmount) public {
+        require(_exists(pixelID), "Graffiti: pixel does not exist");
+        address owner = ownerOf(pixelID);
+        Earmark memory em = _earmarks[pixelID];
+        require(msg.sender == em.receiver, "Graffiti: account not allowed to claim pixel");
+
+        payTax(owner);
+        payTax(msg.sender);
+
+        Account memory sender = _accounts[owner];
+        Account memory receiver = _accounts[msg.sender];
+        uint64 price = _pixelPrices[pixelID];
+
+        require(price <= maxPrice, "Graffiti: pixel is too expensive");
+
+        sender.taxBase = _subUint64(sender.taxBase, price);
+        receiver.taxBase = _addUint64(receiver.taxBase, price);
+
+        uint64 amount;
+        if (sender.balance >= em.amount) {
+            amount = em.amount;
+        } else {
+            if (sender.balance >= 0)  {
+                amount = uint64(sender.balance);
+            } else {
+                amount = 0;
+            }
+        }
+        require(amount >= minAmount, "Graffiti: amount is too small");
+        sender.balance = _subInt128(sender.balance, amount);
+        receiver.balance = _addInt128(receiver.balance, amount);
+
+        _accounts[owner] = sender;
+        _accounts[msg.sender] = receiver;
+        _transfer(owner, msg.sender, pixelID);
+        _earmark(pixelID, address(0), 0);
+
+        emit PixelClaim({
+            pixelID: pixelID,
+            amount: amount
+        });
+    }
+
+    function getEarmarkReceiver(uint256 pixelID) view public returns (address) {
+        return _earmarks[pixelID].receiver;
+    }
+
+    function getEarmarkAmount(uint256 pixelID) view public returns (uint64) {
+        return _earmarks[pixelID].amount;
     }
 
     //
