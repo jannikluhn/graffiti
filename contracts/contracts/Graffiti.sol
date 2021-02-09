@@ -70,8 +70,8 @@ contract Graffiti is ERC721, Ownable {
     uint256 private _totalTaxesPayed;
     uint256 private _totalTaxesWithdrawn;
 
-    uint256 constant taxRateDenominator = 10;
-    uint256 constant taxRateNumerator = 1;
+    uint256 constant taxRateDenominator = 3153600000;
+    uint256 constant taxRateNumerator = 7;
 
     //
     // Pixel getters
@@ -443,8 +443,7 @@ contract Graffiti is ERC721, Ownable {
     function _computeTax(uint64 taxBase, uint64 startTime, uint64 endTime) pure internal returns (uint64) {
         require(endTime >= startTime, "Graffiti: end time must be later than start time");
         uint256 num = uint256(endTime - startTime) * taxBase * taxRateNumerator;
-        uint256 denom = 365 * 24 * 60 * 60 * taxRateDenominator;
-        uint256 tax = num / denom;
+        uint256 tax = num / taxRateDenominator;
         if (tax <= type(uint64).max) {
             return uint64(tax);
         } else {
