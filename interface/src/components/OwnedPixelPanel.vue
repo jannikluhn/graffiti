@@ -2,46 +2,50 @@
   <article class="panel is-outlined" style="pointer-events: auto">
     <p class="panel-heading">
       Your Pixels
+      <button class="delete is-pulled-right" v-on:click="folded = !folded"></button>
     </p>
-    <div class="panel-block">
-      <div class="select is-multiple">
-        <select multiple size="4" v-on:change="onChange">
-          <option
-            v-for="pixel in pixels"
-            v-bind:key="pixel.id"
-            v-bind:value="pixel.id"
-          >
-            {{pixel.id}}
-          </option>
-        </select>
+    <div v-if="!folded">
+      <div class="panel-block">
+        <div class="select">
+          <select v-on:change="onChange">
+            <option
+              v-for="pixel in pixels"
+              v-bind:key="pixel.id"
+              v-bind:value="pixel.id"
+              v-bind:selected="selectedPixel && pixel.id == selectedPixel.id"
+            >
+              {{pixel.id}}
+            </option>
+          </select>
+        </div>
       </div>
-    </div>
-    <div class="panel-block" v-if="selectedPixel">
-      <div class="form">
-        <div class="field">
-          <label class="label">
-            Coordinates
-          </label>
-          <div class="control">
-            <p>{{ coords[0] }}, {{ coords[1] }}</p>
+      <div class="panel-block" v-if="selectedPixel">
+        <div class="form">
+          <div class="field">
+            <label class="label">
+              Coordinates
+            </label>
+            <div class="control">
+              <p>{{ coords[0] }}, {{ coords[1] }}</p>
+            </div>
           </div>
-        </div>
 
-        <div class="field">
-          <label class="label">
-            Price
-          </label>
-          <div class="control">
-            <p>{{ priceStr }}</p>
+          <div class="field">
+            <label class="label">
+              Price
+            </label>
+            <div class="control">
+              <p>{{ priceStr }}</p>
+            </div>
           </div>
-        </div>
 
-        <div class="field">
-          <label class="label">
-            Color
-          </label>
-          <div class="control">
-            <p>{{ selectedPixel.color }}</p>
+          <div class="field">
+            <label class="label">
+              Color
+            </label>
+            <div class="control">
+              <p>{{ selectedPixel.color }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -74,6 +78,7 @@ export default {
     return {
       pixels: [],
       selectedPixel: null,
+      folded: false,
     }
   },
 
