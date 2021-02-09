@@ -55,12 +55,13 @@ contract Graffiti is ERC721, Ownable {
         uint64 amount
     );
 
-    constructor(uint128 width, uint128 height, uint256 constant taxRateNumerator, uint256 constant taxRateDenominator) ERC721("Pixel", "PIX") {
+    constructor(uint128 width, uint128 height, uint256 constant taxRateNumerator, uint256 constant taxRateDenominator, uint256 constant initialTaxesTime) ERC721("Pixel", "PIX") {
         require(width > 0, "Graffiti: width must not be zero");
         require(height > 0, "Graffiti: height must not be zero");
         _maxPixelID = width * height - 1;
         taxRateNumerator = 7;
         taxRateDenominator = 3153600000;
+        initialTaxesTime = 604800;
     }
 
     uint256 private _maxPixelID;
@@ -141,8 +142,10 @@ contract Graffiti is ERC721, Ownable {
         payTax(buyerAddress);
         Account memory buyer = _accounts[buyerAddress];
 
-        // check that buyer has enough money to buy
-        require(buyer.balance >= price, "Graffiti: balance too low");
+        // check that buyer has enough money to buy pixel, including the initial taxes to be paid over the newly-bought period.
+        uint256 initialTaxes = uint256(price) * initialTaxesTime * taxRateNumerator / taxRateDenominator;
+        uint64 minBuyerBalance = price + uint64(initialTaxes);
+        require(buyer.balance >= minBuyerBalance, "Graffiti: balance too low");
 
         // reduce buyer's balance and increase buyer's tax base
         buyer.balance = _subInt128(buyer.balance, price);
