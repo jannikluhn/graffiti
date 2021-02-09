@@ -5,8 +5,11 @@
       <button class="delete is-pulled-right" v-on:click="folded = !folded"></button>
     </p>
     <div v-if="!folded">
-      <div class="panel-block">
-        <div class="select">
+      <div v-if="!pixels.length" class="panel-block">
+        <p>You don't seem to own any pixels.</p>
+      </div>
+      <div v-else class="panel-block">
+        <div class="select is-fullwidth">
           <select v-on:change="onChange">
             <option
               v-for="pixel in pixels"
@@ -14,7 +17,7 @@
               v-bind:value="pixel.id"
               v-bind:selected="selectedPixel && pixel.id == selectedPixel.id"
             >
-              {{pixel.id}}
+              {{ hexToIntStr(pixel.id) }}
             </option>
           </select>
         </div>
@@ -141,6 +144,9 @@ export default {
           })
           let pixels = queryResult.data.pixels
           if (pixels.length == 0) {
+            if (this.pixels.length > 0) {
+              this.selectedPixel = this.pixels[0]
+            }
             return
           }
           this.pixels.push(...pixels)
@@ -161,7 +167,11 @@ export default {
           return
         }
       }
-    }
+    },
+
+    hexToIntStr(n) {
+      return ethers.BigNumber.from(n).toString()
+    },
   },
 }
 </script>
