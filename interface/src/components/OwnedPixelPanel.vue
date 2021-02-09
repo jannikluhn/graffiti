@@ -20,34 +20,24 @@
         </div>
       </div>
       <div class="panel-block" v-if="selectedPixel">
-        <div class="form">
-          <div class="field">
-            <label class="label">
-              Coordinates
-            </label>
-            <div class="control">
-              <p>{{ coords[0] }}, {{ coords[1] }}</p>
-            </div>
-          </div>
+        <table class="table is-fullwidth">
+          <tbody>
+            <tr>
+              <th>Coordinates</th>
+              <td>{{ coords[0] }}, {{ coords[1] }}</td>
+            </tr>
 
-          <div class="field">
-            <label class="label">
-              Price
-            </label>
-            <div class="control">
-              <p>{{ priceStr }}</p>
-            </div>
-          </div>
+            <tr>
+              <th>Price</th>
+              <td>{{ priceStr }}</td>
+            </tr>
 
-          <div class="field">
-            <label class="label">
-              Color
-            </label>
-            <div class="control">
-              <p>{{ selectedPixel.color }}</p>
-            </div>
-          </div>
-        </div>
+            <tr>
+              <th>Color</th>
+              <td>{{ selectedPixel.color }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </article>
