@@ -55,15 +55,18 @@ contract Graffiti is ERC721, Ownable {
         uint64 amount
     );
 
-    constructor(uint128 width, uint128 height, uint256 constant taxRateNumerator, uint256 constant taxRateDenominator, uint256 constant initialTaxesTime) ERC721("Pixel", "PIX") {
+    constructor(uint128 width, uint128 height, uint256 taxRateNumerator, uint256 taxRateDenominator, uint256 initialTaxesTime) ERC721("Pixel", "PIX") {
         require(width > 0, "Graffiti: width must not be zero");
         require(height > 0, "Graffiti: height must not be zero");
         _maxPixelID = width * height - 1;
-        taxRateNumerator = 7;
-        taxRateDenominator = 3153600000;
-        initialTaxesTime = 604800;
+        _taxRateNumerator = taxRateNumerator;
+        _taxRateDenominator = taxRateDenominator;
+        _initialTaxesTime = initialTaxesTime;
     }
 
+    uint256 private _taxRateNumerator;
+    uint256 private _taxRateDenominator;
+    uint256 private _initialTaxesTime;
     uint256 private _maxPixelID;
 
     mapping(uint256 => uint64) private _pixelPrices;
@@ -143,7 +146,7 @@ contract Graffiti is ERC721, Ownable {
         Account memory buyer = _accounts[buyerAddress];
 
         // check that buyer has enough money to buy pixel, including the initial taxes to be paid over the newly-bought period.
-        uint256 initialTaxes = uint256(price) * initialTaxesTime * taxRateNumerator / taxRateDenominator;
+        uint256 initialTaxes = uint256(price) * _initialTaxesTime * _taxRateNumerator / _taxRateDenominator;
         uint64 minBuyerBalance = price + uint64(initialTaxes);
         require(buyer.balance >= minBuyerBalance, "Graffiti: balance too low");
 
@@ -443,10 +446,10 @@ contract Graffiti is ERC721, Ownable {
         }
     }
 
-    function _computeTax(uint64 taxBase, uint64 startTime, uint64 endTime) pure internal returns (uint64) {
+    function _computeTax(uint64 taxBase, uint64 startTime, uint64 endTime) view internal returns (uint64) {
         require(endTime >= startTime, "Graffiti: end time must be later than start time");
-        uint256 num = uint256(endTime - startTime) * taxBase * taxRateNumerator;
-        uint256 tax = num / taxRateDenominator;
+        uint256 num = uint256(endTime - startTime) * taxBase * _taxRateNumerator;
+        uint256 tax = num / _taxRateDenominator;
         if (tax <= type(uint64).max) {
             return uint64(tax);
         } else {
