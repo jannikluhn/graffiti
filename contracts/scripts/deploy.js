@@ -3,7 +3,9 @@ const hre = require("hardhat");
 async function main() {
   const Graffiti = await hre.ethers.getContractFactory("Graffiti");
   const size = 333;
-  const graffiti = await Graffiti.deploy(size, size);
+  const taxRateNumerator = 7;
+  const taxRateDenominator = 365 * 24 * 60 * 60 * 100;
+  const graffiti = await Graffiti.deploy(size, size, taxRateNumerator, taxRateDenominator);
 
   await graffiti.deployed();
 
