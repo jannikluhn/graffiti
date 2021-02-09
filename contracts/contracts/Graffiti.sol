@@ -76,7 +76,7 @@ contract Graffiti is ERC721, Ownable {
 
 
     //
-    // Pixel getters
+    // Getters (functions that let other random contracts and stuff read the state)
     //
     function exists(uint256 pixelID) view public returns (bool) {
         return _exists(pixelID);
@@ -97,6 +97,10 @@ contract Graffiti is ERC721, Ownable {
 
     function getMaxPixelID() view public returns (uint256) {
         return _maxPixelID;
+    }
+
+    function getTaxRate() view public returns (uint256, uint256) {
+        return (_taxRateNumerator, _taxRateDenominator);
     }
 
     //
