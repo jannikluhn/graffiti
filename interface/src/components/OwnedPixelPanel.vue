@@ -39,6 +39,16 @@
           </tbody>
         </table>
       </div>
+
+      <div class="panel-block" v-if="selectedPixel">
+        <form>
+          <ChangePriceField
+            v-bind:account=account
+            v-bind:pixelID="selectedPixel.id"
+            v-on:error="(msg) => $emit('error', msg)"
+          />
+        </form>
+      </div>
     </div>
   </article>
 </template>
@@ -48,6 +58,7 @@ import { ethers } from 'ethers'
 import gql from 'graphql-tag'
 import { gWeiToWei, idToPixelCoords } from '../utils'
 import { gridSize } from '../config'
+import ChangePriceField from './ChangePrice.vue'
 
 const pixelQuery = gql`
   query pixelsOf($address: Bytes, $lastID: String) {
@@ -61,6 +72,9 @@ const pixelQuery = gql`
 
 export default {
   name: "OwnedPixelPanel",
+  components: {
+    ChangePriceField,
+  },
   props: [
     "account",
   ],
