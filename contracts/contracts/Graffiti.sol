@@ -55,12 +55,16 @@ contract Graffiti is ERC721, Ownable {
         uint64 amount
     );
 
-    constructor(uint128 width, uint128 height) ERC721("Pixel", "PIX") {
+    constructor(uint128 width, uint128 height, uint256 taxRateNumerator, uint256 taxRateDenominator) ERC721("Pixel", "PIX") {
         require(width > 0, "Graffiti: width must not be zero");
         require(height > 0, "Graffiti: height must not be zero");
         _maxPixelID = width * height - 1;
+        _taxRateNumerator = taxRateNumerator;
+        _taxRateDenominator = taxRateDenominator;
     }
 
+    uint256 private _taxRateNumerator;
+    uint256 private _taxRateDenominator;
     uint256 private _maxPixelID;
 
     mapping(uint256 => uint64) private _pixelPrices;
@@ -70,11 +74,9 @@ contract Graffiti is ERC721, Ownable {
     uint256 private _totalTaxesPayed;
     uint256 private _totalTaxesWithdrawn;
 
-    uint256 constant taxRateDenominator = 10;
-    uint256 constant taxRateNumerator = 1;
 
     //
-    // Pixel getters
+    // Getters (functions that let other random contracts and stuff read the state)
     //
     function exists(uint256 pixelID) view public returns (bool) {
         return _exists(pixelID);
@@ -95,6 +97,10 @@ contract Graffiti is ERC721, Ownable {
 
     function getMaxPixelID() view public returns (uint256) {
         return _maxPixelID;
+    }
+
+    function getTaxRate() view public returns (uint256, uint256) {
+        return (_taxRateNumerator, _taxRateDenominator);
     }
 
     //
@@ -141,7 +147,7 @@ contract Graffiti is ERC721, Ownable {
         payTax(buyerAddress);
         Account memory buyer = _accounts[buyerAddress];
 
-        // check that buyer has enough money to buy
+        // check that buyer has enough money to buy pixel.
         require(buyer.balance >= price, "Graffiti: balance too low");
 
         // reduce buyer's balance and increase buyer's tax base
@@ -440,11 +446,10 @@ contract Graffiti is ERC721, Ownable {
         }
     }
 
-    function _computeTax(uint64 taxBase, uint64 startTime, uint64 endTime) pure internal returns (uint64) {
+    function _computeTax(uint64 taxBase, uint64 startTime, uint64 endTime) view internal returns (uint64) {
         require(endTime >= startTime, "Graffiti: end time must be later than start time");
-        uint256 num = uint256(endTime - startTime) * taxBase * taxRateNumerator;
-        uint256 denom = 365 * 24 * 60 * 60 * taxRateDenominator;
-        uint256 tax = num / denom;
+        uint256 num = uint256(endTime - startTime) * taxBase * _taxRateNumerator;
+        uint256 tax = num / _taxRateDenominator;
         if (tax <= type(uint64).max) {
             return uint64(tax);
         } else {
