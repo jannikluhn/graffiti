@@ -1,10 +1,11 @@
 <template>
   <article class="panel is-outlined" style="pointer-events: auto;">
-    <p class="panel-heading">
+    <div class="panel-heading">
       Account
-    </p>
+      <button class="delete is-pulled-right" v-on:click="folded = !folded"></button>
+    </div>
 
-    <div v-if="account" class="panel-block">
+    <div v-if="account && !folded" class="panel-block">
       <form>
         <div class="field">
           <label class="label">
@@ -74,6 +75,7 @@ export default {
       shortenAddress: null,
       balance: null,
       taxBase: null,
+      folded: false,
     }
   },
   props: [

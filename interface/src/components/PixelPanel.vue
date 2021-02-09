@@ -1,56 +1,59 @@
 <template>
   <article class="panel is-outlined" style="pointer-events: auto">
-    <p class="panel-heading">
+    <div class="panel-heading">
       Pixel
-    </p>
-    <p v-if="!selectedPixel" class="panel-block">Click on a pixel to select it.</p>
-    <div v-else>
-      <div class="panel-block">
-        <div>
-          <div class="field">
-            <label class="label">
-              Coordinates
-            </label>
-            <div class="control">
-              <p>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</p>
+      <button class="delete is-pulled-right" v-on:click="folded = !folded"></button>
+    </div>
+    <div v-if="!folded">
+      <p v-if="!selectedPixel" class="panel-block">Click on a pixel to select it.</p>
+      <div v-else>
+        <div class="panel-block">
+          <div>
+            <div class="field">
+              <label class="label">
+                Coordinates
+              </label>
+              <div class="control">
+                <p>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label">
+                ID
+              </label>
+              <div class="control">
+                <p>{{ pixelID }}</p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label">
+                Owner
+              </label>
+              <div class="control">
+                <p>{{ ownerStr }}</p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label">
+                Price
+              </label>
+              <div class="control">
+                <p>{{ priceStr }}</p>
+              </div>
             </div>
           </div>
 
-          <div class="field">
-            <label class="label">
-              ID
-            </label>
-            <div class="control">
-              <p>{{ pixelID }}</p>
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="label">
-              Owner
-            </label>
-            <div class="control">
-              <p>{{ ownerStr }}</p>
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="label">
-              Price
-            </label>
-            <div class="control">
-              <p>{{ priceStr }}</p>
-            </div>
-          </div>
         </div>
-
+          <div v-if="!userIsOwner" class="panel-block">
+            <button
+              class="button is-dark is-fullwidth"
+              v-on:click="buyModalActive = true"
+            >Buy</button>
+          </div>
       </div>
-        <div v-if="!userIsOwner" class="panel-block">
-          <button
-            class="button is-dark is-fullwidth"
-            v-on:click="buyModalActive = true"
-          >Buy</button>
-        </div>
     </div>
   <BuyModal
     v-if="buyModalActive"
@@ -86,6 +89,7 @@ export default {
       price: null,
       exists: null,
       buyModalActive: false,
+      folded: false,
     }
   },
 
