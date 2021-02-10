@@ -4,7 +4,7 @@
       Wallet Connection
     </p>
     <div class="panel-block">
-      <button class="button is-fullwidth" v-bind:class="{'is-loading': waitingForAccount}" v-on:click="connect">
+      <button class="button is-fullwidth is-dark" v-bind:class="{'is-loading': waitingForAccount}" v-on:click="connect">
         Connect
       </button>
     </div>
