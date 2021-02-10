@@ -55,7 +55,7 @@ contract Graffiti is ERC721, Ownable {
         uint64 amount
     );
 
-    constructor(uint128 width, uint128 height, uint256 taxRateNumerator, uint256 taxRateDenominator, uint64 initialPrice) ERC721("Pixel", "PIX") {
+    constructor(uint128 width, uint128 height, uint256 taxRateNumerator, uint256 taxRateDenominator, uint64 initialPrice) ERC721("Pixel", "PXL") {
         require(width > 0, "Graffiti: width must not be zero");
         require(height > 0, "Graffiti: height must not be zero");
         _maxPixelID = width * height - 1;
