@@ -55,17 +55,19 @@ contract Graffiti is ERC721, Ownable {
         uint64 amount
     );
 
-    constructor(uint128 width, uint128 height, uint256 taxRateNumerator, uint256 taxRateDenominator) ERC721("Pixel", "PIX") {
+    constructor(uint128 width, uint128 height, uint256 taxRateNumerator, uint256 taxRateDenominator, uint64 initialPrice) ERC721("Pixel", "PIX") {
         require(width > 0, "Graffiti: width must not be zero");
         require(height > 0, "Graffiti: height must not be zero");
         _maxPixelID = width * height - 1;
         _taxRateNumerator = taxRateNumerator;
         _taxRateDenominator = taxRateDenominator;
+        _initialPrice = initialPrice;
     }
 
     uint256 private _taxRateNumerator;
     uint256 private _taxRateDenominator;
     uint256 private _maxPixelID;
+    uint64 private _initialPrice;
 
     mapping(uint256 => uint64) private _pixelPrices;
     mapping(address => Account) private _accounts;
@@ -84,7 +86,7 @@ contract Graffiti is ERC721, Ownable {
 
     function getPrice(uint256 pixelID) view public returns (uint64) {
         if (!_exists(pixelID)) {
-            return 0;
+            return _initialPrice;
         }
 
         address owner = ownerOf(pixelID);
@@ -101,6 +103,10 @@ contract Graffiti is ERC721, Ownable {
 
     function getTaxRate() view public returns (uint256, uint256) {
         return (_taxRateNumerator, _taxRateDenominator);
+    }
+
+    function getInitialPrice() view public returns (uint64) {
+        return _initialPrice;
     }
 
     //
@@ -174,6 +180,11 @@ contract Graffiti is ERC721, Ownable {
             _earmark(pixelID, address(0), 0); // cancel any earmark
         } else {
             owner = address(0);
+
+            // We count initial sale income towards taxes for simplicity. To calculate the actual
+            // taxes paid, subtract `totalSupply() * getInitialPrice()`.
+            _totalTaxesPayed += price;
+
             require(pixelID <= _maxPixelID, "Graffiti: max pixel ID exceeded");
             _mint(buyerAddress, pixelID);
         }
