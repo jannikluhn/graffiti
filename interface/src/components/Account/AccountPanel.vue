@@ -5,53 +5,45 @@
       <button class="delete is-pulled-right" v-on:click="folded = !folded"></button>
     </div>
 
-    <div v-if="account && !folded" class="panel-block">
-      <form>
-        <div class="field">
-          <label class="label">
-            Address
-          </label>
-          <div v-if="account" class="control">
-            <p>{{ shortAddress }}</p>
-          </div>
-          <div v-else class="control">
-            <p>No connected accounts.</p>
-          </div>
-        </div>
+    <div v-if="account && !folded">
+      <div class="panel-block">
+        <table class="table is-fullwidth">
+          <tbody>
+            <tr>
+              <th>Address</th>
+              <td>{{ shortAddress }}</td>
+            </tr>
 
-        <div class="field">
-          <label class="label">
-            Balance
-          </label>
-          <div class="control">
-            <p>{{ balanceStr }}</p>
-          </div>
-        </div>
+            <tr>
+              <th>Balance</th>
+              <td>{{ balanceStr }}</td>
+            </tr>
 
-        <div class="field">
-          <label class="label">
-            Monthly tax
-          </label>
-          <div class="control">
-            <p>{{ taxPerMonthStr }}</p>
+            <tr>
+              <th>Monthly Tax</th>
+              <td>{{ taxPerMonthStr }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel-block">
+        <form>
+          <div class="field">
+            <label class="label">
+              Manage account balance
+            </label>
+            <DepositField
+              v-bind:account="account"
+              v-on:error="(msg) => $emit('error', msg)"
+            />
+            <WithdrawField
+              v-bind:account="account"
+              v-bind:balance="balance"
+              v-on:error="(msg) => $emit('error', msg)"
+            />
           </div>
-        </div>
-
-        <div class="field">
-          <label class="label">
-            Manage account balance
-          </label>
-          <DepositField
-            v-bind:account="account"
-            v-on:error="(msg) => $emit('error', msg)"
-          />
-          <WithdrawField
-            v-bind:account="account"
-            v-bind:balance="balance"
-            v-on:error="(msg) => $emit('error', msg)"
-          />
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </article>
 </template>

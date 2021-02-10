@@ -55,7 +55,7 @@
 
         <footer class="modal-card-foot">
           <button
-            class="button is-primary"
+            class="button is-dark"
             v-bind:class="{'is-loading': waitingForTx}"
             v-bind:disabled="newPriceInvalid || colorInputInvalid"
             v-on:click="buy()"

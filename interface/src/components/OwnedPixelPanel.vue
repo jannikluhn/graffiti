@@ -5,8 +5,11 @@
       <button class="delete is-pulled-right" v-on:click="folded = !folded"></button>
     </p>
     <div v-if="!folded">
-      <div class="panel-block">
-        <div class="select">
+      <div v-if="!pixels.length" class="panel-block">
+        <p>You don't seem to own any pixels.</p>
+      </div>
+      <div v-else class="panel-block">
+        <div class="select is-fullwidth">
           <select v-on:change="onChange">
             <option
               v-for="pixel in pixels"
@@ -14,40 +17,40 @@
               v-bind:value="pixel.id"
               v-bind:selected="selectedPixel && pixel.id == selectedPixel.id"
             >
-              {{pixel.id}}
+              {{ hexToIntStr(pixel.id) }}
             </option>
           </select>
         </div>
       </div>
       <div class="panel-block" v-if="selectedPixel">
-        <div class="form">
-          <div class="field">
-            <label class="label">
-              Coordinates
-            </label>
-            <div class="control">
-              <p>{{ coords[0] }}, {{ coords[1] }}</p>
-            </div>
-          </div>
+        <table class="table is-fullwidth">
+          <tbody>
+            <tr>
+              <th>Coordinates</th>
+              <td>{{ coords[0] }}, {{ coords[1] }}</td>
+            </tr>
 
-          <div class="field">
-            <label class="label">
-              Price
-            </label>
-            <div class="control">
-              <p>{{ priceStr }}</p>
-            </div>
-          </div>
+            <tr>
+              <th>Price</th>
+              <td>{{ priceStr }}</td>
+            </tr>
 
-          <div class="field">
-            <label class="label">
-              Color
-            </label>
-            <div class="control">
-              <p>{{ selectedPixel.color }}</p>
-            </div>
-          </div>
-        </div>
+            <tr>
+              <th>Color</th>
+              <td>{{ selectedPixel.color }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel-block" v-if="selectedPixel">
+        <form>
+          <ChangePriceField
+            v-bind:account=account
+            v-bind:pixelID="selectedPixel.id"
+            v-on:error="(msg) => $emit('error', msg)"
+          />
+        </form>
       </div>
     </div>
   </article>
@@ -58,6 +61,7 @@ import { ethers } from 'ethers'
 import gql from 'graphql-tag'
 import { gWeiToWei, idToPixelCoords } from '../utils'
 import { gridSize } from '../config'
+import ChangePriceField from './ChangePrice.vue'
 
 const pixelQuery = gql`
   query pixelsOf($address: Bytes, $lastID: String) {
@@ -71,6 +75,9 @@ const pixelQuery = gql`
 
 export default {
   name: "OwnedPixelPanel",
+  components: {
+    ChangePriceField,
+  },
   props: [
     "account",
   ],
@@ -137,6 +144,9 @@ export default {
           })
           let pixels = queryResult.data.pixels
           if (pixels.length == 0) {
+            if (this.pixels.length > 0) {
+              this.selectedPixel = this.pixels[0]
+            }
             return
           }
           this.pixels.push(...pixels)
@@ -157,7 +167,11 @@ export default {
           return
         }
       }
-    }
+    },
+
+    hexToIntStr(n) {
+      return ethers.BigNumber.from(n).toString()
+    },
   },
 }
 </script>
