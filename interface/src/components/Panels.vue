@@ -26,6 +26,7 @@
             v-bind:account="account"
             v-on:error="onError($event)"
           />
+          <AboutModal />
         </div>
         <div v-if="wrongNetwork !== null && wrongNetwork">
           <div class="notification is-dark" style="pointer-events: auto;">
@@ -48,6 +49,7 @@ import ConnectPanel from './ConnectPanel.vue'
 import AccountPanel from './Account/AccountPanel.vue'
 import PixelPanel from './PixelPanel.vue'
 import OwnedPixelPanel from './OwnedPixelPanel.vue'
+import AboutModal from './AboutModal.vue'
 
 export default {
   name: "Panels",
@@ -56,6 +58,7 @@ export default {
     AccountPanel,
     PixelPanel,
     OwnedPixelPanel,
+    AboutModal,
   },
   props: [
     "selectedPixel",
