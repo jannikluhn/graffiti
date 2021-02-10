@@ -38,12 +38,16 @@
             </div>
 
             <div class="field">
-              <label class="label">
-                Color value
-              </label>
-              <div class="control">
-                <input class="input" type="text" placeholder="Color" v-model="colorInput">
-                <p v-if="colorInput && colorInputInvalid" class="help is-danger">Invalid color</p>
+              <div class="form__label">
+                <strong>Please choose a color:</strong>
+                <v-swatches 
+                  v-model="colorSwatch" 
+                  :swatches="swatches"
+                  row-length="4"
+                  show-labels: false
+              
+                  popover-x="left"
+                ></v-swatches>
               </div>
             </div>
           </form>
@@ -64,10 +68,12 @@
 
 <script>
 import { ethers } from 'ethers'
-import { weiToGWei, weiToEth } from '../utils.js'
+import { weiToGWei, weiToEth, colorToByte } from '../utils.js'
+import VSwatches from 'vue-swatches'
 
 export default {
   name: "BuyModal",
+  components: { VSwatches },
   props: [
     "active",
     "price",
@@ -77,8 +83,26 @@ export default {
   data() {
     return {
       newPriceInput: weiToEth(this.price).toString(),
-      colorInput: "0",
       waitingForTx: false,
+      colorSwatch: null,
+       swatches: [
+         '#ffffff',
+         '#e4e4e4',
+         '#888888',
+         '#222222',
+         '#ffa7d1',
+         '#e50000',
+         '#e59500',
+         '#a06a42',
+         '#e5d900',
+         '#94e044',
+         '#02be01',
+         '#00d3dd',
+         '#0083c7',
+         '#0000ea',
+         '#cf6ee4',
+         '#820080',
+       ],
     }
   },
   computed: {
@@ -100,7 +124,7 @@ export default {
       return this.newPrice === null || this.newPrice < 0
     },
     color() {
-      let n = Number(this.colorInput)
+      let n = Number(colorToByte(this.colorSwatch))
       if (isNaN(n) || !Number.isInteger(n) || n < 0 || n > 255) {
         return null
       } else {
@@ -108,7 +132,7 @@ export default {
       }
     },
     colorInputInvalid() {
-      return this.color === null
+      return colorToByte(this.colorSwatch) === null
     },
   },
   methods: {
