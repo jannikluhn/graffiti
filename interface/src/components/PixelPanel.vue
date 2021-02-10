@@ -8,44 +8,29 @@
       <p v-if="!selectedPixel" class="panel-block">Click on a pixel to select it.</p>
       <div v-else>
         <div class="panel-block">
-          <div>
-            <div class="field">
-              <label class="label">
-                Coordinates
-              </label>
-              <div class="control">
-                <p>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</p>
-              </div>
-            </div>
+          <table class="table is-fullwidth">
+            <tbody>
+              <tr>
+                <th>Coordinates</th>
+                <td>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</td>
+              </tr>
 
-            <div class="field">
-              <label class="label">
-                ID
-              </label>
-              <div class="control">
-                <p>{{ pixelID }}</p>
-              </div>
-            </div>
+              <tr>
+                <th>Pixel ID</th>
+                <td>{{ pixelID }}</td>
+              </tr>
 
-            <div class="field">
-              <label class="label">
-                Owner
-              </label>
-              <div class="control">
-                <p>{{ ownerStr }}</p>
-              </div>
-            </div>
+              <tr>
+                <th>Owner</th>
+                <td>{{ ownerStr }}</td>
+              </tr>
 
-            <div class="field">
-              <label class="label">
-                Price
-              </label>
-              <div class="control">
-                <p>{{ priceStr }}</p>
-              </div>
-            </div>
-          </div>
-
+              <tr>
+                <th>Price</th>
+                <td>{{ priceStr }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
           <div v-if="!userIsOwner" class="panel-block">
             <button

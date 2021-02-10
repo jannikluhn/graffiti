@@ -1,9 +1,11 @@
 <template>
   <article v-if="!account" class="panel is-outlined" style="pointer-events: auto;">
-
+    <p class="panel-heading">
+      Wallet Connection
+    </p>
     <div class="panel-block">
-      <button class="button is-fullwidth" v-bind:class="{'is-loading': waitingForAccount}" v-on:click="connect">
-        Connect account
+      <button class="button is-fullwidth is-dark" v-bind:class="{'is-loading': waitingForAccount}" v-on:click="connect">
+        Connect
       </button>
     </div>
 
