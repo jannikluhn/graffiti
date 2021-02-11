@@ -55,6 +55,18 @@
 
           <div>
             <label class="label">
+              Why are pixel taxes 1% per month?
+            </label>
+            <p>
+              The Common Ownership Self-Assessed Tax (COST) plan as described in the book <a href="https://assets.press.princeton.edu/chapters/s11222.pdf">Radical Markets by E. Glen Weyl and Eric A. Posner</a> suggests a tax rate of 7% per year: “Because tax rates would, ideally, be adapted to assets based on turnover rates, some assets unlikely to turn over often (family heirlooms and photographs, diaries) would be taxed at very low rates, while others (such as trendy gadgets) would be taxed at high rates. When tax rates are very low, the possessor can prevent others from taking an item by paying a small tax. For typical assets, we estimate that turnover once every fourteen years is reasonable and thus (combined with other factors below) a 7% tax annually is a good target.” (p. 64-65)
+            </p>
+            <p>
+              We rounded up to 12% per year (1% per month) because we think pixels are trendy gadgets that should have a higher turnover... And also because the math is easier.
+            </p>
+          </div>
+
+          <div>
+            <label class="label">
              Why blockchain?
             </label>
             <p>
