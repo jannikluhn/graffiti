@@ -18,7 +18,7 @@
               <tr>
                 <td>{{ pixelID }}</td>
                 <td>{{ pixelID }}</td>
-                <td>{{ priceStr }}</td>
+                <td>{{ formatDAI(price) }}</td>
               </tr>
             </tbody>
           </table>
@@ -47,9 +47,15 @@
               </div>
               <div class="column">
                 <label class="label">
-                  Resulting Monthly Tax
+                  Added Monthly Tax
                 </label>
-                <p>{{ taxStr }}</p>
+                <p>{{ formatDAI(addedTax) }}</p>
+              </div>
+              <div class="column">
+                <label class="label">
+                  Total Monthly Tax
+                </label>
+                <p>{{ formatDAI(totalTax) }}</p>
               </div>
             </div>
 
@@ -58,21 +64,21 @@
                 <label class="label">
                   Amount to Deposit
                 </label>
-                <input class="input is-expanded" type="text" placeholder="DAI" v-model="newPriceInput">
+                <input class="input is-expanded" type="text" placeholder="DAI" v-model="depositInput">
               </div>
               <div class="column">
                 <label class="label">
                   Current balance
                 </label>
-                <p>{{ balanceStr }}</p>
+                <p>{{ formatDAI(balance) }}</p>
               </div>
             </div>
 
             <div class="field">
               <p>
                 The cost of the pixel will be transferred from your deposit to the seller.
-                Subsequently, your balance will be xxx and hold enough funds for yyy months worth
-                of Harberger taxes.
+                In the end, your balance will be {{ formatDAI(balanceAfterPayment) }} which
+                would cover the Harberger taxes for the next {{ taxMonths }} months.
               </p>
             </div>
           </form>
@@ -93,9 +99,8 @@
 
 <script>
 import { ethers } from 'ethers'
-import { weiToGWei, weiToEth, colorsHex, colorHexIndices } from '../utils.js'
+import { weiToGWei, weiToEth, colorsHex, colorHexIndices, computeMonthlyTax } from '../utils.js'
 import VSwatches from 'vue-swatches'
-import { taxRate } from '../config.js'
 
 export default {
   name: "BuyModal",
@@ -109,26 +114,25 @@ export default {
     "taxBase",
   ],
   data() {
-    console.log(this.balance)
     let newPriceInput = ""
     if (this.price) {
       weiToEth(this.price).toString()
     }
     return {
       newPriceInput: newPriceInput,
+      depositInput: "",
       waitingForTx: false,
       colorSwatch: '#ffffff',
       swatches: colorsHex,
+      formatDAI(value) {
+        if (!value) {
+          return "Unknown"
+        }
+        return ethers.utils.formatEther(value) + ' DAI'
+      },
     }
   },
   computed: {
-    priceStr() {
-      if (this.price) {
-        return ethers.utils.formatEther(this.price) + ' DAI'
-      } else {
-        return "Unknown"
-      }
-    },
     newPrice() {
       try {
         return ethers.utils.parseEther(this.newPriceInput)
@@ -137,23 +141,53 @@ export default {
       }
     },
     newPriceInvalid() {
-      return this.newPrice === null || this.newPrice < 0
+      return this.newPrice === null || this.newPrice.lt(0)
+    },
+    deposit() {
+      try {
+        return ethers.utils.parseEther(this.depositInput)
+      } catch(err) {
+        return null
+      }
     },
     color() {
       return colorHexIndices[this.colorSwatch]
     },
-    taxStr() {
-      if (!this.newPrice) {
-        return "Unknown"
+    addedTax() {
+      if (!this.newPrice || this.newPrice.lt(0)) {
+        return null
       }
-      const t = this.newPrice.mul(Math.round(taxRate * 100000)).div(100000).div(12)
-      return ethers.utils.formatEther(t) + ' DAI'
+      return computeMonthlyTax(this.newPrice)
     },
-    balanceStr() {
-      if (!this.balance) {
-        return "Unknown"
+    totalTax() {
+      if (!this.taxBase) {
+        return null
       }
-      return ethers.utils.formatEther(this.balance) + ' DAI'
+      if (!this.addedTax) {
+        return computeMonthlyTax(this.taxBase)
+      }
+      const taxBase = this.taxBase.add(this.newPrice)
+      return computeMonthlyTax(taxBase)
+    },
+    balanceAfterDeposit() {
+      if (!this.balance || !this.deposit) {
+        return null
+      }
+      return this.balance.add(this.deposit)
+    },
+    balanceAfterPayment() {
+      if (!this.balanceAfterDeposit || !this.price) {
+        return null
+      }
+      return this.balanceAfterDeposit.sub(this.price)
+    },
+    taxMonths() {
+      if (!this.balanceAfterPayment || !this.totalTax) {
+        return null
+      }
+      const taxBase = this.taxBase.add(this.newPrice)
+      const taxPerMonth = computeMonthlyTax(taxBase)
+      return this.balanceAfterPayment.div(taxPerMonth)
     }
   },
   watch: {
