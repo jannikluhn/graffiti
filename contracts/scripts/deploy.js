@@ -13,7 +13,7 @@ async function main() {
     taxRateDenominator,
     initialPrice,
     {
-      gasPrice: 20 * 1000000000,
+      gasPrice: 1 * 1000000000,
     },
   );
   console.log("Deploy tx:", graffiti.deployTransaction.hash);

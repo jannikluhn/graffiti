@@ -1,0 +1,12 @@
+type Graffiti @entity {
+  id: ID!
+  pixels: Bytes!
+}
+
+type Pixel @entity {
+  id: ID!
+  owner: Bytes!
+  price: BigInt!
+  color: Int!
+  earmarkedReceiver: Bytes!
+}

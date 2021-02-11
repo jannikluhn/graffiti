@@ -34,7 +34,7 @@ export default {
       if (!this.network) {
         return null
       }
-      return this.network.chainId != 5 
+      return this.network.chainId != 100
     }
   },
 

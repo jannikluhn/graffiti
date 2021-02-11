@@ -39,7 +39,7 @@
         </div>
         <div v-if="wrongNetwork !== null && wrongNetwork">
           <div class="notification is-dark" style="pointer-events: auto;">
-              Wrong Network ☹️ Please change to Goerli Testnet and refresh the page.
+              Wrong Network ☹️ Please change to xDai and refresh the page.
           </div>
         </div>
         <div class="column">
