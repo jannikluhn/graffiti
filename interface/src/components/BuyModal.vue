@@ -17,7 +17,7 @@
             <tbody>
               <tr>
                 <td>{{ pixelID }}</td>
-                <td>{{ pixelID }}</td>
+                <td>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</td>
                 <td>{{ formatDAI(price) }}</td>
               </tr>
             </tbody>
@@ -40,7 +40,7 @@
             <div class="field columns">
               <div class="column">
                 <label class="label">
-                  New Price (DAI)
+                  New Price (xDai)
                 </label>
                 <input
                   class="input is-expanded"
@@ -48,7 +48,7 @@
                     'is-danger': newPriceInput && newPriceInvalid,
                   }"
                   type="text"
-                  placeholder="DAI"
+                  placeholder="xDai"
                   v-model="newPriceInput"
                 >
               </div>
@@ -70,7 +70,7 @@
             <div class="field columns">
               <div class="column">
                 <label class="label">
-                  Amount to Deposit (DAI)
+                  Amount to Deposit (xDai)
                 </label>
                 <input
                   class="input is-expanded"
@@ -78,7 +78,7 @@
                     'is-danger': depositInput && depositInvalid,
                   }"
                   type="text"
-                  placeholder="DAI"
+                  placeholder="xDai"
                   v-model="depositInput"
                 >
               </div>
@@ -156,6 +156,7 @@ export default {
     "account",
     "balance",
     "taxBase",
+    "selectedPixel"
   ],
   data() {
     let newPriceInput = ""
@@ -173,7 +174,7 @@ export default {
         if (!value) {
           return "Unknown"
         }
-        return ethers.utils.formatEther(value) + ' DAI'
+        return ethers.utils.formatEther(value) + ' xDai'
       },
     }
   },
@@ -270,7 +271,7 @@ export default {
       try {
         let signer = this.$provider.getSigner(this.account)
         let contract = this.$contract.connect(signer)
-        await contract.buy(
+        await contract.depositAndBuy(
           this.pixelID,
           weiToGWei(this.price),
           weiToGWei(this.newPrice),
