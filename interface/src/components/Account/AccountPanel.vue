@@ -41,6 +41,9 @@
               v-bind:balance="balance"
               v-on:error="(msg) => $emit('error', msg)"
             />
+            <p>
+              (If your balance runs out, you can lose your pixels!)
+            </p>
           </div>
         </form>
       </div>
