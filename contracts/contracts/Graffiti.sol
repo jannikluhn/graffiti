@@ -58,6 +58,7 @@ contract GraffitETH is ERC721, Ownable {
     constructor(uint128 width, uint128 height, uint256 taxRateNumerator, uint256 taxRateDenominator, uint64 initialPrice) ERC721("Pixel", "PXL") {
         require(width > 0, "GraffitETH: width must not be zero");
         require(height > 0, "GraffitETH: height must not be zero");
+        require(taxRateDenominator > 0, "GraffitETH: tax rate denominator must not be zero");
         _maxPixelID = width * height - 1;
         _taxRateNumerator = taxRateNumerator;
         _taxRateDenominator = taxRateDenominator;
