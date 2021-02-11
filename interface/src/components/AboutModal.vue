@@ -80,12 +80,7 @@
               <a href="https://en.wikipedia.org/wiki/Place_(Reddit)">Reddit’s Place</a> in 2017. More recently was <a href="https://satoshis.place/">Satoshi’s Place</a> in 2020, which was set up so pixels could be purchased using Bitcoin’s lightning network. Credit to Simon de la Rouviere for <a href="https://medium.com/@simondlr/what-is-harberger-tax-where-does-the-blockchain-fit-in-1329046922c6">mentioning this stuff</a> in an article about Harberger taxes and blockchain a couple years ago that probably planted the seed for this project in our subconscious brains. Thanks also to the RadicalxChange project for providing <a href="https://www.radicalxchange.org/concepts/partial-common-ownership/">great resources</a> related to the Harberger tax.
             </p>
           </div>
-
         </section>
-
-        <footer class="modal-card-foot">
-          <p>***ms F was here***</p>
-        </footer>
     </div>
   </div>
 </template>
