@@ -105,7 +105,45 @@ export default {
         this.taxBase = ethers.BigNumber.from(0)
         this.onError('Failed to query account state: ' + err.message)
       }
-      // TOOD: subscribe to balance changing events or query periodically
+
+      this.$contract.on("Deposit", (account, amount, balance) => {
+        if (account != this.account) {
+          return
+        }
+        if (this.balance === null) {
+          this.balance = gWeiToWei(balance)
+        } else {
+          this.balance = this.balance.add(gWeiToWei(amount))
+        }
+      })
+      this.$contract.on("Withdraw", (account, amount, balance) => {
+        if (account != this.account) {
+          return
+        }
+        if (this.balance === null) {
+          this.balance = gWeiToWei(balance)
+        } else {
+          this.balance = this.balance.sub(gWeiToWei(amount))
+        }
+      })
+      this.$contract.on("Buy", (pixelID, seller, buyer, price) => {
+        if (this.balance === null) {
+          return
+        }
+        if (this.account == seller) {
+          this.balance = this.balance.add(gWeiToWei(price))
+          this.taxBase = this.taxBase.sub(gWeiToWei(price))
+        }
+        if (this.account == buyer) {
+          this.balance = this.balance.sub(gWeiToWei(price))
+          // find out the new price and increase tax base accordingly
+          // TODO: use getNominalPrice, or even better get the new price from the price change
+          // event
+          this.$contract.getPrice(pixelID).then((price) => {
+            this.taxBase = this.taxBase.add(gWeiToWei(price))
+          })
+        }
+      })
     },
 
     onError(e) {
