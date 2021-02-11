@@ -15,7 +15,7 @@ struct Earmark {
     uint64 amount;
 }
 
-contract Graffiti is ERC721, Ownable {
+contract GraffitETH is ERC721, Ownable {
 
     event Deposit(
         address account,
@@ -56,8 +56,8 @@ contract Graffiti is ERC721, Ownable {
     );
 
     constructor(uint128 width, uint128 height, uint256 taxRateNumerator, uint256 taxRateDenominator, uint64 initialPrice) ERC721("Pixel", "PXL") {
-        require(width > 0, "Graffiti: width must not be zero");
-        require(height > 0, "Graffiti: height must not be zero");
+        require(width > 0, "GraffitETH: width must not be zero");
+        require(height > 0, "GraffitETH: height must not be zero");
         _maxPixelID = width * height - 1;
         _taxRateNumerator = taxRateNumerator;
         _taxRateDenominator = taxRateDenominator;
@@ -147,14 +147,14 @@ contract Graffiti is ERC721, Ownable {
 
     function _buy(address buyerAddress, uint256 pixelID, uint64 maxPrice, uint64 newPrice, uint8 color) internal {
         uint64 price = getPrice(pixelID);
-        require(price <= maxPrice, "Graffiti: pixel price exceeds max price");
+        require(price <= maxPrice, "GraffitETH: pixel price exceeds max price");
 
         // pay taxes for buyer so that balance is up to date
         payTax(buyerAddress);
         Account memory buyer = _accounts[buyerAddress];
 
         // check that buyer has enough money to buy pixel.
-        require(buyer.balance >= price, "Graffiti: balance too low");
+        require(buyer.balance >= price, "GraffitETH: balance too low");
 
         // reduce buyer's balance and increase buyer's tax base
         buyer.balance = _subInt128(buyer.balance, price);
@@ -165,7 +165,7 @@ contract Graffiti is ERC721, Ownable {
         address owner;
         if (_exists(pixelID)) {
             owner = ownerOf(pixelID);
-            require(owner != buyerAddress, "Graffiti: cannot buy pixel from yourself");
+            require(owner != buyerAddress, "GraffitETH: cannot buy pixel from yourself");
 
             // pay tax for seller so that balance is up to date
             payTax(owner);
@@ -185,7 +185,7 @@ contract Graffiti is ERC721, Ownable {
             // taxes paid, subtract `totalSupply() * getInitialPrice()`.
             _totalTaxesPaid += price;
 
-            require(pixelID <= _maxPixelID, "Graffiti: max pixel ID exceeded");
+            require(pixelID <= _maxPixelID, "GraffitETH: max pixel ID exceeded");
             _mint(buyerAddress, pixelID);
         }
 
@@ -208,9 +208,9 @@ contract Graffiti is ERC721, Ownable {
     }
 
     function setColor(uint256 pixelID, uint8 color) public {
-        require(_exists(pixelID), "Graffiti: pixel does not exist");
+        require(_exists(pixelID), "GraffitETH: pixel does not exist");
         address owner = ownerOf(pixelID);
-        require(msg.sender == owner, "Graffiti: only pixel owner can set color");
+        require(msg.sender == owner, "GraffitETH: only pixel owner can set color");
         emit ColorChange({
             pixelID: pixelID,
             color: color
@@ -220,7 +220,7 @@ contract Graffiti is ERC721, Ownable {
     function setPrice(uint256 pixelID, uint64 newPrice) public {
         require(_exists(pixelID));
         address owner = ownerOf(pixelID);
-        require(msg.sender == owner, "Graffiti: only owner can set pixel price");
+        require(msg.sender == owner, "GraffitETH: only owner can set pixel price");
 
         payTax(msg.sender);
         Account memory account = _accounts[msg.sender];
@@ -263,7 +263,7 @@ contract Graffiti is ERC721, Ownable {
         payTax(msg.sender);
         Account memory acc = _accounts[account];
 
-        require(msg.value % (1 gwei) == 0, "Graffiti: deposit amount must be multiple of 1 GWei");
+        require(msg.value % (1 gwei) == 0, "GraffitETH: deposit amount must be multiple of 1 GWei");
         uint64 amount = uint64(msg.value / (1 gwei));
         if (acc.balance < 0) {
             // the account owes taxes
@@ -302,11 +302,11 @@ contract Graffiti is ERC721, Ownable {
         payTax(account);
         Account memory acc = _accounts[account];
 
-        require(acc.balance >= amount, "Graffiti: cannot withdraw more than balance");
+        require(acc.balance >= amount, "GraffitETH: cannot withdraw more than balance");
         acc.balance = _subInt128(acc.balance, amount);
 
         (bool success,) = receiver.call{value: amount * (1 gwei)}("");
-        require(success, "Graffiti: withdraw call reverted");
+        require(success, "GraffitETH: withdraw call reverted");
         _accounts[account] = acc;
         emit Withdraw({
             account: account,
@@ -325,10 +325,10 @@ contract Graffiti is ERC721, Ownable {
     //
     function _withdrawTaxes(uint256 amount, address receiver) internal {
         uint256 taxBalance = _totalTaxesPaid - _totalTaxesWithdrawn;
-        require(amount <= taxBalance, "Graffiti: not enough taxes to withdraw");
+        require(amount <= taxBalance, "GraffitETH: not enough taxes to withdraw");
         _totalTaxesWithdrawn += amount;
         (bool success,) = receiver.call{value: amount * (1 gwei)}("");
-        require(success, "Graffiti: withdraw taxes call reverted");
+        require(success, "GraffitETH: withdraw taxes call reverted");
         emit TaxWithdraw({
             amount: amount,
             receiver: receiver
@@ -351,10 +351,10 @@ contract Graffiti is ERC721, Ownable {
     // Earmarks
     //
     function earmark(uint256 pixelID, address receiver, uint64 amount) public {
-        require(_exists(pixelID), "Graffiti: pixel does not exist");
+        require(_exists(pixelID), "GraffitETH: pixel does not exist");
         address owner = ownerOf(pixelID);
-        require(msg.sender == owner, "Graffiti: only owner can earmark pixel");
-        require(receiver != owner, "Graffiti: cannot earmark for owner");
+        require(msg.sender == owner, "GraffitETH: only owner can earmark pixel");
+        require(receiver != owner, "GraffitETH: cannot earmark for owner");
         
         _earmark(pixelID, receiver, amount);
     }
@@ -372,10 +372,10 @@ contract Graffiti is ERC721, Ownable {
     }
 
     function claim(uint256 pixelID, uint64 maxPrice, uint64 minAmount) public {
-        require(_exists(pixelID), "Graffiti: pixel does not exist");
+        require(_exists(pixelID), "GraffitETH: pixel does not exist");
         address owner = ownerOf(pixelID);
         Earmark memory em = _earmarks[pixelID];
-        require(msg.sender == em.receiver, "Graffiti: account not allowed to claim pixel");
+        require(msg.sender == em.receiver, "GraffitETH: account not allowed to claim pixel");
 
         payTax(owner);
         payTax(msg.sender);
@@ -384,7 +384,7 @@ contract Graffiti is ERC721, Ownable {
         Account memory receiver = _accounts[msg.sender];
         uint64 price = _pixelPrices[pixelID];
 
-        require(price <= maxPrice, "Graffiti: pixel is too expensive");
+        require(price <= maxPrice, "GraffitETH: pixel is too expensive");
 
         sender.taxBase = _subUint64(sender.taxBase, price);
         receiver.taxBase = _addUint64(receiver.taxBase, price);
@@ -399,7 +399,7 @@ contract Graffiti is ERC721, Ownable {
                 amount = 0;
             }
         }
-        require(amount >= minAmount, "Graffiti: amount is too small");
+        require(amount >= minAmount, "GraffitETH: amount is too small");
         sender.balance = _subInt128(sender.balance, amount);
         receiver.balance = _addInt128(receiver.balance, amount);
 
@@ -458,7 +458,7 @@ contract Graffiti is ERC721, Ownable {
     }
 
     function _computeTax(uint64 taxBase, uint64 startTime, uint64 endTime) view internal returns (uint64) {
-        require(endTime >= startTime, "Graffiti: end time must be later than start time");
+        require(endTime >= startTime, "GraffitETH: end time must be later than start time");
         uint256 num = uint256(endTime - startTime) * taxBase * _taxRateNumerator;
         uint256 tax = num / _taxRateDenominator;
         if (tax <= type(uint64).max) {
