@@ -1,7 +1,7 @@
 <template>
   <article class="panel is-outlined" style="pointer-events: auto">
     <div class="panel-heading">
-      Pixel
+      Create Graffiti
       <button class="delete is-pulled-right" v-on:click="folded = !folded"></button>
     </div>
     <div v-if="!folded">
