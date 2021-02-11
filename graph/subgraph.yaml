@@ -3,11 +3,11 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Graffiti
-    network: goerli
+    name: GraffitETH
+    network: xdai
     source:
-      address: "0x52784170525CC0b8306982c75AEDe1Bf3265c06a"
-      startBlock: 4266075
+      address: "0x63Ef3802D824084258dA2C347Fa6a99dB3051081"
+      startBlock: 14499372
       abi: GraffitETH
     mapping:
       kind: ethereum/events

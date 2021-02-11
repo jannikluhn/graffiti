@@ -26,6 +26,11 @@ module.exports = {
       accounts: [
       ],
     },
+    xdai: {
+      url: "https://rpc.xdaichain.com/",
+      accounts: [
+      ],
+    },
   },
 };
 
