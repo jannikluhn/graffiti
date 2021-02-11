@@ -57,7 +57,7 @@ export default {
         await contract.setPrice(this.pixelID, weiToGWei(this.price))
         this.priceInput = ""
       } catch(err) {
-        this.$emit('error', 'Failed to send deposit transaction: ' + err.message)
+        this.$emit('error', 'Failed to send change price transaction: ' + err.message)
       }
       this.waitingForTx = false
     },

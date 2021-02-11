@@ -1,3 +1,33 @@
+import { ethers } from 'ethers'
+import { taxRate } from './config'
+
+const colorsHexAndRGBA = [
+  ['#ffffff', [255, 255, 255, 255]],
+  ['#e4e4e4', [228, 228, 228, 255]],
+  ['#888888', [136, 136, 136, 255]],
+  ['#222222', [34, 34, 34, 255]],
+  ['#ffa7d1', [255, 167, 209, 255]],
+  ['#e50000', [229, 0, 0, 255]],
+  ['#e59500', [229, 149, 0, 255]],
+  ['#a06a42', [160, 106, 66, 255]],
+  ['#e5d900', [229, 217, 0, 255]],
+  ['#94e044', [148, 224, 68, 255]],
+  ['#02be01', [2, 190, 1, 255]],
+  ['#00d3dd', [0, 211, 221, 255]],
+  ['#0083c7', [0, 131, 199, 255]],
+  ['#0000ea', [0, 0, 234, 255]],
+  ['#cf6ee4', [207, 110, 228, 255]],
+  ['#820080', [130, 0, 128, 255]],
+]
+let colorsHex = [];
+let colorsRGBA = [];
+let colorHexIndices = {};
+for (let [i, [hex, rgba]] of colorsHexAndRGBA.entries()) {
+  colorsHex.push(hex)
+  colorsRGBA.push(rgba)
+  colorHexIndices[hex] = i
+}
+
 function pixelCoordsToID(coords, width) {
   return coords[0] + coords[1] * width
 }
@@ -28,61 +58,11 @@ function weiToEth(wei) {
   return wei.div("1000000000000000000")
 }
 
-function byteToColor(b) {
-  let rgb = undefined
-  switch (b) {
-    case 0:
-      rgb = [255, 255, 255, 255]
-      break
-    case 1:
-      rgb = [228, 228, 228, 255]
-      break
-    case 2:
-      rgb = [136, 136, 136, 255]
-      break
-    case 3:
-      rgb = [34, 34, 34, 255]
-      break
-    case 4:
-      rgb = [255, 167, 209, 255]
-      break
-    case 5:
-      rgb = [229, 0, 0, 255]
-      break
-    case 6:
-      rgb = [229, 149, 0, 255]
-      break
-    case 7:
-      rgb = [160, 106, 66, 255]
-      break
-    case 8:
-      rgb = [229, 217, 0, 255]
-      break
-    case 9:
-      rgb = [148, 224, 68, 255]
-      break
-    case 10:
-      rgb = [2, 190, 1, 255]
-      break
-    case 11:
-      rgb = [0, 211, 221, 255]
-      break
-    case 12:
-      rgb = [0, 131, 199, 255]
-      break
-    case 13:
-      rgb = [0, 0, 234, 255]
-      break
-    case 14:
-      rgb = [207, 110, 228, 255]
-      break
-    case 15:
-      rgb = [130, 0, 128, 255]
-      break
-    default:
-      rgb = [255, 255, 255, 255]
-  }
-  return rgb
+function computeMonthlyTax(value) {
+  const v = ethers.BigNumber.from(value)
+  const f = 100000
+  const taxYearly = v.mul(Math.round(taxRate * f)).div(f)
+  return taxYearly.div(12)
 }
 
 export {
@@ -92,5 +72,8 @@ export {
   gWeiToWei,
   weiToEth,
   shortenAddress,
-  byteToColor,
+  colorsHex,
+  colorsRGBA,
+  colorHexIndices,
+  computeMonthlyTax,
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="modal" v-bind:class="{'is-active': active}">
+  <div class="modal is-fullwidth" v-bind:class="{'is-active': active}">
     <div class="modal-background"></div>
       <div class="modal-card">
         <header class="modal-card-head">
@@ -8,43 +8,122 @@
         </header>
 
         <section class="modal-card-body">
+          <table class="table is-fullwidth has-text-centered">
+            <thead>
+              <th>Pixel ID</th>
+              <th>Coordinates</th>
+              <th>Price</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{ pixelID }}</td>
+                <td>{{ pixelID }}</td>
+                <td>{{ formatDAI(price) }}</td>
+              </tr>
+            </tbody>
+          </table>
+
           <form>
             <div class="field">
               <label class="label">
-                PixelID
+                New Color
               </label>
               <div class="control">
-                <p>{{ pixelID }}</p>
+                <v-swatches 
+                  v-model="colorSwatch" 
+                  :swatches="swatches"
+                  show-border
+                ></v-swatches>
+              </div>
+            </div>
+
+            <div class="field columns">
+              <div class="column">
+                <label class="label">
+                  New Price (DAI)
+                </label>
+                <input
+                  class="input is-expanded"
+                  v-bind:class="{
+                    'is-danger': newPriceInput && newPriceInvalid,
+                  }"
+                  type="text"
+                  placeholder="DAI"
+                  v-model="newPriceInput"
+                >
+              </div>
+              <div class="column">
+                <label class="label">
+                  Added Monthly Tax
+                </label>
+                <p>{{ formatDAI(addedTax) }}</p>
+              </div>
+            </div>
+
+            <div v-if="totalTax !== null && !newPriceInvalid && newPrice.gt(0)" class="field has-text-success">
+              Your monthly tax will increase to {{ formatDAI(totalTax) }}.
+            </div>
+            <div v-if="totalTax !== null && !newPriceInvalid && newPrice.eq(0)" class="field has-text-success">
+              Your monthly tax will remain unchanged at {{ formatDAI(totalTax) }}.
+            </div>
+
+            <div class="field columns">
+              <div class="column">
+                <label class="label">
+                  Amount to Deposit (DAI)
+                </label>
+                <input
+                  class="input is-expanded"
+                  v-bind:class="{
+                    'is-danger': depositInput && depositInvalid,
+                  }"
+                  type="text"
+                  placeholder="DAI"
+                  v-model="depositInput"
+                >
+              </div>
+              <div class="column">
+                <label class="label">
+                  Current balance
+                </label>
+                <p>{{ formatDAI(balance) }}</p>
               </div>
             </div>
 
             <div class="field">
-              <label class="label">
-                Price
-              </label>
-              <div class="control">
-                <p>{{ priceStr }}</p>
-              </div>
-            </div>
-
-            <div class="field">
-              <label class="label">
-                New Price
-              </label>
-              <div class="control">
-                <input class="input" type="text" placeholder="DAI" v-model="newPriceInput">
-                <p v-if="newPriceInput && newPriceInvalid" class="help is-danger">Invalid price</p>
-              </div>
-            </div>
-
-            <div class="field">
-              <label class="label">
-                Color value
-              </label>
-              <div class="control">
-                <input class="input" type="text" placeholder="Color" v-model="colorInput">
-                <p v-if="colorInput && colorInputInvalid" class="help is-danger">Invalid color</p>
-              </div>
+              <p
+                v-if="(newPriceInput != '' && newPriceInvalid) || (depositInput != '' && depositInvalid)"
+                class="has-text-danger"
+              >
+                Some of your inputs are invalid. Please make sure the new price and the deposit
+                amount are properly formatted, are not negative, and are not too fractional.
+              </p>
+              <p
+                v-if="!inputsInvalid && totalDepositCoversCost && totalDepositSufficient"
+                class="has-text-success"
+              >
+                The cost of the pixel will be transferred from your deposit to the seller.
+                After the transaction is complete, your balance will be
+                {{ formatDAI(balanceAfterPayment) }} which would cover the Harberger taxes for the
+                next {{ taxMonths }} months.
+              </p>
+              <p
+                v-if="!inputsInvalid && !totalDepositCoversCost"
+                class="has-text-danger"
+              >
+                Your current balance is insufficient to pay for the pixel. Please increase the
+                deposit amount by at least {{ formatDAI(balanceAfterPayment.mul(-1)) }}.
+              </p>
+              <p
+                v-if="!inputsInvalid && totalDepositCoversCost && !totalDepositSufficient"
+                class="has-text-warning"
+              >
+                Your current deposit is sufficient to pay for the pixel, but not much will be left
+                to pay for Harberger taxes. If you don't increase your deposit, you risk losing all
+                your pixels in the near future. It is recommended to increase the deposit amount by
+                {{ formatDAI(balanceAfterPayment.sub(totalTax.mul(recommendedMonths)).mul(-1)) }} or
+                more to be on the safe side.
+              </p>
             </div>
           </form>
         </section>
@@ -53,7 +132,7 @@
           <button
             class="button is-dark"
             v-bind:class="{'is-loading': waitingForTx}"
-            v-bind:disabled="newPriceInvalid || colorInputInvalid"
+            v-bind:disabled="newPriceInvalid || depositInvalid || !totalDepositCoversCost"
             v-on:click="buy()"
           >Buy</button>
           <button class="button" v-on:click="close()">Cancel</button>
@@ -64,31 +143,41 @@
 
 <script>
 import { ethers } from 'ethers'
-import { weiToGWei, weiToEth } from '../utils.js'
+import { weiToGWei, weiToEth, colorsHex, colorHexIndices, computeMonthlyTax } from '../utils.js'
+import VSwatches from 'vue-swatches'
 
 export default {
   name: "BuyModal",
+  components: { VSwatches },
   props: [
     "active",
     "price",
     "pixelID",
     "account",
+    "balance",
+    "taxBase",
   ],
   data() {
+    let newPriceInput = ""
+    if (this.price) {
+      weiToEth(this.price).toString()
+    }
     return {
-      newPriceInput: weiToEth(this.price).toString(),
-      colorInput: "0",
+      newPriceInput: newPriceInput,
+      depositInput: "0",
       waitingForTx: false,
+      colorSwatch: '#ffffff',
+      swatches: colorsHex,
+      recommendedMonths: 3,
+      formatDAI(value) {
+        if (!value) {
+          return "Unknown"
+        }
+        return ethers.utils.formatEther(value) + ' DAI'
+      },
     }
   },
   computed: {
-    priceStr() {
-      if (this.price) {
-        return ethers.utils.formatEther(this.price) + " DAI"
-      } else {
-        return "Unknown"
-      }
-    },
     newPrice() {
       try {
         return ethers.utils.parseEther(this.newPriceInput)
@@ -97,18 +186,79 @@ export default {
       }
     },
     newPriceInvalid() {
-      return this.newPrice === null || this.newPrice < 0
+      return this.newPrice === null || this.newPrice.lt(0) || this.newPrice.mod(1e9) != 0
     },
-    color() {
-      let n = Number(this.colorInput)
-      if (isNaN(n) || !Number.isInteger(n) || n < 0 || n > 255) {
+    deposit() {
+      try {
+        return ethers.utils.parseEther(this.depositInput)
+      } catch(err) {
         return null
-      } else {
-        return n
       }
     },
-    colorInputInvalid() {
-      return this.color === null
+    depositInvalid() {
+      return this.deposit === null || this.deposit.lt(0) || this.deposit.mod(1e9) != 0
+    },
+    inputsInvalid() {
+      return this.newPriceInvalid || this.depositInvalid
+    },
+    color() {
+      return colorHexIndices[this.colorSwatch]
+    },
+    addedTax() {
+      if (this.newPriceInvalid) {
+        return null
+      }
+      return computeMonthlyTax(this.newPrice)
+    },
+    totalTax() {
+      if (!this.taxBase) {
+        return null
+      }
+      if (!this.addedTax) {
+        return computeMonthlyTax(this.taxBase)
+      }
+      const taxBase = this.taxBase.add(this.newPrice)
+      return computeMonthlyTax(taxBase)
+    },
+    balanceAfterDeposit() {
+      if (!this.balance || !this.deposit) {
+        return null
+      }
+      return this.balance.add(this.deposit)
+    },
+    balanceAfterPayment() {
+      if (!this.balanceAfterDeposit || !this.price) {
+        return null
+      }
+      return this.balanceAfterDeposit.sub(this.price)
+    },
+    taxMonths() {
+      if (!this.balanceAfterPayment || !this.totalTax || this.newPriceInvalid) {
+        return null
+      }
+      const taxBase = this.taxBase.add(this.newPrice)
+      const taxPerMonth = computeMonthlyTax(taxBase)
+      return this.balanceAfterPayment.div(taxPerMonth)
+    },
+    totalDepositCoversCost() {
+      if (this.balanceAfterPayment === null) {
+        return null
+      }
+      return this.balanceAfterPayment.gte(0)
+    },
+    totalDepositSufficient() {
+      if (this.taxMonths === null) {
+        return null
+      }
+      return this.totalDepositCoversCost && this.taxMonths.gte(this.recommendedMonths)
+    },
+  },
+  watch: {
+    price: {
+      handler() {
+        this.newPriceInput = ethers.utils.formatEther(this.price)
+      },
+      immediate: true,
     },
   },
   methods: {
@@ -120,7 +270,14 @@ export default {
       try {
         let signer = this.$provider.getSigner(this.account)
         let contract = this.$contract.connect(signer)
-        await contract.buy(this.pixelID, weiToGWei(this.price), weiToGWei(this.newPrice), this.color)
+        await contract.buy(
+          this.pixelID,
+          weiToGWei(this.price),
+          weiToGWei(this.newPrice),
+          this.color,
+          {value: this.deposit,
+        }
+        )
         this.newPriceInput = ""
       } catch(err) {
         this.$emit('error', 'Failed to send buy transaction: ' + err.message)
@@ -131,3 +288,9 @@ export default {
   },
 }
 </script>
+
+<style>
+.vue-swatches__trigger {
+  box-shadow: inset 0 0 2px rgba(0,0,0,.75);
+}
+</style>

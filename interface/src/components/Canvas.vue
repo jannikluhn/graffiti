@@ -12,7 +12,7 @@
 <script>
 import { ethers } from 'ethers'
 import gql from 'graphql-tag'
-import { idToPixelCoords, byteToColor } from '../utils'
+import { idToPixelCoords, colorsRGBA } from '../utils'
 import { gridSize } from '../config'
 
 const pixelQuery = gql`
@@ -164,11 +164,11 @@ export default {
     },
 
     setPixel(id, colorByte) {
-      const color = byteToColor(colorByte);
+      const rgba = colorsRGBA[colorByte];
       const pixelCoords = idToPixelCoords(id, gridSize[0]);
       const redIndex = (pixelCoords[0] + pixelCoords[1] * gridSize[1]) * 4
       for (let i = 0; i < 4; i++) {
-        this.imageData.data[redIndex + i] = color[i]
+        this.imageData.data[redIndex + i] = rgba[i]
       }
     },
 
