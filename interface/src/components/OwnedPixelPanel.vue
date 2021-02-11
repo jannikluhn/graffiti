@@ -2,7 +2,8 @@
   <article class="panel is-outlined" style="pointer-events: auto">
     <p class="panel-heading">
       Your Pixels
-      <button class="delete is-pulled-right" v-on:click="folded = !folded"></button>
+      <chevron-up-icon size="1.5x" class="is-pulled-right" v-if="!folded" v-on:click="folded = !folded"></chevron-up-icon>
+      <chevron-down-icon size="1.5x" class="is-pulled-right" v-if="folded" v-on:click="folded = !folded"></chevron-down-icon>
     </p>
     <div v-if="!folded">
       <div v-if="!pixels.length" class="panel-block">
@@ -77,6 +78,7 @@ import { gridSize } from '../config'
 import ChangePriceField from './ChangePrice.vue'
 import ChangeColorField from './ChangeColor.vue'
 import VSwatches from 'vue-swatches'
+import { ChevronUpIcon, ChevronDownIcon } from 'vue-feather-icons'
 
 
 const pixelQuery = gql`
@@ -95,6 +97,8 @@ export default {
     ChangePriceField,
     ChangeColorField,
     VSwatches,
+    ChevronUpIcon,
+    ChevronDownIcon
   },
   props: [
     "account",
