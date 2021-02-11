@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import { ethers } from 'ethers'
-import GraffitiMetadata from './assets/Graffiti.json'
+import GraffitETHMetadata from './assets/GraffitETH.json'
 import { ApolloClient, InMemoryCache } from '@apollo/client/core'
 import '@/assets/main.scss'
 import 'vue-swatches/dist/vue-swatches.css'
@@ -9,8 +9,8 @@ import 'vue-swatches/dist/vue-swatches.css'
 
 if (window.ethereum) {
   const provider = new ethers.providers.Web3Provider(window.ethereum)
-  const address = '0x86B6200E8A90603D20fb11C457ec6b8C4265C314'
-  const contract = new ethers.Contract(address, GraffitiMetadata.abi, provider)
+  const address = '0x52784170525CC0b8306982c75AEDe1Bf3265c06a'
+  const contract = new ethers.Contract(address, GraffitETHMetadata.abi, provider)
   // todo: check we're on the right network
 
   Vue.prototype.$provider = provider
