@@ -44,6 +44,7 @@
     </div>
   <BuyModal
     v-if="buyModalActive"
+    v-bind:selectedPixel="selectedPixel"
     v-bind:active="buyModalActive"
     v-bind:pixelID="pixelID"
     v-bind:price="price"

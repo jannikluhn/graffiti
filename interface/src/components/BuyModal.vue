@@ -17,7 +17,7 @@
             <tbody>
               <tr>
                 <td>{{ pixelID }}</td>
-                <td>{{ pixelID }}</td>
+                <td>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</td>
                 <td>{{ formatDAI(price) }}</td>
               </tr>
             </tbody>
@@ -156,6 +156,7 @@ export default {
     "account",
     "balance",
     "taxBase",
+    "selectedPixel"
   ],
   data() {
     let newPriceInput = ""
