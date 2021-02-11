@@ -76,11 +76,11 @@
               GraffitETH was created as part of the ETHDenver Buildathon. Inspiration for the concept of a digital graffiti wall can be traced back to The Million Dollar Homepage in 2005 (https://en.wikipedia.org/wiki/The_Million_Dollar_Homepage). Another influential project after that was Reddit’s Place in 2017 (https://en.wikipedia.org/wiki/Place_(Reddit)). More recently was Satoshi’s Place in 2020 (https://satoshis.place/), which was set up so pixels could be purchased using Bitcoin’s lightning network. Credit to Simon de la Rouviere for mentioning this stuff in an article about Harberger taxes and blockchain a couple years ago (https://medium.com/@simondlr/what-is-harberger-tax-where-does-the-blockchain-fit-in-1329046922c6) that probably planted the seed for this project in our subconscious brains. Thanks also to the RadicalxChange project for providing great resources related to the Harberger tax (https://www.radicalxchange.org/concepts/partial-common-ownership/).
             </p>
           </div>
-          
+
         </section>
 
         <footer class="modal-card-foot">
-          <p>Footer</p>
+          <p>***ms F was here***</p>
         </footer>
     </div>
   </div>
