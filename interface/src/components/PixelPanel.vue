@@ -2,7 +2,8 @@
   <article class="panel is-outlined" style="pointer-events: auto">
     <div class="panel-heading">
       Create Graffiti
-      <button class="delete is-pulled-right" v-on:click="folded = !folded"></button>
+      <chevron-up-icon size="1.5x" class="is-pulled-right" v-if="!folded" v-on:click="folded = !folded"></chevron-up-icon>
+      <chevron-down-icon size="1.5x" class="is-pulled-right" v-if="folded" v-on:click="folded = !folded"></chevron-down-icon>
     </div>
     <div v-if="!folded">
       <p v-if="!selectedPixel" class="panel-block">Click on a pixel to select it.</p>
@@ -61,6 +62,7 @@ import { ethers } from 'ethers'
 import { pixelCoordsToID, gWeiToWei, shortenAddress } from '../utils.js'
 import BuyModal from './BuyModal.vue'
 import { gridSize } from '../config.js'
+import { ChevronUpIcon, ChevronDownIcon } from 'vue-feather-icons'
 
 export default {
   name: "PixelPanel",
@@ -72,6 +74,8 @@ export default {
   ],
   components: {
     BuyModal,
+    ChevronUpIcon,
+    ChevronDownIcon
   },
 
   data() {
