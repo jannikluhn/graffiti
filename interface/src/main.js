@@ -5,6 +5,7 @@ import GraffitiMetadata from './assets/Graffiti.json'
 import { ApolloClient, InMemoryCache } from '@apollo/client/core'
 
 import '@/assets/main.scss'
+import 'vue-swatches/dist/vue-swatches.css'
 
 
 if (window.ethereum) {

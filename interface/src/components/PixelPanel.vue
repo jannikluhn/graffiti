@@ -1,7 +1,7 @@
 <template>
   <article class="panel is-outlined" style="pointer-events: auto">
     <div class="panel-heading">
-      Pixel
+      Create Graffiti
       <button class="delete is-pulled-right" v-on:click="folded = !folded"></button>
     </div>
     <div v-if="!folded">
@@ -21,21 +21,22 @@
               </tr>
 
               <tr>
-                <th>Owner</th>
+                <th>Graffitier</th>
                 <td>{{ ownerStr }}</td>
               </tr>
 
               <tr>
                 <th>Price</th>
-                <td>{{ priceStr }}</td>
+                <td>{{ formatDAI(price) }}</td>
               </tr>
             </tbody>
           </table>
         </div>
-          <div v-if="!userIsOwner" class="panel-block">
+          <div class="panel-block">
             <button
               class="button is-dark is-fullwidth"
               v-on:click="buyModalActive = true"
+              v-bind:disabled="!account || userIsOwner"
             >Buy</button>
           </div>
       </div>
@@ -45,6 +46,9 @@
     v-bind:active="buyModalActive"
     v-bind:pixelID="pixelID"
     v-bind:price="price"
+    v-bind:account="account"
+    v-bind:balance="balance"
+    v-bind:taxBase="taxBase"
     v-on:close="buyModalActive = false"
     v-on:error="(msg) => $emit('error', msg)"
   />
@@ -63,6 +67,8 @@ export default {
   props: [
     "selectedPixel",
     "account",
+    "balance",
+    "taxBase",
   ],
   components: {
     BuyModal,
@@ -75,19 +81,18 @@ export default {
       exists: null,
       buyModalActive: false,
       folded: false,
+      formatDAI(value) {
+        if (!value) {
+          return "Unknown"
+        }
+        return ethers.utils.formatEther(value) + ' DAI'
+      },
     }
   },
 
   computed: {
     pixelID() {
       return pixelCoordsToID(this.selectedPixel, gridSize[0])
-    },
-    priceStr() {
-      if (this.price) {
-        return ethers.utils.formatEther(this.price) + " DAI"
-      } else {
-        return "Unknown"
-      }
     },
     ownerStr() {
       if (this.exists === null) {
@@ -105,7 +110,7 @@ export default {
       return shortenAddress(this.owner)
     },
     userIsOwner() {
-        return this.owner !== null && this.account == this.owner
+      return this.owner !== null && this.account == this.owner
     },
   },
 

@@ -1,11 +1,12 @@
 const hre = require("hardhat");
 
 async function main() {
-  const Graffiti = await hre.ethers.getContractFactory("Graffiti");
-  const size = 333;
-  const taxRateNumerator = 7;
+  const Graffiti = await hre.ethers.getContractFactory("GraffitETH");
+  const size = 151;
+  const taxRateNumerator = 12;
   const taxRateDenominator = 365 * 24 * 60 * 60 * 100;
-  const graffiti = await Graffiti.deploy(size, size, taxRateNumerator, taxRateDenominator);
+  const initialPrice = 100000000;  // 0.1 ETH/DAI in GWei
+  const graffiti = await Graffiti.deploy(size, size, taxRateNumerator, taxRateDenominator, initialPrice);
 
   await graffiti.deployed();
 

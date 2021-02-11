@@ -41,6 +41,9 @@
               v-bind:balance="balance"
               v-on:error="(msg) => $emit('error', msg)"
             />
+            <p>
+              (If your balance runs out, you can lose your pixels!)
+            </p>
           </div>
         </form>
       </div>
@@ -52,7 +55,7 @@
 import { ethers } from 'ethers'
 import DepositField from './Deposit.vue'
 import WithdrawField from './Withdraw.vue'
-import { gWeiToWei, shortenAddress } from '../../utils.js'
+import { shortenAddress } from '../../utils.js'
 import { taxRate } from '../../config.js'
 
 export default {
@@ -65,52 +68,14 @@ export default {
     return {
       waitingForAccount: false,
       shortenAddress: null,
-      balance: null,
-      taxBase: null,
       folded: false,
     }
   },
   props: [
     "account",
+    "balance",
+    "taxBase",
   ],
-
-  mounted() {
-    const filters = [
-      this.$contract.filters.Deposit(),
-      this.$contract.filters.Withdraw(),
-    ];
-    const updateBalance = (account, amount, balance) => {
-      if (this.account !== null && this.account == account) {
-        this.balance = gWeiToWei(balance)
-      }
-    }
-    for (let f of filters) {
-      this.$contract.on(f, updateBalance)
-    }
-  },
-
-  watch: {
-    account: {
-      handler: async function () {
-        if (this.account) {
-          try {
-            let balanceGWei = await this.$contract.getBalance(this.account)
-            let taxBaseGWei = await this.$contract.getTaxBase(this.account)
-            this.balance = gWeiToWei(balanceGWei)
-            this.taxBase = gWeiToWei(taxBaseGWei)
-          } catch(err) {
-            this.balance = null
-            this.taxBase = null
-            this.$emit('error', 'Failed to query account state: ' + err.message)
-          }
-        } else {
-          this.balance = null
-          this.taxBase = null
-        }
-      },
-      immediate: true,
-    },
-  },
 
   computed: {
     balanceStr() {

@@ -12,11 +12,15 @@
           <AccountPanel
             v-on:error="onError($event)"
             v-bind:account="account"
+            v-bind:balance="balance"
+            v-bind:taxBase="taxBase"
             v-if="account"
           />
           <PixelPanel
             v-bind:selectedPixel="selectedPixel"
             v-bind:account="account"
+            v-bind:balance="balance"
+            v-bind:taxBase="taxBase"
             v-on:error="onError($event)"
           />
         </div>
@@ -38,7 +42,7 @@
               Wrong Network ☹️ Please change to Goerli Testnet and refresh the page.
           </div>
         </div>
-        <div class="column is-narrow">
+        <div class="column">
           <div v-for="error in errors" v-bind:key="error.key" class="notification is-danger" style="pointer-events: auto;">
             <button class="delete" v-on:click="removeError(error.key)"></button>
             {{ error.message }}
@@ -55,6 +59,9 @@ import AccountPanel from './Account/AccountPanel.vue'
 import PixelPanel from './PixelPanel.vue'
 import OwnedPixelPanel from './OwnedPixelPanel.vue'
 import AboutModal from './AboutModal.vue'
+
+import { ethers } from 'ethers'
+import { gWeiToWei } from '../utils'
 
 export default {
   name: "Panels",
@@ -76,12 +83,27 @@ export default {
       errors: [],
       numErrors: 0,
       aboutModalActive: false,
+      balance: null,
+      taxBase: null,
     }
   },
 
   methods: {
-    onAccountChanged(account) {
+    async onAccountChanged(account) {
       this.account = account
+      this.balance = null
+      this.taxBase = null
+      try {
+        let balanceGWei = await this.$contract.getBalance(this.account)
+        let taxBaseGWei = await this.$contract.getTaxBase(this.account)
+        this.balance = gWeiToWei(balanceGWei)
+        this.taxBase = gWeiToWei(taxBaseGWei)
+      } catch(err) {
+        this.balance = ethers.BigNumber.from(0)
+        this.taxBase = ethers.BigNumber.from(0)
+        this.onError('Failed to query account state: ' + err.message)
+      }
+      // TOOD: subscribe to balance changing events or query periodically
     },
 
     onError(e) {
