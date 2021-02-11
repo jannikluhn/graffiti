@@ -37,7 +37,14 @@
 
             <tr>
               <th>Color</th>
-              <td>{{ selectedPixel.color }}</td>
+              <td>
+                <v-swatches
+                  v-model="swatches[selectedPixel.color.toString()]"
+                  :swatches="swatches"
+                  show-border
+                  disabled
+                ></v-swatches>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -65,10 +72,12 @@
 <script>
 import { ethers } from 'ethers'
 import gql from 'graphql-tag'
-import { gWeiToWei, idToPixelCoords } from '../utils'
+import { gWeiToWei, idToPixelCoords, colorsHex } from '../utils'
 import { gridSize } from '../config'
 import ChangePriceField from './ChangePrice.vue'
 import ChangeColorField from './ChangeColor.vue'
+import VSwatches from 'vue-swatches'
+
 
 const pixelQuery = gql`
   query pixelsOf($address: Bytes, $lastID: String) {
@@ -85,6 +94,7 @@ export default {
   components: {
     ChangePriceField,
     ChangeColorField,
+    VSwatches,
   },
   props: [
     "account",
@@ -94,6 +104,7 @@ export default {
       pixels: [],
       selectedPixel: null,
       folded: false,
+      swatches: colorsHex,
     }
   },
 
