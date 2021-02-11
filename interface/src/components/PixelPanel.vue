@@ -89,7 +89,7 @@ export default {
         if (!value) {
           return "Unknown"
         }
-        return ethers.utils.formatEther(value) + ' DAI'
+        return ethers.utils.formatEther(value) + ' xDai'
       },
     }
   },

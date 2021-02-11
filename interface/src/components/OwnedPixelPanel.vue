@@ -140,7 +140,7 @@ export default {
       if (!this.selectedPixel) {
         return ""
       }
-      return ethers.utils.formatEther(this.price) + " DAI"
+      return ethers.utils.formatEther(this.price) + " xDai"
     },
     coords() {
       if (!this.selectedPixel) {
