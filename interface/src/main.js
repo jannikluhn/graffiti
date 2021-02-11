@@ -9,7 +9,7 @@ import 'vue-swatches/dist/vue-swatches.css'
 
 if (window.ethereum) {
   const provider = new ethers.providers.Web3Provider(window.ethereum)
-  const address = '0x52784170525CC0b8306982c75AEDe1Bf3265c06a'
+  const address = '0x63Ef3802D824084258dA2C347Fa6a99dB3051081'
   const contract = new ethers.Contract(address, GraffitETHMetadata.abi, provider)
   // todo: check we're on the right network
 
@@ -21,7 +21,7 @@ if (window.ethereum) {
 }
 
 const apolloClient = new ApolloClient({
-  uri: 'https://api.thegraph.com/subgraphs/name/jannikluhn/graffiti-goerli',
+  uri: 'https://api.thegraph.com/subgraphs/name/jannikluhn/graffiteth',
   cache: new InMemoryCache(),
 })
 Vue.prototype.$apolloClient = apolloClient
