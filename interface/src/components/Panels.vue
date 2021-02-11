@@ -36,7 +36,7 @@
               Wrong Network ☹️ Please change to Goerli Testnet and refresh the page.
           </div>
         </div>
-        <div class="column is-narrow">
+        <div class="column">
           <div v-for="error in errors" v-bind:key="error.key" class="notification is-danger" style="pointer-events: auto;">
             <button class="delete" v-on:click="removeError(error.key)"></button>
             {{ error.message }}
