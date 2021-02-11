@@ -1,13 +1,16 @@
 <template>
-  <div class="modal is-active">
+  <div class="modal" v-bind:class="{'is-active': active}">
     <div class="modal-background"></div>
-      <div class="modal-card">
+      <div class="modal-card about">
         <header class="modal-card-head">
           <p class="modal-card-title">About</p>
+          <button class="delete" aria-label="close" v-on:click="close()"></button>
         </header>
 
         <section class="modal-card-body">
-
+          <div class="img">
+            <img src="../assets/logoRainbow.svg" width="290px" alt="GraffitETH">
+          </div>
           <div>
             <label class="label">
               What it is
@@ -73,7 +76,8 @@
               Acknowledgements
             </label>
             <p>
-              GraffitETH was created as part of the ETHDenver Buildathon. Inspiration for the concept of a digital graffiti wall can be traced back to The Million Dollar Homepage in 2005 (https://en.wikipedia.org/wiki/The_Million_Dollar_Homepage). Another influential project after that was Reddit’s Place in 2017 (https://en.wikipedia.org/wiki/Place_(Reddit)). More recently was Satoshi’s Place in 2020 (https://satoshis.place/), which was set up so pixels could be purchased using Bitcoin’s lightning network. Credit to Simon de la Rouviere for mentioning this stuff in an article about Harberger taxes and blockchain a couple years ago (https://medium.com/@simondlr/what-is-harberger-tax-where-does-the-blockchain-fit-in-1329046922c6) that probably planted the seed for this project in our subconscious brains. Thanks also to the RadicalxChange project for providing great resources related to the Harberger tax (https://www.radicalxchange.org/concepts/partial-common-ownership/).
+              GraffitETH was created as part of the ETHDenver Buildathon. Inspiration for the concept of a digital graffiti wall can be traced back to <a href="https://en.wikipedia.org/wiki/The_Million_Dollar_Homepage">The Million Dollar Homepage</a> in 2005. Another influential project after that was 
+              <a href="https://en.wikipedia.org/wiki/Place_(Reddit)">Reddit’s Place</a> in 2017. More recently was <a href="https://satoshis.place/">Satoshi’s Place</a> in 2020, which was set up so pixels could be purchased using Bitcoin’s lightning network. Credit to Simon de la Rouviere for <a href="https://medium.com/@simondlr/what-is-harberger-tax-where-does-the-blockchain-fit-in-1329046922c6">mentioning this stuff</a> in an article about Harberger taxes and blockchain a couple years ago that probably planted the seed for this project in our subconscious brains. Thanks also to the RadicalxChange project for providing <a href="https://www.radicalxchange.org/concepts/partial-common-ownership/">great resources</a> related to the Harberger tax.
             </p>
           </div>
 
@@ -89,5 +93,11 @@
 <script>
 export default {
   name: "AboutModal",
+  props: ["active"],
+  methods: {
+    close() {
+      this.$emit('close')
+    }
+  }
 }
 </script>

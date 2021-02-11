@@ -3,3 +3,32 @@
 .panel-block {
   background-color: $white;
 }
+
+.about {
+  height: 570px;
+  pointer-events: all;
+}
+
+#i {
+  pointer-events: all;
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  width: 28px;
+  height: 28px;
+  border-radius: 100px;
+  color: #fff;
+  background-color: #363636;
+  text-align: center;
+  font-weight: 700;
+  line-height: 25px;
+}
+
+.about label {
+  margin-top: 30px;;
+}
+
+.img {
+  display: flex;
+  justify-content: center;
+}

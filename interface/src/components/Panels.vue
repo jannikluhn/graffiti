@@ -26,7 +26,12 @@
             v-bind:account="account"
             v-on:error="onError($event)"
           />
-          <AboutModal />
+          <div id="i" v-on:click="aboutModalActive = true">?</div>
+          <AboutModal 
+            v-if="aboutModalActive"
+            v-bind:active="aboutModalActive"
+            v-on:close="aboutModalActive = false"
+          />
         </div>
         <div v-if="wrongNetwork !== null && wrongNetwork">
           <div class="notification is-dark" style="pointer-events: auto;">
@@ -70,6 +75,7 @@ export default {
       account: null,
       errors: [],
       numErrors: 0,
+      aboutModalActive: false,
     }
   },
 
