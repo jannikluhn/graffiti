@@ -33,3 +33,14 @@ $modal-content-width: 769px;
   display: flex;
   justify-content: center;
 }
+
+#coords {
+  position: fixed;
+  right: 65px;
+  top: 21px;
+  font-size: 13px;
+  background-color: white;
+  box-shadow: rgba(85, 85, 85, 0.189) 1px 1px 7px;
+  border-radius: 5px;
+  padding: 4px 8px;
+}
