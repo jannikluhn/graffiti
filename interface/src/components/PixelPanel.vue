@@ -32,10 +32,14 @@
             </tbody>
           </table>
         </div>
-          <div v-if="!userIsOwner" class="panel-block">
+          <div class="panel-block">
             <button
               class="button is-dark is-fullwidth"
               v-on:click="buyModalActive = true"
+              v-bind:account="account"
+              v-bind:balance="balance"
+              v-bind:taxBase="taxBase"
+              v-bind:disabled="!account || userIsOwner"
             >Buy</button>
           </div>
       </div>
@@ -63,6 +67,8 @@ export default {
   props: [
     "selectedPixel",
     "account",
+    "balance",
+    "taxBase",
   ],
   components: {
     BuyModal,
@@ -105,7 +111,7 @@ export default {
       return shortenAddress(this.owner)
     },
     userIsOwner() {
-        return this.owner !== null && this.account == this.owner
+      return this.owner !== null && this.account == this.owner
     },
   },
 

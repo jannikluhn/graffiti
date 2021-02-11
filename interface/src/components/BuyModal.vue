@@ -1,5 +1,5 @@
 <template>
-  <div class="modal" v-bind:class="{'is-active': active}">
+  <div class="modal is-fullwidth" v-bind:class="{'is-active': active}">
     <div class="modal-background"></div>
       <div class="modal-card">
         <header class="modal-card-head">
@@ -8,38 +8,22 @@
         </header>
 
         <section class="modal-card-body">
+          <table class="table is-fullwidth has-text-centered">
+            <thead>
+              <th>Pixel ID</th>
+              <th>Coordinates</th>
+              <th>Price</th>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{ pixelID }}</td>
+                <td>{{ pixelID }}</td>
+                <td>{{ priceStr }}</td>
+              </tr>
+            </tbody>
+          </table>
+
           <form>
-            <div class="field">
-              <label class="label">
-                Pixel ID
-              </label>
-              <div class="control">
-                <p>{{ pixelID }}</p>
-              </div>
-            </div>
-
-            <div class="field">
-              <label class="label">
-                Price
-              </label>
-              <div class="control">
-                <p>{{ priceStr }}</p>
-              </div>
-            </div>
-
-            <div class="field">
-              <label class="label">
-                New Price
-              </label>
-              <div class="control">
-                <input class="input" type="text" placeholder="DAI" v-model="newPriceInput">
-                <p v-if="newPriceInput && newPriceInvalid" class="help is-danger">Invalid price</p>
-                <p>
-                (You must pay 1% per month on this price.)
-                </p>
-              </div>
-            </div>
-
             <div class="field">
               <label class="label">
                 New Color
@@ -49,9 +33,47 @@
                   v-model="colorSwatch" 
                   :swatches="swatches"
                   show-border
-                  popover-y="top"
                 ></v-swatches>
               </div>
+            </div>
+
+            <div class="field columns">
+              <div class="column">
+                <label class="label">
+                  New Price
+                </label>
+                <input class="input is-expanded" type="text" placeholder="DAI" v-model="newPriceInput">
+                <p v-if="newPriceInput && newPriceInvalid" class="help is-danger">Invalid price</p>
+              </div>
+              <div class="column">
+                <label class="label">
+                  Resulting Monthly Tax
+                </label>
+                <p>{{ taxStr }}</p>
+              </div>
+            </div>
+
+            <div class="field columns">
+              <div class="column">
+                <label class="label">
+                  Amount to Deposit
+                </label>
+                <input class="input is-expanded" type="text" placeholder="DAI" v-model="newPriceInput">
+              </div>
+              <div class="column">
+                <label class="label">
+                  Current balance
+                </label>
+                <p>{{ balanceStr }}</p>
+              </div>
+            </div>
+
+            <div class="field">
+              <p>
+                The cost of the pixel will be transferred from your deposit to the seller.
+                Subsequently, your balance will be xxx and hold enough funds for yyy months worth
+                of Harberger taxes.
+              </p>
             </div>
           </form>
         </section>
@@ -73,6 +95,7 @@
 import { ethers } from 'ethers'
 import { weiToGWei, weiToEth, colorsHex, colorHexIndices } from '../utils.js'
 import VSwatches from 'vue-swatches'
+import { taxRate } from '../config.js'
 
 export default {
   name: "BuyModal",
@@ -82,10 +105,17 @@ export default {
     "price",
     "pixelID",
     "account",
+    "balance",
+    "taxBase",
   ],
   data() {
+    console.log(this.balance)
+    let newPriceInput = ""
+    if (this.price) {
+      weiToEth(this.price).toString()
+    }
     return {
-      newPriceInput: weiToEth(this.price).toString(),
+      newPriceInput: newPriceInput,
       waitingForTx: false,
       colorSwatch: '#ffffff',
       swatches: colorsHex,
@@ -94,7 +124,7 @@ export default {
   computed: {
     priceStr() {
       if (this.price) {
-        return ethers.utils.formatEther(this.price) + " DAI"
+        return ethers.utils.formatEther(this.price) + ' DAI'
       } else {
         return "Unknown"
       }
@@ -111,6 +141,27 @@ export default {
     },
     color() {
       return colorHexIndices[this.colorSwatch]
+    },
+    taxStr() {
+      if (!this.newPrice) {
+        return "Unknown"
+      }
+      const t = this.newPrice.mul(Math.round(taxRate * 100000)).div(100000).div(12)
+      return ethers.utils.formatEther(t) + ' DAI'
+    },
+    balanceStr() {
+      if (!this.balance) {
+        return "Unknown"
+      }
+      return ethers.utils.formatEther(this.balance) + ' DAI'
+    }
+  },
+  watch: {
+    price: {
+      handler() {
+        this.newPriceInput = ethers.utils.formatEther(this.price)
+      },
+      immediate: true,
     },
   },
   methods: {
