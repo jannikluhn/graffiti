@@ -42,7 +42,7 @@
               v-on:error="(msg) => $emit('error', msg)"
             />
             <p>
-              (If your balance runs out, you lose your pixels!)
+              (If your balance runs out, you can lose your pixels!)
             </p>
           </div>
         </form>
