@@ -30,6 +30,12 @@
             v-bind:account="account"
             v-on:error="onError($event)"
           />
+          <div id="i" v-on:click="aboutModalActive = true">?</div>
+          <AboutModal 
+            v-if="aboutModalActive"
+            v-bind:active="aboutModalActive"
+            v-on:close="aboutModalActive = false"
+          />
         </div>
         <div v-if="wrongNetwork !== null && wrongNetwork">
           <div class="notification is-dark" style="pointer-events: auto;">
@@ -52,6 +58,8 @@ import ConnectPanel from './ConnectPanel.vue'
 import AccountPanel from './Account/AccountPanel.vue'
 import PixelPanel from './PixelPanel.vue'
 import OwnedPixelPanel from './OwnedPixelPanel.vue'
+import AboutModal from './AboutModal.vue'
+
 import { ethers } from 'ethers'
 import { gWeiToWei } from '../utils'
 
@@ -62,6 +70,7 @@ export default {
     AccountPanel,
     PixelPanel,
     OwnedPixelPanel,
+    AboutModal,
   },
   props: [
     "selectedPixel",
@@ -73,6 +82,7 @@ export default {
       account: null,
       errors: [],
       numErrors: 0,
+      aboutModalActive: false,
       balance: null,
       taxBase: null,
     }
