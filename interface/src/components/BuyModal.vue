@@ -71,7 +71,7 @@
 
 <script>
 import { ethers } from 'ethers'
-import { weiToGWei, weiToEth, colorToByte } from '../utils.js'
+import { weiToGWei, weiToEth, colorsHex, colorHexIndices } from '../utils.js'
 import VSwatches from 'vue-swatches'
 
 export default {
@@ -88,24 +88,7 @@ export default {
       newPriceInput: weiToEth(this.price).toString(),
       waitingForTx: false,
       colorSwatch: '#ffffff',
-       swatches: [
-         '#ffffff',
-         '#e4e4e4',
-         '#888888',
-         '#222222',
-         '#ffa7d1',
-         '#e50000',
-         '#e59500',
-         '#a06a42',
-         '#e5d900',
-         '#94e044',
-         '#02be01',
-         '#00d3dd',
-         '#0083c7',
-         '#0000ea',
-         '#cf6ee4',
-         '#820080',
-       ],
+      swatches: colorsHex,
     }
   },
   computed: {
@@ -127,12 +110,7 @@ export default {
       return this.newPrice === null || this.newPrice < 0
     },
     color() {
-      let n = Number(colorToByte(this.colorSwatch))
-      if (isNaN(n) || !Number.isInteger(n) || n < 0 || n > 255) {
-        return null
-      } else {
-        return n
-      }
+      return colorHexIndices[this.colorSwatch]
     },
   },
   methods: {
