@@ -7,6 +7,7 @@ import { ApolloClient, InMemoryCache } from '@apollo/client/core'
 import '@/assets/main.scss'
 import 'vue-swatches/dist/vue-swatches.css'
 
+
 if (window.ethereum) {
   const provider = new ethers.providers.Web3Provider(window.ethereum)
   const address = '0x86B6200E8A90603D20fb11C457ec6b8C4265C314'
