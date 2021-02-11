@@ -37,6 +37,8 @@
             v-on:close="aboutModalActive = false"
           />
         </div>
+        <div id="i" v-on:click="aboutModalActive = true">?</div>
+        <div id="coords">123, 123</div>
         <div v-if="wrongNetwork !== null && wrongNetwork">
           <div class="notification is-dark" style="pointer-events: auto;">
               Wrong Network ☹️ Please change to xDai and refresh the page.
