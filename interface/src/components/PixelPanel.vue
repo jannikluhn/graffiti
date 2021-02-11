@@ -21,7 +21,7 @@
               </tr>
 
               <tr>
-                <th>Owner</th>
+                <th>Graffitier</th>
                 <td>{{ ownerStr }}</td>
               </tr>
 
