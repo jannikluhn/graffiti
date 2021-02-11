@@ -1,7 +1,7 @@
 <template>
   <div class="field has-addons">
     <div class="control">
-      <input class="input" type="text" placeholder="DAI" v-model="amountInput">
+      <input class="input" type="text" placeholder="xDai" v-model="amountInput">
     <p v-if="amountInput && amountInvalid" class="help is-danger">Invalid deposit amount</p>
     </div>
     <div class="control">

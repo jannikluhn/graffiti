@@ -40,7 +40,7 @@
             <div class="field columns">
               <div class="column">
                 <label class="label">
-                  New Price (DAI)
+                  New Price (xDai)
                 </label>
                 <input
                   class="input is-expanded"
@@ -48,7 +48,7 @@
                     'is-danger': newPriceInput && newPriceInvalid,
                   }"
                   type="text"
-                  placeholder="DAI"
+                  placeholder="xDai"
                   v-model="newPriceInput"
                 >
               </div>
@@ -70,7 +70,7 @@
             <div class="field columns">
               <div class="column">
                 <label class="label">
-                  Amount to Deposit (DAI)
+                  Amount to Deposit (xDai)
                 </label>
                 <input
                   class="input is-expanded"
@@ -78,7 +78,7 @@
                     'is-danger': depositInput && depositInvalid,
                   }"
                   type="text"
-                  placeholder="DAI"
+                  placeholder="xDai"
                   v-model="depositInput"
                 >
               </div>
@@ -112,7 +112,7 @@
                 class="has-text-danger"
               >
                 Your current balance is insufficient to pay for the pixel. Please increase the
-                deposit amount by at least {{ formatDAI(balanceAfterPayment.mul(-1)) }}.
+                deposit amount by at least {{ format(balanceAfterPayment.mul(-1)) }}.
               </p>
               <p
                 v-if="!inputsInvalid && totalDepositCoversCost && !totalDepositSufficient"
@@ -173,7 +173,7 @@ export default {
         if (!value) {
           return "Unknown"
         }
-        return ethers.utils.formatEther(value) + ' DAI'
+        return ethers.utils.formatEther(value) + ' xDai'
       },
     }
   },

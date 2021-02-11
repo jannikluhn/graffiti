@@ -1,6 +1,6 @@
 $modal-content-width: 769px;
 @import '~bulma';
-
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 .panel-block {
   background-color: $white;
@@ -33,4 +33,9 @@ $modal-content-width: 769px;
 .img {
   display: flex;
   justify-content: center;
+}
+
+.panel {
+  transform: scale(0.7);
+  transform-origin: top left;
 }
