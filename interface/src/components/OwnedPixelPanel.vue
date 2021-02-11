@@ -45,6 +45,12 @@
 
       <div class="panel-block" v-if="selectedPixel">
         <form>
+          <ChangeColorField
+            v-bind:account="account"
+            v-bind:pixelID="selectedPixel.id"
+            v-bind:currentColor="selectedPixel.color"
+            v-on:error="(msg) => $emit('error', msg)"
+          />
           <ChangePriceField
             v-bind:account=account
             v-bind:pixelID="selectedPixel.id"
@@ -62,6 +68,7 @@ import gql from 'graphql-tag'
 import { gWeiToWei, idToPixelCoords } from '../utils'
 import { gridSize } from '../config'
 import ChangePriceField from './ChangePrice.vue'
+import ChangeColorField from './ChangeColor.vue'
 
 const pixelQuery = gql`
   query pixelsOf($address: Bytes, $lastID: String) {
@@ -77,6 +84,7 @@ export default {
   name: "OwnedPixelPanel",
   components: {
     ChangePriceField,
+    ChangeColorField,
   },
   props: [
     "account",
