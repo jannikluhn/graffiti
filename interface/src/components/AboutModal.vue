@@ -28,7 +28,7 @@
               GraffitETH is a digital graffiti wall in which pixels are NFTs (non-fungible tokens, a type of digital property) subject to the Harberger tax. What that means: You can paint a pixel by buying the NFT, but anyone else can buy it from you immediately and paint over it. To prevent other people from painting over your pixel, you must set a high price... But you can’t set it too high, since you will have to pay pixel taxes on it!
             </p>
             <p>
-              Anyone can participate and paint the wall. To get started, you’ll need to set up a web3 Ethereum wallet (for managing your crypto assets and interacting with the GraffitETH smart contract) and load it with xDAI (the cryptocurrency used for buying and paying taxes on the pixels, and for paying transaction fees on the xDai blockchain).
+              Anyone can participate and paint the wall. To get started, you’ll need to set up a web3 Ethereum wallet (for managing your crypto assets and interacting with the GraffitETH smart contract) and load it with xDAI (the cryptocurrency used for buying and paying taxes on the pixels, and for paying transaction fees on the xDai blockchain). Check out the User Guide for details.
             </p>
           </div>
 
@@ -37,7 +37,7 @@
               What do you do with the money?
             </label>
             <p>
-              A DAO (Decentralized Autonomous Organization, like a board of directors) will use the money raised through pixel taxes to display the evolving artwork over time (on billboards, online ads, etc.). Perhaps someday your pixels will appear on a billboard in Times Square, ETHDenver t-shirts, or even a flag on the moon...
+              A <a href="https://www.dd.ie/2016/04/the-decentralized-autonomous.html">DAO (Decentralized Autonomous Organization)</a> will use the money raised through pixel taxes to display the evolving artwork over time (on billboards, online ads, etc.). Perhaps someday your pixels will appear on a billboard in Times Square, ETHDenver t-shirts, or even a flag on the moon...
             </p>
           </div>
 
@@ -68,6 +68,18 @@
             </label>
             <p>
               GraffitETH is an open-source project deployed on xDai, an Ethereum sidechain. We chose to use xDai because it is cheaper and faster than the Ethereum mainchain, but it is still compatible with other essential integrations like The Graph. In addition, xDai transaction fees are denominated in a “stablecoin” pegged to the US Dollar, making it simpler to interact with.
+            </p>
+          </div>
+
+          <div>
+            <label class="label">
+              Nerdy stuff
+            </label>
+            <p>
+              Contract address: [coming soon]
+            </p>
+            <p>
+              Source code: <a href="https://github.com/jannikluhn/graffiti">https://github.com/jannikluhn/graffiti</a>
             </p>
           </div>
 
