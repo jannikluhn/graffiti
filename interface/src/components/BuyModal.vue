@@ -11,7 +11,7 @@
           <form>
             <div class="field">
               <label class="label">
-                PixelID
+                Pixel ID
               </label>
               <div class="control">
                 <p>{{ pixelID }}</p>
