@@ -11,7 +11,7 @@
           <form>
             <div class="field">
               <label class="label">
-                PixelID
+                Pixel ID
               </label>
               <div class="control">
                 <p>{{ pixelID }}</p>
@@ -34,6 +34,9 @@
               <div class="control">
                 <input class="input" type="text" placeholder="DAI" v-model="newPriceInput">
                 <p v-if="newPriceInput && newPriceInvalid" class="help is-danger">Invalid price</p>
+                <p>
+                (You must pay 1% per month on this price.)
+                </p>
               </div>
             </div>
 
