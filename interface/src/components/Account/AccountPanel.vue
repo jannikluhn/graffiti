@@ -84,7 +84,7 @@ export default {
   computed: {
     balanceStr() {
       if (this.balance) {
-        return ethers.utils.formatEther(this.balance) + " DAI"
+        return ethers.utils.formatEther(this.balance) + " xDai"
       } else {
         return "Unknown"
       }
@@ -93,7 +93,7 @@ export default {
       if (this.taxBase) {
         const taxPerYear = this.taxBase.mul(Math.round(taxRate * 100000)).div(100000)
         const taxPerDay = taxPerYear.div(12)
-        return ethers.utils.formatEther(taxPerDay) + " DAI"
+        return ethers.utils.formatEther(taxPerDay) + " xDai"
       } else {
         return "Unknown"
       }
