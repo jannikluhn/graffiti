@@ -28,6 +28,11 @@ export default {
 
   created() {
     window.ethereum.on('accountsChanged', this.onAccountsChanged)
+    this.$provider.listAccounts().then((accounts) => {
+      if (accounts.length > 0) {
+        this.$emit("accountChanged", accounts[0])
+      }
+    })
   },
 
   methods: {
