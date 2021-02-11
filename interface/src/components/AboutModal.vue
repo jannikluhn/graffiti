@@ -16,7 +16,7 @@
               What it is
             </label>
             <p>
-              GraffitETH is the Ethereum graffiti wall. It’s an experiment in market socialism, a collaborative artwork, and a window into Ethereum for the world.
+              GraffitETH is the Ethereum graffiti wall. It’s an experiment in market socialism, a collaborative artwork, and a window into Ethereum for the world. Created by <a href="http://marianono.superhi.com/">Maria Nogueira</a>, <a href="https://github.com/jannikluhn">Jannik Luhn</a>, and <a href="https://twitter.com/aleezagroks">Aleeza Howitt</a>.
             </p>
           </div>
 
