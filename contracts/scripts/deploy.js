@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  const Graffiti = await hre.ethers.getContractFactory("Graffiti");
+  const Graffiti = await hre.ethers.getContractFactory("GraffitETH");
   const size = 333;
   const taxRateNumerator = 7;
   const taxRateDenominator = 365 * 24 * 60 * 60 * 100;
