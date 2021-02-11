@@ -270,7 +270,7 @@ export default {
       try {
         let signer = this.$provider.getSigner(this.account)
         let contract = this.$contract.connect(signer)
-        await contract.buy(
+        await contract.depositAndBuy(
           this.pixelID,
           weiToGWei(this.price),
           weiToGWei(this.newPrice),

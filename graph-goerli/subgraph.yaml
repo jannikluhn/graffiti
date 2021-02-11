@@ -6,9 +6,9 @@ dataSources:
     name: Graffiti
     network: goerli
     source:
-      address: "0x86B6200E8A90603D20fb11C457ec6b8C4265C314"
-      startBlock: 4248094
-      abi: Graffiti
+      address: "0x52784170525CC0b8306982c75AEDe1Bf3265c06a"
+      startBlock: 4266075
+      abi: GraffitETH
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -16,8 +16,8 @@ dataSources:
       entities:
         - Graffiti
       abis:
-        - name: Graffiti
-          file: ./abis/Graffiti.json
+        - name: GraffitETH
+          file: ./abis/GraffitETH.json
       eventHandlers:
         - event: ColorChange(uint256,uint8)
           handler: handleColorChange
