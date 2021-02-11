@@ -17,6 +17,7 @@
     "ethers": "^5.0.29",
     "graphql": "^15.5.0",
     "vue": "^2.6.12",
+    "vue-feather-icons": "^5.1.0",
     "vue-swatches": "^2.1.0"
   },
   "devDependencies": {

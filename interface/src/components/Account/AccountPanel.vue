@@ -2,7 +2,8 @@
   <article class="panel is-outlined" style="pointer-events: auto;">
     <div class="panel-heading">
       Account
-      <button class="delete is-pulled-right" v-on:click="folded = !folded"></button>
+      <chevron-up-icon size="1.5x" class="is-pulled-right" v-if="!folded" v-on:click="folded = !folded"></chevron-up-icon>
+      <chevron-down-icon size="1.5x" class="is-pulled-right" v-if="folded" v-on:click="folded = !folded"></chevron-down-icon>
     </div>
 
     <div v-if="account && !folded">
@@ -57,12 +58,15 @@ import DepositField from './Deposit.vue'
 import WithdrawField from './Withdraw.vue'
 import { shortenAddress } from '../../utils.js'
 import { taxRate } from '../../config.js'
+import { ChevronUpIcon, ChevronDownIcon } from 'vue-feather-icons'
 
 export default {
   name: 'AccountPanel',
   components: {
     DepositField,
     WithdrawField,
+    ChevronUpIcon,
+    ChevronDownIcon
   },
   data() {
     return {
