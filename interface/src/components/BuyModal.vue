@@ -155,3 +155,9 @@ export default {
   },
 }
 </script>
+
+<style>
+.vue-swatches__trigger {
+  box-shadow: inset 0 0 2px rgba(0,0,0,.75);
+}
+</style>
