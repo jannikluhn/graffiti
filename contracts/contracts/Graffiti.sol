@@ -122,6 +122,13 @@ contract GraffitETH is ERC721, Ownable {
         return _exists(pixelID);
     }
 
+    function getNominalPrice(uint256 pixelID) view public returns (uint64) {
+        if (!_exists(pixelID)) {
+            return _initialPrice;
+        }
+        return _pixelPrices[pixelID];
+    }
+
     function getPrice(uint256 pixelID) view public returns (uint64) {
         if (!_exists(pixelID)) {
             return _initialPrice;
