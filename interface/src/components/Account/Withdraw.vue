@@ -44,7 +44,7 @@ export default {
       }
     },
     amountInvalid() {
-      return this.amount === null || this.amount <= 0 || (this.balance !== null && this.balance.lt(this.amount))
+      return this.amount === null || this.amount.lte(0) || (this.balance !== null && this.balance.lt(this.amount))
     },
   },
 
