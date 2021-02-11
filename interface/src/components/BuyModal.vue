@@ -41,15 +41,15 @@
             </div>
 
             <div class="field">
-              <div class="form__label">
-                <strong>Please choose a color:</strong>
+              <label class="label">
+                New Color
+              </label>
+              <div class="control">
                 <v-swatches 
                   v-model="colorSwatch" 
                   :swatches="swatches"
-                  row-length="4"
-                  show-labels: false
-              
-                  popover-x="left"
+                  show-border
+                  popover-y="top"
                 ></v-swatches>
               </div>
             </div>
@@ -60,7 +60,7 @@
           <button
             class="button is-dark"
             v-bind:class="{'is-loading': waitingForTx}"
-            v-bind:disabled="newPriceInvalid || colorInputInvalid"
+            v-bind:disabled="newPriceInvalid"
             v-on:click="buy()"
           >Buy</button>
           <button class="button" v-on:click="close()">Cancel</button>
@@ -87,7 +87,7 @@ export default {
     return {
       newPriceInput: weiToEth(this.price).toString(),
       waitingForTx: false,
-      colorSwatch: null,
+      colorSwatch: '#ffffff',
        swatches: [
          '#ffffff',
          '#e4e4e4',
@@ -133,9 +133,6 @@ export default {
       } else {
         return n
       }
-    },
-    colorInputInvalid() {
-      return colorToByte(this.colorSwatch) === null
     },
   },
   methods: {
