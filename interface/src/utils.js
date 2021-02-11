@@ -1,3 +1,6 @@
+import { ethers } from 'ethers'
+import { taxRate } from './config'
+
 const colorsHexAndRGBA = [
   ['#ffffff', [255, 255, 255, 255]],
   ['#e4e4e4', [228, 228, 228, 255]],
@@ -55,6 +58,13 @@ function weiToEth(wei) {
   return wei.div("1000000000000000000")
 }
 
+function computeMonthlyTax(value) {
+  const v = ethers.BigNumber.from(value)
+  const f = 100000
+  const taxYearly = v.mul(Math.round(taxRate * f)).div(f)
+  return taxYearly.div(12)
+}
+
 export {
   pixelCoordsToID,
   idToPixelCoords,
@@ -65,4 +75,5 @@ export {
   colorsHex,
   colorsRGBA,
   colorHexIndices,
+  computeMonthlyTax,
 }

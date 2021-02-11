@@ -27,7 +27,7 @@
 
               <tr>
                 <th>Price</th>
-                <td>{{ priceStr }}</td>
+                <td>{{ formatDAI(price) }}</td>
               </tr>
             </tbody>
           </table>
@@ -36,9 +36,6 @@
             <button
               class="button is-dark is-fullwidth"
               v-on:click="buyModalActive = true"
-              v-bind:account="account"
-              v-bind:balance="balance"
-              v-bind:taxBase="taxBase"
               v-bind:disabled="!account || userIsOwner"
             >Buy</button>
           </div>
@@ -49,6 +46,9 @@
     v-bind:active="buyModalActive"
     v-bind:pixelID="pixelID"
     v-bind:price="price"
+    v-bind:account="account"
+    v-bind:balance="balance"
+    v-bind:taxBase="taxBase"
     v-on:close="buyModalActive = false"
     v-on:error="(msg) => $emit('error', msg)"
   />
@@ -81,19 +81,18 @@ export default {
       exists: null,
       buyModalActive: false,
       folded: false,
+      formatDAI(value) {
+        if (!value) {
+          return "Unknown"
+        }
+        return ethers.utils.formatEther(value) + ' DAI'
+      },
     }
   },
 
   computed: {
     pixelID() {
       return pixelCoordsToID(this.selectedPixel, gridSize[0])
-    },
-    priceStr() {
-      if (this.price) {
-        return ethers.utils.formatEther(this.price) + " DAI"
-      } else {
-        return "Unknown"
-      }
     },
     ownerStr() {
       if (this.exists === null) {
