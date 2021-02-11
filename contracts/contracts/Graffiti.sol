@@ -15,6 +15,41 @@ struct Earmark {
     uint64 amount;
 }
 
+// GraffitETH is an NFT contract in which each token represents a pixel. The owner has the right
+// to change the pixel color. Pixel ownership is governed by the Harberger tax mechanism, i.e.,
+// - every pixel can be bought at any time at a price the owner has to set
+// - the owner has to pay a tax proportional to the pixel price
+//
+// In order to facilitate tax payments, the contract manages accounts. Each account stores a
+// balance and the tax base. The tax base is the sum of the prices of all pixels the account owns.
+// It is used to calculate the tax burden (tax base * tax rate per second = tax burden per second).
+// The balance is increased by depositing and decreased by withdrawing or paying taxes. The account
+// also stores the time at which the last tax payment has been carried out. This is used to
+// calculate the timespan for which taxes have to be paid next time. The contract ensures that
+// taxes are paid whenever the balance or tax base changes. This means that the "missing" tax is
+// always simply tax base * tax rate * time since last tax payment.
+//
+// Account balances beomce negative if the deposit does not cover the tax burden. In this case, new
+// deposits go directly to the tax receiver's account until the account balance is zero again.
+//
+// If an account balance is negative (i.e. taxes have not been paid), the account's pixels can be
+// bought for free by anyone with a non-negative balance.
+//
+// All amounts are stored in GWei and usually as uint64's. In order to avoid overflows, math is
+// carried out "clamped", i.e., if numbers would go above the maximum (below the minimum) we just
+// treat them as if they would be exactly at the maximum (minimum). This means very large or very
+// low numbers are not necessarily accurate, but in practice they are unlikely to be reached. This
+// approach avoids reverting transactions if numbers get out of bounds which could be used to
+// prevent buying pixels in some cases.
+//
+// The contract tracks the total amount of taxes an account has paid. This allows them to claim a
+// proportional amount of DAO shares in a separate contract.
+//
+// Freely transferring pixels is prevented as it would not only transfer value, but also the
+// obligation to pay taxes. Instead, we allow pixel owners to "earmark" pixels for other users. The
+// earmark stores the receiver's address and an additional amount. The receiver can claim any
+// pixel that is earmarked to them. If they do, the pixel as well as the deposit amount is
+// transferred to them.
 contract GraffitETH is ERC721, Ownable {
 
     event Deposit(
