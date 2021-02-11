@@ -72,8 +72,8 @@ contract Graffiti is ERC721, Ownable {
     mapping(uint256 => uint64) private _pixelPrices;
     mapping(address => Account) private _accounts;
     mapping(uint256 => Earmark) private _earmarks;
-    mapping(address => uint256) private _totalTaxesPayedBy;
-    uint256 private _totalTaxesPayed;
+    mapping(address => uint256) private _totalTaxesPaidBy;
+    uint256 private _totalTaxesPaid;
     uint256 private _totalTaxesWithdrawn;
 
 
@@ -130,12 +130,12 @@ contract Graffiti is ERC721, Ownable {
         return _totalTaxesWithdrawn;
     }
 
-    function getTotalTaxesPayed() view public returns (uint256) {
-        return _totalTaxesPayed;
+    function getTotalTaxesPaid() view public returns (uint256) {
+        return _totalTaxesPaid;
     }
 
-    function getTotalTaxesPayedBy(address account) view public returns (uint256) {
-        return _totalTaxesPayedBy[account];
+    function getTotalTaxesPaidBy(address account) view public returns (uint256) {
+        return _totalTaxesPaidBy[account];
     }
 
     //
@@ -183,7 +183,7 @@ contract Graffiti is ERC721, Ownable {
 
             // We count initial sale income towards taxes for simplicity. To calculate the actual
             // taxes paid, subtract `totalSupply() * getInitialPrice()`.
-            _totalTaxesPayed += price;
+            _totalTaxesPaid += price;
 
             require(pixelID <= _maxPixelID, "Graffiti: max pixel ID exceeded");
             _mint(buyerAddress, pixelID);
@@ -242,20 +242,20 @@ contract Graffiti is ERC721, Ownable {
 
         uint64 unaccountedTax = _computeTax(acc.taxBase, acc.lastTaxPayment, uint64(block.timestamp));
         if (unaccountedTax > 0 || acc.lastTaxPayment == 0) {
-            uint64 taxPayed;
+            uint64 taxPaid;
             if (acc.balance >= unaccountedTax) {
-                taxPayed = unaccountedTax;
+                taxPaid = unaccountedTax;
             } else if (acc.balance >= 0) {
-                taxPayed = uint64(acc.balance);
+                taxPaid = uint64(acc.balance);
             } else {
-                taxPayed = 0;
+                taxPaid = 0;
             }
             acc.balance = _subInt128(acc.balance, unaccountedTax);
             acc.lastTaxPayment = uint64(block.timestamp);
 
             _accounts[account] = acc;
-            _totalTaxesPayed += taxPayed;
-            _totalTaxesPayedBy[account] += taxPayed;
+            _totalTaxesPaid += taxPaid;
+            _totalTaxesPaidBy[account] += taxPaid;
         }
     }
 
@@ -273,8 +273,8 @@ contract Graffiti is ERC721, Ownable {
             } else {
                 tax = uint64(-acc.balance);
             }
-            _totalTaxesPayed += tax;
-            _totalTaxesPayedBy[account] += tax;
+            _totalTaxesPaid += tax;
+            _totalTaxesPaidBy[account] += tax;
         }
         acc.balance = _addInt128(acc.balance, amount);
 
@@ -324,7 +324,7 @@ contract Graffiti is ERC721, Ownable {
     // Tax withdrawal
     //
     function _withdrawTaxes(uint256 amount, address receiver) internal {
-        uint256 taxBalance = _totalTaxesPayed - _totalTaxesWithdrawn;
+        uint256 taxBalance = _totalTaxesPaid - _totalTaxesWithdrawn;
         require(amount <= taxBalance, "Graffiti: not enough taxes to withdraw");
         _totalTaxesWithdrawn += amount;
         (bool success,) = receiver.call{value: amount * (1 gwei)}("");
@@ -344,7 +344,7 @@ contract Graffiti is ERC721, Ownable {
     }
 
     function withdrawAllTaxes() public onlyOwner {
-        _withdrawTaxes(_totalTaxesPayed - _totalTaxesWithdrawn, msg.sender);
+        _withdrawTaxes(_totalTaxesPaid - _totalTaxesWithdrawn, msg.sender);
     }
 
     //
