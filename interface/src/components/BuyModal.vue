@@ -112,7 +112,7 @@
                 class="has-text-danger"
               >
                 Your current balance is insufficient to pay for the pixel. Please increase the
-                deposit amount by at least {{ format(balanceAfterPayment.mul(-1)) }}.
+                deposit amount by at least {{ formatDAI(balanceAfterPayment.mul(-1)) }}.
               </p>
               <p
                 v-if="!inputsInvalid && totalDepositCoversCost && !totalDepositSufficient"
