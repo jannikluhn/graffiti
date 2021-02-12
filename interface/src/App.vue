@@ -1,7 +1,15 @@
 <template>
   <div id="app">
-    <Canvas v-on:pixelSelected="onPixelSelected" v-bind:wrongNetwork="wrongNetwork" />
-    <Panels v-bind:selectedPixel="selectedPixel" v-bind:wrongNetwork="wrongNetwork" />
+    <Canvas
+      v-on:pixelSelected="onPixelSelected"
+      v-on:cursorPixelChanged="onCursorPixelChanged"
+      v-bind:wrongNetwork="wrongNetwork"
+    />
+    <Panels
+      v-bind:selectedPixel="selectedPixel"
+      v-bind:cursorPixel="cursorPixel"
+      v-bind:wrongNetwork="wrongNetwork"
+    />
   </div>
 </template>
 
@@ -19,6 +27,7 @@ export default {
   data() {
     return {
       selectedPixel: null,
+      cursorPixel: null,
       network: null
     }
   },
@@ -42,6 +51,9 @@ export default {
     onPixelSelected(coords) {
       this.selectedPixel = coords
     },
+    onCursorPixelChanged(coords) {
+      this.cursorPixel = coords
+    }
   },
 }
 </script>
