@@ -104,8 +104,11 @@
               >
                 The cost of the pixel will be transferred from your deposit to the seller.
                 After the transaction is complete, your balance will be
-                {{ formatDAI(balanceAfterPayment) }} which would cover the Harberger taxes for the
-                next {{ taxMonths }} months.
+                {{ formatDAI(balanceAfterPayment) }} which would
+                {{ !noTaxesPaid
+                  ? "cover the Harberger taxes for the next " + taxMonths + " months."
+                  : "last forever as you don't pay any taxes at the moment"
+                }}
               </p>
               <p
                 v-if="!inputsInvalid && !totalDepositCoversCost"
@@ -115,7 +118,7 @@
                 deposit amount by at least {{ formatDAI(balanceAfterPayment.mul(-1)) }}.
               </p>
               <p
-                v-if="!inputsInvalid && totalDepositCoversCost && !totalDepositSufficient"
+                v-if="!inputsInvalid && totalDepositCoversCost && !totalDepositSufficient && !noTaxesPaid"
                 class="has-text-warning"
               >
                 Your current deposit is sufficient to pay for the pixel, but not much will be left
@@ -233,8 +236,15 @@ export default {
       }
       return this.balanceAfterDeposit.sub(this.price)
     },
+    noTaxesPaid() {
+      if (this.newPriceInvalid || this.taxBase === null) {
+        return null
+      }
+      const taxBase = this.taxBase.add(this.newPrice)
+      return taxBase.eq(0)
+    },
     taxMonths() {
-      if (!this.balanceAfterPayment || !this.totalTax || this.newPriceInvalid) {
+      if (!this.balanceAfterPayment || !this.totalTax || this.newPriceInvalid || this.noTaxesPaid) {
         return null
       }
       const taxBase = this.taxBase.add(this.newPrice)
@@ -248,6 +258,9 @@ export default {
       return this.balanceAfterPayment.gte(0)
     },
     totalDepositSufficient() {
+      if (this.noTaxesPaid) {
+        return true
+      }
       if (this.taxMonths === null) {
         return null
       }

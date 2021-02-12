@@ -64,10 +64,12 @@ contract GraffitETH is ERC721, Ownable {
     );
     event ColorChange(
         uint256 pixelID,
+        address owner,
         uint8 color
     );
     event PriceChange(
         uint256 pixelID,
+        address owner,
         uint64 price
     );
     event Buy(
@@ -118,6 +120,13 @@ contract GraffitETH is ERC721, Ownable {
     //
     function exists(uint256 pixelID) view public returns (bool) {
         return _exists(pixelID);
+    }
+
+    function getNominalPrice(uint256 pixelID) view public returns (uint64) {
+        if (!_exists(pixelID)) {
+            return _initialPrice;
+        }
+        return _pixelPrices[pixelID];
     }
 
     function getPrice(uint256 pixelID) view public returns (uint64) {
@@ -235,10 +244,12 @@ contract GraffitETH is ERC721, Ownable {
         });
         emit ColorChange({
             pixelID: pixelID,
+            owner: buyerAddress,
             color: color
         });
         emit PriceChange({
             pixelID: pixelID,
+            owner: buyerAddress,
             price: newPrice
         });
     }
@@ -249,6 +260,7 @@ contract GraffitETH is ERC721, Ownable {
         require(msg.sender == owner, "GraffitETH: only pixel owner can set color");
         emit ColorChange({
             pixelID: pixelID,
+            owner: owner,
             color: color
         });
     }
@@ -269,6 +281,7 @@ contract GraffitETH is ERC721, Ownable {
 
         emit PriceChange({
             pixelID: pixelID,
+            owner: owner,
             price: newPrice
         });
     }
