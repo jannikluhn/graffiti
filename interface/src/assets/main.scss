@@ -1,6 +1,10 @@
 $modal-content-width: 769px;
 @import '~bulma';
 
+html {
+  background-color: #eee;
+}
+
 .panel-block {
   background-color: $white;
 }
@@ -8,6 +12,10 @@ $modal-content-width: 769px;
 .info {
   height: 570px;
   pointer-events: all;
+}
+
+.info .modal-card-body {
+  padding-bottom: 48px;
 }
 
 #i {
