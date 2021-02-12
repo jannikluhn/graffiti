@@ -1,24 +1,30 @@
 <template>
   <div class="modal" v-bind:class="{'is-active': active}">
     <div class="modal-background"></div>
-      <div class="modal-card about">
+      <div class="modal-card info">
         <header class="modal-card-head">
-          <p class="modal-card-title">About</p>
-          <button class="delete" aria-label="close" v-on:click="close()"></button>
+          <!-- <p class="modal-card-title">About</p> -->
+          <button class="delete is-pulled-right" aria-label="close" v-on:click="close()"></button>
         </header>
-
         <section class="modal-card-body">
           <div class="img">
-            <img src="../assets/logoRainbow.svg" width="290px" alt="GraffitETH">
+            <img src="../assets/logoRainbow.svg" width="387px" alt="GraffitETH">
           </div>
-          <div>
-            <label class="label">
-              What it is
-            </label>
-            <p>
-              GraffitETH is the Ethereum graffiti wall. It’s an experiment in market socialism, a collaborative artwork, and a window into Ethereum for the world. Created by <a href="http://marianono.superhi.com/">Maria Nogueira</a>, <a href="https://github.com/jannikluhn">Jannik Luhn</a>, and <a href="https://twitter.com/aleezagroks">Aleeza Howitt</a>.
-            </p>
+          <div class="tabs is-centered is-small">
+            <ul>
+              <li v-bind:class="{'is-active': selectedTab==0}" v-on:click="selectedTab=0"><a><strong>About</strong></a></li>
+              <li v-bind:class="{'is-active': selectedTab==1}" v-on:click="selectedTab=1"><a><strong>How-to</strong></a></li>
+            </ul>
           </div>
+          <div v-if="selectedTab==0">
+            <div>
+              <label class="label">
+                What it is
+              </label>
+              <p>
+                 GraffitETH is the Ethereum graffiti wall. It’s an experiment in market socialism, a collaborative artwork, and a window into Ethereum for the world. Created by <a href="http://marianono.superhi.com/">Maria Nogueira</a>, <a href="https://github.com/jannikluhn">Jannik Luhn</a>, and <a href="https://twitter.com/aleezagroks">Aleeza Howitt</a>
+              </p>
+            </div>
 
           <div>
             <label class="label">
@@ -74,14 +80,15 @@
             </p>
           </div>
 
-          <div>
-            <label class="label">
-              Why xDai?
-            </label>
-            <p>
-              GraffitETH is an open-source project deployed on xDai, an Ethereum sidechain. We chose to use xDai because it is cheaper and faster than the Ethereum mainchain, but it is still compatible with other essential integrations like The Graph. In addition, xDai transaction fees are denominated in a “stablecoin” pegged to the US Dollar, making it simpler to interact with.
-            </p>
-          </div>
+            <div>
+              <label class="label">
+                Why xDai?
+              </label>
+              <p>
+                GraffitETH is an open-source project deployed on xDai, an Ethereum sidechain. We chose to use xDai because it is cheaper and faster than the Ethereum mainchain, but it is still compatible with other essential integrations like The Graph. In addition, xDai transaction fees are denominated in a “stablecoin” pegged to the US Dollar, making it simpler to interact with.
+              </p>
+            </div>
+
 
           <div>
             <label class="label">
@@ -104,6 +111,49 @@
               <a href="https://en.wikipedia.org/wiki/Place_(Reddit)">Reddit’s Place</a> in 2017. More recently was <a href="https://satoshis.place/">Satoshi’s Place</a> in 2020, which was set up so pixels could be purchased using Bitcoin’s lightning network. Credit to Simon de la Rouviere for <a href="https://medium.com/@simondlr/what-is-harberger-tax-where-does-the-blockchain-fit-in-1329046922c6">mentioning this stuff</a> in an article about Harberger taxes and blockchain a couple years ago that probably planted the seed for this project in our subconscious brains. Thanks also to the RadicalxChange project for providing <a href="https://www.radicalxchange.org/concepts/partial-common-ownership/">great resources</a> related to the Harberger tax.
             </p>
           </div>
+            
+          </div>
+          <div v-if="selectedTab==1">
+            <div>
+              <label class="label">
+              Web3 Setup
+              </label>
+              <ol>
+                <li>Download <a href="httols://metamask.io/">Metamask</a> or another web3 wallet.</li>
+                <li>Load your wallet with xDai. You can do this by buying it directly from <a href="https://ramp.network/">The Ramp</a>. See <a href="https://honeyswap.org/xdai-ramp">this article</a> for instructions.<br>Advanced: If you have DAI already, you can convert it to xDai with the <a href="https://bridge.xdaichain.com/">xDai Bridge</a>.</li>
+                <li>Connect Metamask to the xDai network. See <a href="https://www.xdaichain.com/for-users/wallets/metamask/metamask-setup">this article</a> for instructions.</li>
+                <li>Click “connect wallet” in the Wallet Connection panel. Metamask will ask you to confirm. Congrats, now you can interact with the GraffitETH dapp!</li>
+              </ol>
+            </div>
+            <div>
+              <label class="label">
+                Paint a Pixel
+              </label>
+              <ol>
+                <li>Click on any pixel to select it.</li>
+                <li>There is a panel called <strong>Create Graffiti</strong>. Click <strong>Buy</strong>.</li>
+                <li>Pick a new color to paint your pixel.</li>
+                <li>Set a price for your pixel. You will pay 1% per month on this price for as long as you own it. Remember, anyone can buy it from you at this price and paint over it!</li>
+                <li>Choose how much xDai to add to your deposit. You need to have enough money in your balance to pay for the pixel, as well as to pay pixel taxes on it. If your deposit is already high enough, you don’t have to deposit more. <em>If your balance goes to zero, anyone will be able to buy and paint your pixels for free.</em></li>
+                <li>Click <strong>Buy</strong>.</li>
+                <li>Metamask will ask you to confirm.</li>
+                <li>Congrats, you have graffitied GraffitETH! 🎉 </li>
+              </ol>
+            </div>
+            <div>
+              <label class="label">
+                GraffitETH DAO
+              </label>
+              <ol>
+                <li>The funds raised from pixel taxes will go towards displaying our collaborative artwork in dope places.</li>
+                <li>All pixel taxpayers will be invited to participate in governance of the GraffitETH DAO, to help decide where GraffitETH is displayed.</li>
+                <li>Follow our Twitter account <a href="https://twitter.com/@graffiteth">@graffiteth</a> for updates!</li>
+              </ol>
+            </div>
+            <div class="disclaimer">
+              Disclaimer: These contracts are unaudited.<br>We think it’s safe, but who the hell knows, so please don’t put your life savings in here.
+            </div>
+          </div>
         </section>
     </div>
   </div>
@@ -116,6 +166,11 @@ export default {
   methods: {
     close() {
       this.$emit('close')
+    }
+  },
+  data() {
+    return {
+      selectedTab: 0
     }
   }
 }

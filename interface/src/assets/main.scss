@@ -5,7 +5,7 @@ $modal-content-width: 769px;
   background-color: $white;
 }
 
-.about {
+.info {
   height: 570px;
   pointer-events: all;
 }
@@ -25,13 +25,14 @@ $modal-content-width: 769px;
   line-height: 25px;
 }
 
-.about label {
+.info label {
   margin-top: 30px;;
 }
 
 .img {
   display: flex;
   justify-content: center;
+  margin: 24px 0 38px 0;
 }
 
 #coords {
@@ -43,4 +44,20 @@ $modal-content-width: 769px;
   box-shadow: rgba(85, 85, 85, 0.189) 1px 1px 7px;
   border-radius: 5px;
   padding: 4px 8px;
+}
+
+$tabs-toggle-link-active-background-color: rgb(173, 173, 173);
+
+.info ol {
+  list-style-position: inside;
+}
+
+.info li::marker {
+  font-weight: 700;
+}
+
+.disclaimer {
+  font-weight: 700;
+  margin: 30px;
+  color: rgb(247, 99, 82);
 }
