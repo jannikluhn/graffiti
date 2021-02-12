@@ -205,7 +205,16 @@ export default {
       }
     },
     onMouseMove(event) {
+      const oldPixel = this.canvasToPixelCoords(this.cursorPos)
       this.cursorPos = clickPos(event)
+      const newPixel = this.canvasToPixelCoords(this.cursorPos)
+      if (newPixel[0] != oldPixel[0] || newPixel[1] != oldPixel[1]) {
+        if (newPixel[0] >= 0 && newPixel[0] < gridSize[0] && newPixel[1] >= 0 && newPixel[1] < gridSize[1]) {
+          this.$emit('cursorPixelChanged', newPixel)
+        } else {
+          this.$emit('cursorPixelChanged', null)
+        }
+      }
 
       if (this.mouseDownPos) {  // dragging
         this.canvasOffset = [
