@@ -6,8 +6,8 @@ dataSources:
     name: GraffitETH
     network: xdai
     source:
-      address: "0x63Ef3802D824084258dA2C347Fa6a99dB3051081"
-      startBlock: 14499372
+      address: "0xc56F6037596116875ABEa6845f60dA88088F06Ea"
+      startBlock: 14502172
       abi: GraffitETH
     mapping:
       kind: ethereum/events
@@ -19,9 +19,9 @@ dataSources:
         - name: GraffitETH
           file: ./abis/GraffitETH.json
       eventHandlers:
-        - event: ColorChange(uint256,uint8)
+        - event: ColorChange(uint256,address,uint8)
           handler: handleColorChange
-        - event: PriceChange(uint256,uint64)
+        - event: PriceChange(uint256,address,uint64)
           handler: handlePriceChange
         - event: Buy(uint256,address,address,uint64)
           handler: handleBuy

@@ -9,7 +9,7 @@ import 'vue-swatches/dist/vue-swatches.css'
 
 if (window.ethereum) {
   const provider = new ethers.providers.Web3Provider(window.ethereum)
-  const address = '0x63Ef3802D824084258dA2C347Fa6a99dB3051081'
+  const address = '0xc56F6037596116875ABEa6845f60dA88088F06Ea'
   const contract = new ethers.Contract(address, GraffitETHMetadata.abi, provider)
   // todo: check we're on the right network
 
