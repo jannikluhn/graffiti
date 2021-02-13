@@ -73,7 +73,7 @@
 <script>
 import { ethers } from 'ethers'
 import gql from 'graphql-tag'
-import { gWeiToWei, idToPixelCoords, colorsHex } from '../utils'
+import { gWeiToWei, idToPixelCoords, pixelCoordsToID, colorsHex } from '../utils'
 import { gridSize } from '../config'
 import ChangePriceField from './ChangePrice.vue'
 import ChangeColorField from './ChangeColor.vue'
@@ -102,6 +102,7 @@ export default {
   },
   props: [
     "account",
+    "canvasSelectedPixel",
   ],
   data() {
     return {
@@ -126,6 +127,21 @@ export default {
         this.queryPixels()
       },
       immediate: true,
+    },
+    canvasSelectedPixel() {
+      // If the user selects a pixel they own by clicking on it, show it in this panel.
+      if (!this.canvasSelectedPixel) {
+        return
+      }
+
+      const id = pixelCoordsToID(this.canvasSelectedPixel, gridSize[0])
+      for (let p of this.pixels) {
+        const pIdBig = ethers.BigNumber.from(p.id)
+        if (pIdBig.eq(id)) {
+          this.selectedPixel = p
+          return
+        }
+      }
     },
   },
 
