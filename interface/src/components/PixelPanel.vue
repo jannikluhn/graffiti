@@ -23,7 +23,10 @@
 
               <tr>
                 <th>Graffitier</th>
-                <td>{{ ownerStr }}</td>
+                <td v-if="unknownOwner">Unknown</td>
+                <td v-else-if="!exists">None</td>
+                <td v-else-if="selfOwned">You</td>
+                <td v-else><AddressLink v-bind:address="owner" /></td>
               </tr>
 
               <tr>
@@ -37,7 +40,7 @@
             <button
               class="button is-dark is-fullwidth"
               v-on:click="buyModalActive = true"
-              v-bind:disabled="!account || userIsOwner"
+              v-bind:disabled="!account || selfOwned"
             >Buy</button>
           </div>
       </div>
@@ -60,8 +63,9 @@
 
 <script>
 import { ethers } from 'ethers'
-import { pixelCoordsToID, gWeiToWei, shortenAddress } from '../utils.js'
+import { pixelCoordsToID, gWeiToWei } from '../utils.js'
 import BuyModal from './BuyModal.vue'
+import AddressLink from './AddressLink.vue'
 import { gridSize } from '../config.js'
 import { ChevronUpIcon, ChevronDownIcon } from 'vue-feather-icons'
 
@@ -76,7 +80,8 @@ export default {
   components: {
     BuyModal,
     ChevronUpIcon,
-    ChevronDownIcon
+    ChevronDownIcon,
+    AddressLink,
   },
 
   data() {
@@ -99,23 +104,11 @@ export default {
     pixelID() {
       return pixelCoordsToID(this.selectedPixel, gridSize[0])
     },
-    ownerStr() {
-      if (this.exists === null) {
-        return "Unknown"
-      }
-      if (!this.exists) {
-        return "None"
-      }
-      if (this.owner === null) {
-        return "Unknown"
-      }
-      if (this.owner == this.account) {
-        return "You"
-      }
-      return shortenAddress(this.owner)
+    unknownOwner() {
+      return this.exists === null || this.owner === null
     },
-    userIsOwner() {
-      return this.owner !== null && this.account == this.owner
+    selfOwned() {
+      return this.owner !== null && this.owner == this.account
     },
   },
 
