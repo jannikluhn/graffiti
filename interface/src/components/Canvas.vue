@@ -80,7 +80,7 @@ export default {
       this.draw()
     })
 
-    this.$contract.on("ColorChange", (id, color) => {
+    this.$contract.on("ColorChange", (id, _, color) => {
       if (this.imageData) {
         this.setPixel(id.toNumber(), color)
         this.offscreenCtx.putImageData(this.imageData, 0, 0)
