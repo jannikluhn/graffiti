@@ -12,7 +12,7 @@
           <tbody>
             <tr>
               <th>Address</th>
-              <td>{{ shortAddress }}</td>
+              <td><AddressLink v-bind:address="account" /></td>
             </tr>
 
             <tr>
@@ -56,7 +56,7 @@
 import { ethers } from 'ethers'
 import DepositField from './Deposit.vue'
 import WithdrawField from './Withdraw.vue'
-import { shortenAddress } from '../../utils.js'
+import AddressLink from '../AddressLink.vue'
 import { taxRate } from '../../config.js'
 import { ChevronUpIcon, ChevronDownIcon } from 'vue-feather-icons'
 
@@ -66,12 +66,12 @@ export default {
     DepositField,
     WithdrawField,
     ChevronUpIcon,
-    ChevronDownIcon
+    ChevronDownIcon,
+    AddressLink,
   },
   data() {
     return {
       waitingForAccount: false,
-      shortenAddress: null,
       folded: false,
     }
   },
@@ -97,9 +97,6 @@ export default {
       } else {
         return "Unknown"
       }
-    },
-    shortAddress() {
-      return shortenAddress(this.account)
     },
   },
 }
