@@ -25,6 +25,7 @@ const pixelQuery = gql`
 
 const minPixelSize = 1
 const maxPixelSize = 50
+const selectedLineWidth = 4
 
 function clickPos(event) {
   let rect = event.target.getBoundingClientRect()
@@ -137,17 +138,15 @@ export default {
 
         if (this.selectedPixel) {
           const canvasCoords = this.pixelToCanvasCoords(this.selectedPixel)
-          const d = this.pixelSize * 0.3
+          const x0 = canvasCoords[0] - selectedLineWidth / 2
+          const y0 = canvasCoords[1] - selectedLineWidth / 2
+          const x1 = canvasCoords[0] + this.pixelSize + selectedLineWidth / 2
+          const y1 = canvasCoords[1] + this.pixelSize + selectedLineWidth / 2
 
           this.ctx.save()
-          this.ctx.lineWidth = 5
+          this.ctx.lineWidth = selectedLineWidth
           this.ctx.beginPath()
-          this.ctx.rect(
-            canvasCoords[0] - d,
-            canvasCoords[1] - d,
-            this.pixelSize + 2 * d,
-            this.pixelSize + 2 * d,
-          )
+          this.ctx.rect(x0, y0, x1 - x0, y1 - y0)
           this.ctx.stroke()
           this.ctx.restore()
         }
