@@ -28,6 +28,7 @@
           <OwnedPixelPanel
             v-if="account"
             v-bind:account="account"
+            v-bind:canvasSelectedPixel="selectedPixel"
             v-on:error="onError($event)"
           />
           <div id="i" v-on:click="aboutModalActive = true">?</div>
