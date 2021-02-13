@@ -105,7 +105,7 @@ export default {
       return pixelCoordsToID(this.selectedPixel, gridSize[0])
     },
     unknownOwner() {
-      return this.exists === null || this.owner === null
+      return this.exists === null || (this.exists && this.owner === null)
     },
     selfOwned() {
       return this.owner !== null && this.owner == this.account
@@ -113,7 +113,18 @@ export default {
   },
 
   watch: {
-    async selectedPixel() {
+    async selectedPixel(newPixel, oldPixel) {
+      if (newPixel === null && oldPixel === null) {
+        return
+      }
+      if (oldPixel !== null && newPixel !== null && newPixel[0] == oldPixel[0] && newPixel[1] == oldPixel[1]) {
+        return
+      }
+
+      this.exists = null
+      this.price = null
+      this.owner = null
+
       if (this.selectedPixel) {
         try {
           let priceGWei = await this.$contract.getPrice(this.pixelID)
@@ -130,10 +141,6 @@ export default {
           this.owner = null
           this.$emit('error', 'Failed to query pixel details: ' + err.message)
         }
-      } else {
-        this.exists = null
-        this.price = null
-        this.owner = null
       }
     },
   }
