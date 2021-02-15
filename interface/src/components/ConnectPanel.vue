@@ -1,30 +1,33 @@
 <template>
-  <article v-if="!account" class="panel is-outlined" style="pointer-events: auto;">
-    <p class="panel-heading">
-      Wallet Connection
-    </p>
+  <Panel
+    v-if="!account"
+    title="Wallet Connection"
+  >
     <div class="panel-block">
       <button class="button is-fullwidth is-dark" v-bind:class="{'is-loading': waitingForAccount}" v-on:click="connect">
         Connect
       </button>
     </div>
-
-  </article>
+  </Panel>
 </template>
 
 <script>
 import { ethers } from 'ethers'
+import Panel from './Panel.vue'
 
 export default {
   name: 'ConnectPanel',
+  props: [
+    "account"
+  ],
+  components: {
+    Panel,
+  },
   data() {
     return {
       waitingForAccount: false,
     }
   },
-  props: [
-    "account"
-  ],
 
   created() {
     window.ethereum.on('accountsChanged', this.onAccountsChanged)

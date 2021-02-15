@@ -1,58 +1,63 @@
 <template>
-  <div class="is-overlay" style="pointer-events: none;">
-    <section class="section">
-      <div class="columns">
-        <div v-if="!wrongNetwork" class="column is-narrow">
-          <ConnectPanel
-            v-on:error="onError($event)"
-            v-on:accountChanged="onAccountChanged"
-            v-bind:account="account"
-            v-if="!wrongNetwork"
-          />
-          <AccountPanel
-            v-on:error="onError($event)"
-            v-bind:account="account"
-            v-bind:balance="balance"
-            v-bind:taxBase="taxBase"
-            v-if="account"
-          />
-          <PixelPanel
-            v-bind:selectedPixel="selectedPixel"
-            v-bind:account="account"
-            v-bind:balance="balance"
-            v-bind:taxBase="taxBase"
-            v-on:error="onError($event)"
-          />
-        </div>
-        <div class="column is-narrow">
-          <OwnedPixelPanel
-            v-if="account"
-            v-bind:account="account"
-            v-bind:canvasSelectedPixel="selectedPixel"
-            v-on:error="onError($event)"
-          />
-          <div id="i" v-on:click="aboutModalActive = true">?</div>
-          <AboutModal 
-            v-if="aboutModalActive"
-            v-bind:active="aboutModalActive"
-            v-on:close="aboutModalActive = false"
-          />
-        </div>
-        <div id="i" v-on:click="aboutModalActive = true">?</div>
-        <div v-if="cursorPixel" id="coords">{{ cursorPixel[0] }}, {{ cursorPixel[1] }}</div>
-        <div v-if="wrongNetwork !== null && wrongNetwork">
-          <div class="notification is-dark" style="pointer-events: auto;">
-              Wrong Network ☹️ Please change to xDai and refresh the page.
-          </div>
-        </div>
-        <div class="column">
-          <div v-for="error in errors" v-bind:key="error.key" class="notification is-danger" style="pointer-events: auto;">
-            <button class="delete" v-on:click="removeError(error.key)"></button>
-            {{ error.message }}
-          </div>
+  <div class="is-overlay">
+    <div>
+      <div
+        v-if="!wrongNetwork"
+        class="is-flex is-flex-wrap-wrap is-flex-direction-column is-align-content-flex-start mt-2 ml-2"
+      >
+        <ConnectPanel
+          v-on:error="onError($event)"
+          v-on:accountChanged="onAccountChanged"
+          v-bind:account="account"
+          v-if="!wrongNetwork"
+        />
+        <AccountPanel
+          v-on:error="onError($event)"
+          v-bind:account="account"
+          v-bind:balance="balance"
+          v-bind:taxBase="taxBase"
+          v-if="account"
+        />
+        <PixelPanel
+          v-bind:selectedPixel="selectedPixel"
+          v-bind:account="account"
+          v-bind:balance="balance"
+          v-bind:taxBase="taxBase"
+          v-on:error="onError($event)"
+        />
+        <OwnedPixelPanel
+          v-if="account"
+          v-bind:account="account"
+          v-bind:canvasSelectedPixel="selectedPixel"
+          v-on:error="onError($event)"
+        />
+        <hr class="flex-break">
+        <div
+          v-for="error in errors"
+          v-bind:key="error.key"
+          class="notification is-danger error-notification m-4"
+        >
+          <button class="delete" v-on:click="removeError(error.key)"></button>
+          {{ error.message }}
         </div>
       </div>
-    </section>
+
+      <div
+        v-if="wrongNetwork !== null && wrongNetwork"
+        class="notification is-dark connection-notification m-4"
+      >
+        You are connected to a wrong network. Please change to xDai and refresh the page.
+      </div>
+
+      <div v-if="cursorPixel" id="coords">{{ cursorPixel[0] }}, {{ cursorPixel[1] }}</div>
+    </div>
+
+    <div id="i" v-on:click="aboutModalActive = true">?</div>
+    <AboutModal
+      v-if="aboutModalActive"
+      v-bind:active="aboutModalActive"
+      v-on:close="aboutModalActive = false"
+    />
   </div>
 </template>
 
@@ -167,3 +172,29 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+@import '../assets/constants.scss';
+
+.is-overlay {
+  pointer-events: none;
+}
+
+.is-flex {
+  height: 100vh;
+}
+
+.flex-break {
+  height: 100%;
+}
+
+.error-notification {
+  width: $panel-width;
+  pointer-events: auto;
+}
+
+.connection-notification {
+  width: $panel-width;
+  pointer-events: auto;
+}
+</style>

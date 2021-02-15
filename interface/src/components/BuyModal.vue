@@ -270,7 +270,11 @@ export default {
   watch: {
     price: {
       handler() {
-        this.newPriceInput = ethers.utils.formatEther(this.price)
+        if (this.price !== null) {
+          this.newPriceInput = ethers.utils.formatEther(this.price)
+        } else {
+          this.newPriceInput = ""
+        }
       },
       immediate: true,
     },
