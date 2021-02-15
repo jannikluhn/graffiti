@@ -11,13 +11,12 @@ if (window.ethereum) {
   const provider = new ethers.providers.Web3Provider(window.ethereum)
   const address = '0xc56F6037596116875ABEa6845f60dA88088F06Ea'
   const contract = new ethers.Contract(address, GraffitETHMetadata.abi, provider)
-  // todo: check we're on the right network
 
   Vue.prototype.$provider = provider
   Vue.prototype.$contract = contract
 } else {
   Vue.prototype.$provider = null
-  Vue.prototype.$graffitiContract = null
+  Vue.prototype.$contract = null
 }
 
 const apolloClient = new ApolloClient({

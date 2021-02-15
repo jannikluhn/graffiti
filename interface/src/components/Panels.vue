@@ -2,7 +2,7 @@
   <div class="is-overlay">
     <div>
       <div
-        v-if="!wrongNetwork"
+        v-if="!noWeb3 && !wrongNetwork"
         class="is-flex is-flex-wrap-wrap is-flex-direction-column is-align-content-flex-start mt-2 ml-2"
       >
         <ConnectPanel
@@ -43,10 +43,19 @@
       </div>
 
       <div
-        v-if="wrongNetwork !== null && wrongNetwork"
-        class="notification is-dark connection-notification m-4"
+        v-if="noWeb3"
+        class="notification is-dark connection-notification m-5"
       >
-        You are connected to a wrong network. Please change to xDai and refresh the page.
+        No web3 provider detected. Please install a web3 wallet such as
+        <a href="https://metamask.io/">Metamask</a>.
+      </div>
+      <div
+        v-if="wrongNetwork !== null && wrongNetwork"
+        class="notification is-dark connection-notification m-5"
+      >
+        You are connected to a wrong network. Please change to xDai and refresh the page. If you're
+        using Metamask, find instructions
+        <a href="https://www.xdaichain.com/for-users/wallets/metamask/metamask-setup">here</a>.
       </div>
 
       <div v-if="cursorPixel" id="coords">{{ cursorPixel[0] }}, {{ cursorPixel[1] }}</div>
@@ -94,6 +103,7 @@ export default {
       aboutModalActive: false,
       balance: null,
       taxBase: null,
+      noWeb3: this.$provider === null,
     }
   },
 
