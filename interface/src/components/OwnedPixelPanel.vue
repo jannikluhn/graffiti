@@ -1,73 +1,66 @@
 <template>
-  <article class="panel is-outlined" style="pointer-events: auto">
-    <p class="panel-heading">
-      Your Pixels
-      <chevron-up-icon size="1.5x" class="is-pulled-right" v-if="!folded" v-on:click="folded = !folded"></chevron-up-icon>
-      <chevron-down-icon size="1.5x" class="is-pulled-right" v-if="folded" v-on:click="folded = !folded"></chevron-down-icon>
-    </p>
-    <div v-if="!folded">
-      <div v-if="!pixels.length" class="panel-block">
-        <p>You don't seem to own any pixels.</p>
-      </div>
-      <div v-else class="panel-block">
-        <div class="select is-fullwidth">
-          <select v-on:change="onChange">
-            <option
-              v-for="pixel in pixels"
-              v-bind:key="pixel.id"
-              v-bind:value="pixel.id"
-              v-bind:selected="selectedPixel && pixel.id == selectedPixel.id"
-            >
-              {{ hexToIntStr(pixel.id) }}
-            </option>
-          </select>
-        </div>
-      </div>
-      <div class="panel-block" v-if="selectedPixel">
-        <table class="table is-fullwidth">
-          <tbody>
-            <tr>
-              <th>Coordinates</th>
-              <td>{{ coords[0] }}, {{ coords[1] }}</td>
-            </tr>
-
-            <tr>
-              <th>Price</th>
-              <td>{{ priceStr }}</td>
-            </tr>
-
-            <tr>
-              <th>Color</th>
-              <td>
-                <v-swatches
-                  v-model="swatches[selectedPixel.color.toString()]"
-                  :swatches="swatches"
-                  show-border
-                  disabled
-                ></v-swatches>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="panel-block" v-if="selectedPixel">
-        <form>
-          <ChangeColorField
-            v-bind:account="account"
-            v-bind:pixelID="selectedPixel.id"
-            v-bind:currentColor="selectedPixel.color"
-            v-on:error="(msg) => $emit('error', msg)"
-          />
-          <ChangePriceField
-            v-bind:account=account
-            v-bind:pixelID="selectedPixel.id"
-            v-on:error="(msg) => $emit('error', msg)"
-          />
-        </form>
+  <Panel title="Your Pixels">
+    <div v-if="!pixels.length" class="panel-block">
+      <p>You don't seem to own any pixels.</p>
+    </div>
+    <div v-else class="panel-block">
+      <div class="select is-fullwidth">
+        <select v-on:change="onChange">
+          <option
+            v-for="pixel in pixels"
+            v-bind:key="pixel.id"
+            v-bind:value="pixel.id"
+            v-bind:selected="selectedPixel && pixel.id == selectedPixel.id"
+          >
+            {{ hexToIntStr(pixel.id) }}
+          </option>
+        </select>
       </div>
     </div>
-  </article>
+    <div class="panel-block" v-if="selectedPixel">
+      <table class="table is-fullwidth">
+        <tbody>
+          <tr>
+            <th>Coordinates</th>
+            <td>{{ coords[0] }}, {{ coords[1] }}</td>
+          </tr>
+
+          <tr>
+            <th>Price</th>
+            <td>{{ priceStr }}</td>
+          </tr>
+
+          <tr>
+            <th>Color</th>
+            <td>
+              <v-swatches
+                v-model="swatches[selectedPixel.color.toString()]"
+                :swatches="swatches"
+                show-border
+                disabled
+              ></v-swatches>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel-block" v-if="selectedPixel">
+      <form>
+        <ChangeColorField
+          v-bind:account="account"
+          v-bind:pixelID="selectedPixel.id"
+          v-bind:currentColor="selectedPixel.color"
+          v-on:error="(msg) => $emit('error', msg)"
+        />
+        <ChangePriceField
+          v-bind:account=account
+          v-bind:pixelID="selectedPixel.id"
+          v-on:error="(msg) => $emit('error', msg)"
+        />
+      </form>
+    </div>
+  </Panel>
 </template>
 
 <script>
@@ -75,10 +68,10 @@ import { ethers } from 'ethers'
 import gql from 'graphql-tag'
 import { gWeiToWei, idToPixelCoords, pixelCoordsToID, colorsHex } from '../utils'
 import { gridSize } from '../config'
+import Panel from './Panel.vue'
 import ChangePriceField from './ChangePrice.vue'
 import ChangeColorField from './ChangeColor.vue'
 import VSwatches from 'vue-swatches'
-import { ChevronUpIcon, ChevronDownIcon } from 'vue-feather-icons'
 
 
 const pixelQuery = gql`
@@ -93,17 +86,16 @@ const pixelQuery = gql`
 
 export default {
   name: "OwnedPixelPanel",
-  components: {
-    ChangePriceField,
-    ChangeColorField,
-    VSwatches,
-    ChevronUpIcon,
-    ChevronDownIcon
-  },
   props: [
     "account",
     "canvasSelectedPixel",
   ],
+  components: {
+    Panel,
+    ChangePriceField,
+    ChangeColorField,
+    VSwatches,
+  },
   data() {
     return {
       pixels: [],

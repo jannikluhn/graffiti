@@ -1,85 +1,75 @@
 <template>
-  <article class="panel is-outlined" style="pointer-events: auto;">
-    <div class="panel-heading">
-      Account
-      <chevron-up-icon size="1.5x" class="is-pulled-right" v-if="!folded" v-on:click="folded = !folded"></chevron-up-icon>
-      <chevron-down-icon size="1.5x" class="is-pulled-right" v-if="folded" v-on:click="folded = !folded"></chevron-down-icon>
+  <Panel title="Account">
+    <div class="panel-block">
+      <table class="table is-fullwidth">
+        <tbody>
+          <tr>
+            <th>Address</th>
+            <td><AddressLink v-bind:address="account" /></td>
+          </tr>
+
+          <tr>
+            <th>Balance</th>
+            <td>{{ balanceStr }}</td>
+          </tr>
+
+          <tr>
+            <th>Monthly Tax</th>
+            <td>{{ taxPerMonthStr }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-
-    <div v-if="account && !folded">
-      <div class="panel-block">
-        <table class="table is-fullwidth">
-          <tbody>
-            <tr>
-              <th>Address</th>
-              <td><AddressLink v-bind:address="account" /></td>
-            </tr>
-
-            <tr>
-              <th>Balance</th>
-              <td>{{ balanceStr }}</td>
-            </tr>
-
-            <tr>
-              <th>Monthly Tax</th>
-              <td>{{ taxPerMonthStr }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="panel-block">
-        <form>
-          <div class="field">
-            <label class="label">
-              Manage account balance
-            </label>
-            <DepositField
-              v-bind:account="account"
-              v-on:error="(msg) => $emit('error', msg)"
-            />
-            <WithdrawField
-              v-bind:account="account"
-              v-bind:balance="balance"
-              v-on:error="(msg) => $emit('error', msg)"
-            />
-            <p>
-              (If your balance runs out, you can lose your pixels!)
-            </p>
-          </div>
-        </form>
-      </div>
+    <div class="panel-block">
+      <form class="is-fullwidth">
+        <div class="field">
+          <label class="label">
+            Manage account balance
+          </label>
+          <DepositField
+            v-bind:account="account"
+            v-on:error="(msg) => $emit('error', msg)"
+          />
+          <WithdrawField
+            v-bind:account="account"
+            v-bind:balance="balance"
+            v-on:error="(msg) => $emit('error', msg)"
+          />
+          <p>
+            (If your balance runs out, you can lose your pixels!)
+          </p>
+        </div>
+      </form>
     </div>
-  </article>
+  </Panel>
 </template>
 
 <script>
 import { ethers } from 'ethers'
+import Panel from '../Panel.vue'
 import DepositField from './Deposit.vue'
 import WithdrawField from './Withdraw.vue'
 import AddressLink from '../AddressLink.vue'
 import { taxRate } from '../../config.js'
-import { ChevronUpIcon, ChevronDownIcon } from 'vue-feather-icons'
 
 export default {
   name: 'AccountPanel',
-  components: {
-    DepositField,
-    WithdrawField,
-    ChevronUpIcon,
-    ChevronDownIcon,
-    AddressLink,
-  },
-  data() {
-    return {
-      waitingForAccount: false,
-      folded: false,
-    }
-  },
   props: [
     "account",
     "balance",
     "taxBase",
   ],
+  components: {
+    Panel,
+    DepositField,
+    WithdrawField,
+    AddressLink,
+  },
+  data() {
+    return {
+      waitingForAccount: false,
+    }
+  },
 
   computed: {
     balanceStr() {

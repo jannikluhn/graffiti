@@ -101,6 +101,8 @@ export default {
       }
 
       let o = addV(this.canvasOrigin, subV(this.mouseMoveCanvasCoords, this.mouseDownCanvasCoords))
+      o[0] = Math.max(o[0], -mulV(gridSize, this.pixelSize)[0]);
+      o[1] = Math.max(o[1], -mulV(gridSize, this.pixelSize)[1]);
       return o
     },
     selectedPixelCanvasCoords() {

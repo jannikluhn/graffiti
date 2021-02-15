@@ -1,73 +1,75 @@
 <template>
-  <article class="panel is-outlined" style="pointer-events: auto">
-    <div class="panel-heading">
-      Create Graffiti
-      <chevron-up-icon size="1.5x" class="is-pulled-right" v-if="!folded" v-on:click="folded = !folded"></chevron-up-icon>
-      <chevron-down-icon size="1.5x" class="is-pulled-right" v-if="folded" v-on:click="folded = !folded"></chevron-down-icon>
+  <Panel title="Create Graffiti">
+    <div
+      v-if="!selectedPixel"
+      class="panel-block"
+    >
+      <p>Click on a pixel to select it.</p>
     </div>
-    <div v-if="!folded">
-      <p v-if="!selectedPixel" class="panel-block">Click on a pixel to select it.</p>
-      <div v-else>
-        <div class="panel-block">
-          <table class="table is-fullwidth">
-            <tbody>
-              <tr>
-                <th>Coordinates</th>
-                <td>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</td>
-              </tr>
 
-              <tr>
-                <th>Pixel ID</th>
-                <td>{{ pixelID }}</td>
-              </tr>
+    <div v-else>
+      <div class="panel-block">
+        <table class="table is-fullwidth">
+          <tbody>
+            <tr>
+              <th>Coordinates</th>
+              <td>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</td>
+            </tr>
 
-              <tr>
-                <th>Graffitier</th>
-                <td v-if="unknownOwner">Unknown</td>
-                <td v-else-if="!exists">None</td>
-                <td v-else-if="selfOwned">You</td>
-                <td v-else><AddressLink v-bind:address="owner" /></td>
-              </tr>
+            <tr>
+              <th>Pixel ID</th>
+              <td>{{ pixelID }}</td>
+            </tr>
 
-              <tr>
-                <th>Price</th>
-                <td>{{ formatDAI(price) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-          <div class="panel-block">
-            <button
-              class="button is-dark is-fullwidth"
-              v-on:click="buyModalActive = true"
-              v-bind:disabled="!account || selfOwned"
-            >Buy</button>
-          </div>
+            <tr>
+              <th>Graffitier</th>
+              <td v-if="unknownOwner">Unknown</td>
+              <td v-else-if="!exists">None</td>
+              <td v-else-if="selfOwned">You</td>
+              <td v-else><AddressLink v-bind:address="owner" /></td>
+            </tr>
+
+            <tr>
+              <th>Price</th>
+              <td>{{ formatDAI(price) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel-block">
+        <button
+          class="button is-dark is-fullwidth"
+          v-on:click="buyModalActive = true"
+          v-bind:disabled="!account || selfOwned"
+        >
+          Buy
+        </button>
       </div>
     </div>
-  <BuyModal
-    v-if="buyModalActive"
-    v-bind:selectedPixel="selectedPixel"
-    v-bind:active="buyModalActive"
-    v-bind:pixelID="pixelID"
-    v-bind:price="price"
-    v-bind:account="account"
-    v-bind:balance="balance"
-    v-bind:taxBase="taxBase"
-    v-on:close="buyModalActive = false"
-    v-on:error="(msg) => $emit('error', msg)"
-  />
-  </article>
 
+    <BuyModal
+      v-if="buyModalActive"
+      v-bind:selectedPixel="selectedPixel"
+      v-bind:active="buyModalActive"
+      v-bind:pixelID="pixelID"
+      v-bind:price="price"
+      v-bind:account="account"
+      v-bind:balance="balance"
+      v-bind:taxBase="taxBase"
+      v-on:close="buyModalActive = false"
+      v-on:error="(msg) => $emit('error', msg)"
+    />
+  </Panel>
 </template>
 
 <script>
 import { ethers } from 'ethers'
 import { pixelCoordsToID, gWeiToWei } from '../utils.js'
+import Panel from './Panel.vue'
 import BuyModal from './BuyModal.vue'
 import AddressLink from './AddressLink.vue'
 import { gridSize } from '../config.js'
-import { ChevronUpIcon, ChevronDownIcon } from 'vue-feather-icons'
 
 export default {
   name: "PixelPanel",
@@ -78,9 +80,8 @@ export default {
     "taxBase",
   ],
   components: {
+    Panel,
     BuyModal,
-    ChevronUpIcon,
-    ChevronDownIcon,
     AddressLink,
   },
 
@@ -90,7 +91,6 @@ export default {
       price: null,
       exists: null,
       buyModalActive: false,
-      folded: false,
       formatDAI(value) {
         if (!value) {
           return "Unknown"
