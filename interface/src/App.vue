@@ -32,10 +32,12 @@ export default {
     }
   },
 
-  mounted() { 
+  mounted() {
+    if (this.$provider !== null) {
       this.$provider.getNetwork().then((network) => {
         this.network = network
       })
+    }
   },
 
   computed: {
