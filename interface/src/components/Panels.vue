@@ -77,8 +77,9 @@ import PixelPanel from './PixelPanel.vue'
 import OwnedPixelPanel from './OwnedPixelPanel.vue'
 import AboutModal from './AboutModal.vue'
 
-import { ethers } from 'ethers'
 import { gWeiToWei } from '../utils'
+
+const balancePollInterval = 4000
 
 export default {
   name: "Panels",
@@ -107,6 +108,21 @@ export default {
     }
   },
 
+  created() {
+    let pollBalanceRepeatedly = () => {
+      this.pollBalance().then(window.setTimeout(pollBalanceRepeatedly, balancePollInterval))
+    }
+    pollBalanceRepeatedly()
+
+    this.$contract.on("Buy", (_, seller, buyer) => {
+      if (this.account == seller || this.account == buyer) {
+        this.$contract.getTaxBase(this.account).then((taxBase) => {
+          this.taxBase = gWeiToWei(taxBase)
+        })
+      }
+    })
+  },
+
   methods: {
     async onAccountChanged(account) {
       this.account = account
@@ -118,49 +134,25 @@ export default {
         this.balance = gWeiToWei(balanceGWei)
         this.taxBase = gWeiToWei(taxBaseGWei)
       } catch(err) {
-        this.balance = ethers.BigNumber.from(0)
-        this.taxBase = ethers.BigNumber.from(0)
+        this.balance = null
+        this.taxBase = null
         this.onError('Failed to query account state: ' + err.message)
       }
+    },
 
-      this.$contract.on("Deposit", (account, amount, balance) => {
-        if (account != this.account) {
-          return
-        }
-        if (this.balance === null) {
-          this.balance = gWeiToWei(balance)
-        } else {
-          this.balance = this.balance.add(gWeiToWei(amount))
-        }
-      })
-      this.$contract.on("Withdraw", (account, amount, balance) => {
-        if (account != this.account) {
-          return
-        }
-        if (this.balance === null) {
-          this.balance = gWeiToWei(balance)
-        } else {
-          this.balance = this.balance.sub(gWeiToWei(amount))
-        }
-      })
-      this.$contract.on("Buy", (pixelID, seller, buyer, price) => {
-        if (this.balance === null) {
-          return
-        }
-        if (this.account == seller) {
-          this.balance = this.balance.add(gWeiToWei(price))
-          this.taxBase = this.taxBase.sub(gWeiToWei(price))
-        }
-        if (this.account == buyer) {
-          this.balance = this.balance.sub(gWeiToWei(price))
-          // find out the new price and increase tax base accordingly
-          // TODO: use getNominalPrice, or even better get the new price from the price change
-          // event
-          this.$contract.getPrice(pixelID).then((price) => {
-            this.taxBase = this.taxBase.add(gWeiToWei(price))
-          })
-        }
-      })
+    async pollBalance() {
+      if (!this.account) {
+        this.balance = null
+        return
+      }
+
+      try {
+        let balanceGWei = await this.$contract.getBalance(this.account)
+        this.balance = gWeiToWei(balanceGWei)
+      } catch (err) {
+        this.balance = null
+        this.onError('Failed to query account balance: ' + err.message)
+      }
     },
 
     onError(e) {
