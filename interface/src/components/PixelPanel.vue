@@ -40,7 +40,7 @@
       <div class="panel-block">
         <button
           class="button is-dark is-fullwidth"
-          v-on:click="buyModalActive = true"
+          v-on:click="onBuyClick"
           v-bind:disabled="!account || selfOwned"
         >
           Buy
@@ -143,6 +143,15 @@ export default {
         }
       }
     },
-  }
+  },
+
+  methods: {
+    onBuyClick() {
+      if (!this.account || this.selfOwned) {
+        return
+      }
+      this.buyModalActive = true
+    },
+  },
 }
 </script>
