@@ -135,7 +135,7 @@
           <button
             class="button is-dark"
             v-bind:class="{'is-loading': waitingForTx}"
-            v-bind:disabled="newPriceInvalid || depositInvalid || !totalDepositCoversCost"
+            v-bind:disabled="buyButtonDisabled"
             v-on:click="buy()"
           >Buy</button>
           <button class="button" v-on:click="close()">Cancel</button>
@@ -266,6 +266,9 @@ export default {
       }
       return this.totalDepositCoversCost && this.taxMonths.gte(this.recommendedMonths)
     },
+    buyButtonDisabled() {
+      return this.newPriceInvalid || this.depositInvalid || !this.totalDepositCoversCost
+    },
   },
   watch: {
     price: {
@@ -284,6 +287,10 @@ export default {
       this.$emit('close')
     },
     async buy() {
+      if (this.buyButtonDisabled) {
+        return
+      }
+
       this.waitingForTx = true
       try {
         let signer = this.$provider.getSigner(this.account)

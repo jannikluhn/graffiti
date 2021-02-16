@@ -50,6 +50,10 @@ export default {
 
   methods: {
     async changePrice() {
+      if (this.priceInvalid) {
+        return
+      }
+
       this.waitingForTx = true
       try {
         let signer = this.$provider.getSigner(this.account)

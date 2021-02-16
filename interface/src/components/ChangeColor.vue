@@ -66,6 +66,10 @@ export default {
 
   methods: {
     async changeColor() {
+      if (!this.colorChanged) {
+        return
+      }
+
       this.waitingForTx = true
       try {
         let signer = this.$provider.getSigner(this.account)

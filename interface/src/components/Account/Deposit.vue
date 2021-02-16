@@ -48,6 +48,10 @@ export default {
 
   methods: {
     async deposit() {
+      if (this.amountInvalid) {
+        return
+      }
+
       this.waitingForTx = true
       try {
         let signer = this.$provider.getSigner(this.account)
