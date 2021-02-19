@@ -1,9 +1,17 @@
 <template>
   <div class="is-overlay">
     <div>
-      <!-- <div
+
+      <div
+        class="notification is-danger connection-notification m-5"
+      >
+        We're investigating a bug, please don't use GraffitETH.lol for now! 💩 💩 💩
+      </div>
+
+      <div
         v-if="!noWeb3 && !wrongNetwork"
         class="is-flex is-flex-wrap-wrap is-flex-direction-column is-align-content-flex-start mt-2 ml-2"
+        style="transform: scale(0.85); transform-origin: top left;"
       >
         <ConnectPanel
           v-on:error="onError($event)"
@@ -11,6 +19,7 @@
           v-bind:account="account"
           v-if="!wrongNetwork"
         />
+        
         <AccountPanel
           v-on:error="onError($event)"
           v-bind:account="account"
@@ -18,6 +27,15 @@
           v-bind:taxBase="taxBase"
           v-if="account"
         />
+
+        <Recover
+          v-on:error="onError($event)"
+          v-bind:account="account"
+          v-bind:balance="balance"
+          v-bind:taxBase="taxBase"
+          v-if="account && balance > 0.001"
+        />
+
         <PixelPanel
           v-bind:selectedPixel="selectedPixel"
           v-bind:account="account"
@@ -31,6 +49,7 @@
           v-bind:canvasSelectedPixel="selectedPixel"
           v-on:error="onError($event)"
         />
+        
         <hr class="flex-break">
         <div
           v-for="error in errors"
@@ -56,14 +75,9 @@
         You are connected to a wrong network. Please change to xDai and refresh the page. If you're
         using Metamask, find instructions
         <a href="https://www.xdaichain.com/for-users/wallets/metamask/metamask-setup">here</a>.
-      </div> -->
-      <div
-        class="notification is-dark connection-notification m-5"
-      >
-        We're investigating a bug, please don't use GraffitETH.lol for now! 💩 💩 💩
       </div>
 
-      <!-- <div v-if="cursorPixel" id="coords">{{ cursorPixel[0] }}, {{ cursorPixel[1] }}</div> -->
+      <div v-if="cursorPixel" id="coords">{{ cursorPixel[0] }}, {{ cursorPixel[1] }}</div>
     </div>
 
     <div id="i" v-on:click="aboutModalActive = true">?</div>
@@ -76,10 +90,11 @@
 </template>
 
 <script>
-// import ConnectPanel from './ConnectPanel.vue'
-// import AccountPanel from './Account/AccountPanel.vue'
-// import PixelPanel from './PixelPanel.vue'
-// import OwnedPixelPanel from './OwnedPixelPanel.vue'
+import ConnectPanel from './ConnectPanel.vue'
+import Recover from './Recover.vue'
+import AccountPanel from './Account/AccountPanel.vue'
+import PixelPanel from './PixelPanel.vue'
+import OwnedPixelPanel from './OwnedPixelPanel.vue'
 import AboutModal from './AboutModal.vue'
 
 import { gWeiToWei } from '../utils'
@@ -89,11 +104,12 @@ const balancePollInterval = 4000
 export default {
   name: "Panels",
   components: {
-    // ConnectPanel,
-    // AccountPanel,
-    // PixelPanel,
-    // OwnedPixelPanel,
+    ConnectPanel,
+    AccountPanel,
+    PixelPanel,
+    OwnedPixelPanel,
     AboutModal,
+    Recover
   },
   props: [
     "selectedPixel",
