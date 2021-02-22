@@ -28,17 +28,26 @@ import "hardhat/console.sol";
 // bought for free by anyone with a non-negative balance.
 //
 // All amounts and prices are stored in GWei and usually as uint64's. In order to avoid overflows,
-// math is carried out "clamped", i.e., if numbers would go above the maximum (below the minimum)
-// we just treat them as if they would be exactly at the maximum (minimum). This means very large
-// or very low numbers are not necessarily accurate. However, the positive maximum is realistically
-// never going to be reached (it corresponds to ~18B ETH/xDai). The negative maximum can be reached
-// by setting a pixel price extermely high and accumulating the debt. In this case, the clamping
-// would save the account some taxes, but only when it's already so much in debt that it will
-// likely never be repaid anyway.
+// in most cases math is carried out "clamped", i.e., if numbers would go above the maximum (or
+// below the minimum) we just treat them as if they would be exactly at the maximum (minimum). This
+// means very large or very low numbers are not necessarily accurate. However, the positive maximum
+// is realistically never going to be reached (it corresponds to ~18B ETH/xDai). The negative
+// maximum can be reached by setting a pixel price extermely high and accumulating the debt. In
+// this case, the clamping would save the account some taxes, but only when it's already so much in
+// debt that it will likely never be repaid anyway.
 //
 // The clamping math is an alternative to the usual approach of reverting transactions when
 // numbers run out of bounds. The latter might be a way for an owner to prevent their pixels being
 // sold.
+//
+// The main exception from using clamped math is for calculating the tax base as the sum of all
+// pixel prices. Otherwise, one could do the following:
+// 1) set the price of two pixels to 2**64 - 1, meaning the tax base would be clamped
+//    at 2**64 - 1.
+// 2) set the price of one of the pixels to 0, meaning the tax base is zero. Thus,
+//    one would have to pay no taxes despite owning one pixel at price 2**64 - 1.
+// Instead, we revert if the sum would exceed the maximum allowed value, so that the user can
+// choose a lower value.
 //
 // The contract tracks the total amount of taxes an account has paid. This allows them to claim a
 // proportional amount of DAO shares in a separate contract.
@@ -431,17 +440,18 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         );
 
         Account memory account = _accounts[msg.sender];
-
-        account.taxBase = ClampedMath.subUint64(
-            account.taxBase,
-            _pixelPrices[pixelID]
         uint64 taxPaid;
         (account, taxPaid) = Taxes.payTaxes(
             account,
             _taxRateNumerator,
             _taxRateDenominator
         );
-        account.taxBase = ClampedMath.addUint128(account.taxBase, newPrice);
+
+        uint64 oldPrice = _pixelPrices[pixelID];
+        assert(account.taxBase >= oldPrice);
+        account.taxBase -= oldPrice;
+        require(newPrice <= type(uint64).max - account.taxBase, "GraffitETH2: pixel price too high, tax base max exceeded");
+        account.taxBase += newPrice;
 
         _pixelPrices[pixelID] = newPrice;
         _accounts[msg.sender] = account;
@@ -672,10 +682,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
             // reduce buyer's balance and increase buyer's tax base
             buyer.balance = ClampedMath.subInt128(buyer.balance, price);
-            buyer.taxBase = ClampedMath.addUint128(
-                buyer.taxBase,
-                args[i].newPrice
-            );
+            require(args[i].newPrice <= type(uint64).max - buyer.taxBase, "GraffitETH2: pixel price too high, tax base max exceeded");
+            buyer.taxBase += args[i].newPrice;
 
             address sellerAddress;
             if (_exists(args[i].pixelID)) {
@@ -715,10 +723,9 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
                 // update seller balance and tax base
                 seller.balance = ClampedMath.addInt128(seller.balance, price);
-                seller.taxBase = ClampedMath.subUint64(
-                    seller.taxBase,
-                    _pixelPrices[args[i].pixelID]
-                );
+                uint64 oldPrice = _pixelPrices[args[i].pixelID];
+                assert(seller.taxBase >= oldPrice);
+                seller.taxBase -= oldPrice;
                 sellers[sellerIndex] = seller;
 
                 // perform transfer
@@ -938,8 +945,10 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         uint64 price = _pixelPrices[pixelID];
         require(price <= maxPrice, "GraffitETH2: pixel is too expensive");
 
-        sender.taxBase = ClampedMath.subUint64(sender.taxBase, price);
-        receiver.taxBase = ClampedMath.addUint128(receiver.taxBase, price);
+        assert(sender.taxBase >= price);
+        require(price <= type(uint64).max - receiver.taxBase, "GraffitETH2: pixel price too high, tax base max exceeded");
+        sender.taxBase -= price;
+        receiver.taxBase += price;
 
         uint64 amount;
         if (sender.balance >= em.amount) {
