@@ -430,12 +430,16 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             "GraffitETH2: only pixel owner can set price"
         );
 
-        payTaxes(msg.sender);
         Account memory account = _accounts[msg.sender];
 
         account.taxBase = ClampedMath.subUint64(
             account.taxBase,
             _pixelPrices[pixelID]
+        uint64 taxPaid;
+        (account, taxPaid) = Taxes.payTaxes(
+            account,
+            _taxRateNumerator,
+            _taxRateDenominator
         );
         account.taxBase = ClampedMath.addUint128(account.taxBase, newPrice);
 
