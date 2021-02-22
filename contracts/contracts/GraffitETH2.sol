@@ -844,7 +844,9 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         );
         acc.balance = ClampedMath.subInt128(acc.balance, amount);
 
-        (bool success, ) = receiver.call{value: uint256(amount) * (1 gwei)}("");
+        uint256 transferValue = uint256(amount) * (1 gwei);
+        assert(transferValue / (1 gwei) == amount);
+        (bool success, ) = receiver.call{value: transferValue}("");
         require(success, "GraffitETH2: withdraw call reverted");
 
         _accounts[account] = acc;
@@ -891,6 +893,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
         uint256 transferValue = uint256(amount) * (1 gwei);
         assert(transferValue <= address(this).balance);
+        assert(transferValue / (1 gwei) == amount);
         (bool success, ) = receiver.call{value: transferValue}("");
         require(success, "GraffitETH2: withdraw taxes call reverted");
 
