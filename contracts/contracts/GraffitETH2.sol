@@ -524,10 +524,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     /// @dev Withdraw all of the taxes and income from initial sales and send it to the caller.
     ///     Only the contract owner is allowed to do this.
     function withdrawAllOwner() public onlyOwner {
-        _withdrawOwner(
-            _totalTaxesPaid + _totalInitialSaleRevenue - _totalWithdrawnByOwner,
-            msg.sender
-        );
+        _withdrawOwner(getOwnerWithdrawableAmount(), msg.sender);
     }
 
     /// @dev Earmark a pixel so that the specified account can claim it. Only the pixel owner can
