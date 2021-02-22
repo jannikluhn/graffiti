@@ -98,6 +98,9 @@ contract RugPull {
     bool private _rugPullDisabled;
 
     constructor(uint256 headsUp) {
+        // avoid overflow if heads up is chosen extremely large
+        require(headsUp <= 5 * 365 * 24 * 60 * 60, "RugPull: heads up too big");
+
         _rugPullHeadsUp = headsUp;
         _rugPullDisabled = false;
         _rugPullTime = 0;
