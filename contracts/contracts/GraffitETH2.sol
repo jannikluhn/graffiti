@@ -363,6 +363,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         return _accounts[account].totalTaxesPaid;
     }
 
+    /// @dev Get the maximum amount of funds (from both initial pixel sales and from taxes) in
+    ///     GWei that the owner can to withdraw at the moment.
     function getOwnerWithdrawableAmount() public view returns (uint64) {
         uint64 totalRevenue =
             ClampedMath.addUint128(_totalTaxesPaid, _totalInitialSaleRevenue);
