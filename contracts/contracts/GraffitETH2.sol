@@ -81,6 +81,11 @@ struct PixelBuyArgs {
     uint8 color;
 }
 
+struct Pixel {
+    uint64 nominalPrice;
+    bool primordial;
+}
+
 // RugPull is a safety hatch. It allows the owner to withdraw all funds from a contract in case of
 // a bug, in particular to be able to withdraw stuck funds. This action must be announced a certain
 // time in advance (e.g., a month, configurable) in order to allow users that don't trust the owner
@@ -232,8 +237,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     // during initialization the owner can set owners, prices, and colors of pixels.
     bool _initializing;
 
-    // nominal price of each pixel after it has been bought first for the first time
-    mapping(uint256 => uint64) private _pixelPrices;
+    mapping(uint256 => Pixel) private _pixels;
 
     mapping(address => Account) private _accounts;
     mapping(uint256 => Earmark) private _earmarks;
@@ -276,6 +280,12 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         return _exists(pixelID);
     }
 
+    /// @dev Check if the given pixel is primordial, i.e., it was created during initialization
+    ///     and hasn't been changed since and, thus, no taxes have to be paid for it.
+    function isPrimordial(uint256 pixelID) public view returns (bool) {
+        return _pixels[pixelID].primordial;
+    }
+
     /// @dev Get the nominal price of a pixel in GWei. The nominal price is the price at which the
     ///     owner wants to sell it (the actual price might be different if the owner is indebted),
     ///     or the initial price if there is no owner yet.
@@ -283,7 +293,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         if (!_exists(pixelID)) {
             return _initialPrice;
         }
-        return _pixelPrices[pixelID];
+        return _pixels[pixelID].nominalPrice;
     }
 
     /// @dev Get the price for which anyone can buy a pixel in GWei. For non-existant pixels it is
@@ -299,7 +309,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             return 0;
         }
 
-        return _pixelPrices[pixelID];
+        return _pixels[pixelID].nominalPrice;
     }
 
     /// @dev Get the maximum valid pixel id.
@@ -367,7 +377,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     ///     GWei that the owner can to withdraw at the moment.
     function getOwnerWithdrawableAmount() public view returns (uint64) {
         uint64 totalRevenue =
-            ClampedMath.addUint128(_totalTaxesPaid, _totalInitialSaleRevenue);
+            ClampedMath.addUint64(_totalTaxesPaid, _totalInitialSaleRevenue);
         assert(_totalWithdrawnByOwner <= totalRevenue);
         uint64 amount = totalRevenue - _totalWithdrawnByOwner;
         return amount;
@@ -449,13 +459,22 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             _taxRateDenominator
         );
 
-        uint64 oldPrice = _pixelPrices[pixelID];
-        assert(account.taxBase >= oldPrice);
-        account.taxBase -= oldPrice;
+        Pixel memory oldPixel = _pixels[pixelID];
+        if (!oldPixel.primordial) {
+            // Owners don't pay taxes for primordial pixels and thus their prices are not
+            // reflected in the owner's tax base. We therefore only subtract the price if the
+            // pixel is not primordial.
+            assert(account.taxBase >= oldPixel.nominalPrice);
+            account.taxBase -= oldPixel.nominalPrice;
+        }
         require(newPrice <= type(uint64).max - account.taxBase, "GraffitETH2: pixel price too high, tax base max exceeded");
         account.taxBase += newPrice;
 
-        _pixelPrices[pixelID] = newPrice;
+        _pixels[pixelID] = Pixel({
+            nominalPrice: newPrice,
+            primordial: false
+        });
+        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxPaid);
         _accounts[msg.sender] = account;
 
         emit PriceChanged({pixelID: pixelID, owner: owner, price: newPrice});
@@ -473,7 +492,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         );
 
         _accounts[account] = acc;
-        _totalTaxesPaid = ClampedMath.addUint128(_totalTaxesPaid, taxPaid);
+        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxPaid);
     }
 
     /// @dev Deposit money to the given account.
@@ -599,7 +618,10 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             } else {
                 _mint(owner, pixelID);
             }
-            _pixelPrices[pixelID] = price;
+            _pixels[pixelID] = Pixel({
+                nominalPrice: price,
+                primordial: true
+            });
             emit PriceChanged({pixelID: pixelID, owner: owner, price: price});
             emit ColorChanged({pixelID: pixelID, owner: owner, color: color});
         }
@@ -722,9 +744,12 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
                 // update seller balance and tax base
                 seller.balance = ClampedMath.addInt128(seller.balance, price);
-                uint64 oldPrice = _pixelPrices[args[i].pixelID];
-                assert(seller.taxBase >= oldPrice);
-                seller.taxBase -= oldPrice;
+                Pixel memory oldPixel = _pixels[args[i].pixelID];
+                if (!oldPixel.primordial) {
+                    // only subtract price from tax base for non-primordial pixels
+                    assert(seller.taxBase >= oldPixel.nominalPrice);
+                    seller.taxBase -= oldPixel.nominalPrice;
+                }
                 sellers[sellerIndex] = seller;
 
                 // perform transfer
@@ -732,7 +757,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                 _earmark(args[i].pixelID, buyerAddress, address(0), 0); // cancel any earmark
             } else {
                 sellerAddress = address(0);
-                initialSaleRevenue = ClampedMath.addUint128(
+                initialSaleRevenue = ClampedMath.addUint64(
                     initialSaleRevenue,
                     price
                 );
@@ -745,7 +770,10 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             }
 
             // update nominal price
-            _pixelPrices[args[i].pixelID] = args[i].newPrice;
+            _pixels[args[i].pixelID] = Pixel({
+                nominalPrice: args[i].newPrice,
+                primordial: false
+            });
 
             emit Bought({
                 pixelID: args[i].pixelID,
@@ -772,8 +800,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             address sellerAddress = sellerAddresses[i];
             _accounts[sellerAddress] = sellers[i];
         }
-        _totalTaxesPaid = ClampedMath.addUint128(_totalTaxesPaid, taxesPaid);
-        _totalInitialSaleRevenue = ClampedMath.addUint128(
+        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
+        _totalInitialSaleRevenue = ClampedMath.addUint64(
             _totalInitialSaleRevenue,
             initialSaleRevenue
         );
@@ -809,7 +837,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                 tax = taxesOwed;
             }
             taxPaid += tax;
-            acc.totalTaxesPaid = ClampedMath.addUint128(
+            acc.totalTaxesPaid = ClampedMath.addUint64(
                 acc.totalTaxesPaid,
                 tax
             );
@@ -817,7 +845,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         acc.balance = ClampedMath.addInt128(acc.balance, amount);
 
         _accounts[account] = acc;
-        _totalTaxesPaid = ClampedMath.addUint128(_totalTaxesPaid, taxPaid);
+        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxPaid);
         emit Deposited({
             account: account,
             depositor: depositor,
@@ -860,7 +888,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         require(success, "GraffitETH2: withdraw call reverted");
 
         _accounts[account] = acc;
-        _totalTaxesPaid = ClampedMath.addUint128(_totalTaxesPaid, taxPaid);
+        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxPaid);
 
         emit Withdrawn({
             account: account,
@@ -888,15 +916,12 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     }
 
     function _withdrawOwner(uint64 amount, address receiver) internal {
-        uint64 totalRevenue =
-            ClampedMath.addUint128(_totalTaxesPaid, _totalInitialSaleRevenue);
-        assert(_totalWithdrawnByOwner <= totalRevenue);
         uint64 maxAmount = getOwnerWithdrawableAmount();
         require(
             amount <= maxAmount,
             "GraffitETH2: not enough funds to withdraw"
         );
-        _totalWithdrawnByOwner = ClampedMath.addUint128(
+        _totalWithdrawnByOwner = ClampedMath.addUint64(
             _totalWithdrawnByOwner,
             amount
         );
@@ -941,7 +966,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             _taxRateDenominator
         );
 
-        uint64 price = _pixelPrices[pixelID];
+        uint64 price = getNominalPrice(pixelID);
         require(price <= maxPrice, "GraffitETH2: pixel is too expensive");
 
         assert(sender.taxBase >= price);
@@ -965,7 +990,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
         _accounts[owner] = sender;
         _accounts[claimer] = receiver;
-        _totalTaxesPaid = ClampedMath.addUint128(_totalTaxesPaid, taxesPaid);
+        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
 
         _transfer(owner, claimer, pixelID);
         _earmark(pixelID, owner, address(0), 0);
@@ -1008,7 +1033,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 }
 
 library ClampedMath {
-    function addUint128(uint64 a, uint64 b) internal pure returns (uint64) {
+    function addUint64(uint64 a, uint64 b) internal pure returns (uint64) {
         uint64 res;
         if (a <= type(uint64).max - b) {
             res = a + b;
@@ -1115,7 +1140,7 @@ library Taxes {
         acc.balance = ClampedMath.subInt128(acc.balance, unaccountedTax);
         assert(block.timestamp >= acc.lastTaxPayment);
         acc.lastTaxPayment = uint64(block.timestamp);
-        acc.totalTaxesPaid = ClampedMath.addUint128(
+        acc.totalTaxesPaid = ClampedMath.addUint64(
             acc.totalTaxesPaid,
             taxPaid
         );
@@ -1131,7 +1156,7 @@ library Taxes {
     ) internal view returns (Account memory, uint64) {
         uint64 taxPaid;
         (acc, taxPaid) = payTaxes(acc, taxRateNumerator, taxRateDenominator);
-        taxesPaid = ClampedMath.addUint128(taxesPaid, taxPaid);
+        taxesPaid = ClampedMath.addUint64(taxesPaid, taxPaid);
         return (acc, taxesPaid);
     }
 }
