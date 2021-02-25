@@ -905,7 +905,7 @@ describe("Claiming", function () {
     await c2.claim(0, parseEtherToGWei("20"), 0);
     expect((await c2.getBalance(a2)).sub(b).abs()).to.be.lte(5000);
   });
-})
+});
 
 function weiToGWei(wei) {
   return ethers.BigNumber.from(wei).div(1000000000);

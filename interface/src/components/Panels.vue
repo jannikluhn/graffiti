@@ -1,13 +1,6 @@
 <template>
   <div class="is-overlay">
     <div>
-
-      <div
-        class="notification is-danger connection-notification m-5"
-      >
-        We're investigating a bug, please don't use GraffitETH.lol for now! 💩 💩 💩
-      </div>
-
       <div
         v-if="!noWeb3 && !wrongNetwork"
         class="is-flex is-flex-wrap-wrap is-flex-direction-column is-align-content-flex-start mt-2 ml-2"
@@ -19,21 +12,21 @@
           v-bind:account="account"
           v-if="!wrongNetwork"
         />
-        
-        <AccountPanel
-          v-on:error="onError($event)"
-          v-bind:account="account"
-          v-bind:balance="balance"
-          v-bind:taxBase="taxBase"
-          v-if="account"
-        />
 
         <Recover
           v-on:error="onError($event)"
           v-bind:account="account"
           v-bind:balance="balance"
           v-bind:taxBase="taxBase"
-          v-if="account && balance > 0.001"
+          v-if="account && balanceNonDusty"
+        />
+
+        <AccountPanel
+          v-on:error="onError($event)"
+          v-bind:account="account"
+          v-bind:balance="balance"
+          v-bind:taxBase="taxBase"
+          v-if="account"
         />
 
         <PixelPanel
@@ -76,6 +69,11 @@
         using Metamask, find instructions
         <a href="https://www.xdaichain.com/for-users/wallets/metamask/metamask-setup">here</a>.
       </div>
+      <div
+        class="notification is-dark connection-notification m-5"
+      >
+        We're investigating a bug, please don't use GraffitETH.lol for now! 💩 💩 💩
+      </div>
 
       <div v-if="cursorPixel" id="coords">{{ cursorPixel[0] }}, {{ cursorPixel[1] }}</div>
     </div>
@@ -91,15 +89,17 @@
 
 <script>
 import ConnectPanel from './ConnectPanel.vue'
-import Recover from './Recover.vue'
 import AccountPanel from './Account/AccountPanel.vue'
 import PixelPanel from './PixelPanel.vue'
 import OwnedPixelPanel from './OwnedPixelPanel.vue'
 import AboutModal from './AboutModal.vue'
+import Recover from './Recover.vue'
+import { ethers } from 'ethers'
 
 import { gWeiToWei } from '../utils'
 
 const balancePollInterval = 4000
+const dustThreshold = ethers.utils.parseEther("0.001")
 
 export default {
   name: "Panels",
@@ -109,7 +109,7 @@ export default {
     PixelPanel,
     OwnedPixelPanel,
     AboutModal,
-    Recover
+    Recover,
   },
   props: [
     "selectedPixel",
@@ -192,7 +192,13 @@ export default {
       }
       this.errors = newErrors
     }
-  }
+  },
+
+  computed: {
+    balanceNonDusty() {
+      return this.balance !== null && this.balance.gte(dustThreshold)
+    },
+  },
 }
 </script>
 
