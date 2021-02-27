@@ -818,8 +818,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
     function _depositTo(address depositor, address account) internal {
         Account memory acc = _accounts[account];
-        uint64 taxPaid;
-        (acc, taxPaid) = _payTaxes(acc);
+        uint64 taxesPaid;
+        (acc, taxesPaid) = _payTaxes(acc);
 
         require(
             msg.value % (1 gwei) == 0,
@@ -832,22 +832,25 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         );
         uint64 amount = uint64(valueGWei);
 
+        // if the account owes taxes pay them from the deposited amount
         if (acc.balance < 0) {
-            // the account owes taxes, so pay them from the deposited amount
-            uint64 taxesOwed = uint64(-acc.balance);
-            uint64 tax;
-            if (amount <= taxesOwed) {
-                tax = amount;
+            // balance is int128 which can't represent -type(int128).min. Therefore, convert to
+            // int256 before flipping the sign.
+            int256 taxesOwed = -int256(acc.balance);
+            uint64 taxes;
+            if (taxesOwed >= amount) {
+                taxes = amount;
             } else {
-                tax = taxesOwed;
+                assert(taxesOwed <= type(uint64).max);  // taxesOwed < amount <= uint64.max
+                taxes = uint64(taxesOwed);
             }
-            taxPaid += tax;
-            acc.totalTaxesPaid = ClampedMath.addUint64(acc.totalTaxesPaid, tax);
+            taxesPaid = ClampedMath.addUint64(taxesPaid, taxes);
+            acc.totalTaxesPaid = ClampedMath.addUint64(acc.totalTaxesPaid, taxes);
         }
         acc = _increaseBalance(acc, amount);
 
         _accounts[account] = acc;
-        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxPaid);
+        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
         emit Deposited({
             account: account,
             depositor: depositor,
