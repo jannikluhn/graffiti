@@ -332,11 +332,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     function getBalance(address account) public view returns (int128) {
         Account memory acc = _accounts[account];
         uint64 taxPaid;
-        (acc, taxPaid) = Taxes.payTaxes(
-            acc,
-            _taxRateNumerator,
-            _taxRateDenominator
-        );
+        (acc, taxPaid) = _payTaxes(acc);
         return acc.balance;
     }
 
@@ -440,16 +436,15 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
         Account memory account = _accounts[msg.sender];
         uint64 taxPaid;
-        (account, taxPaid) = Taxes.payTaxes(
-            account,
-            _taxRateNumerator,
-            _taxRateDenominator
-        );
+        (account, taxPaid) = _payTaxes(account);
 
         uint64 oldPrice = _pixelPrices[pixelID];
         assert(account.taxBase >= oldPrice);
         account.taxBase -= oldPrice;
-        require(newPrice <= type(uint64).max - account.taxBase, "GraffitETH2: pixel price too high, tax base max exceeded");
+        require(
+            newPrice <= type(uint64).max - account.taxBase,
+            "GraffitETH2: pixel price too high, tax base max exceeded"
+        );
         account.taxBase += newPrice;
 
         _pixelPrices[pixelID] = newPrice;
@@ -464,11 +459,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     function payTaxes(address account) public {
         Account memory acc = _accounts[account];
         uint64 taxPaid;
-        (acc, taxPaid) = Taxes.payTaxes(
-            acc,
-            _taxRateNumerator,
-            _taxRateDenominator
-        );
+        (acc, taxPaid) = _payTaxes(acc);
 
         _accounts[account] = acc;
         _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxPaid);
@@ -633,6 +624,28 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     // Internal functions
     //
 
+    function _payTaxes(Account memory account)
+        internal
+        view
+        returns (Account memory, uint64)
+    {
+        return Taxes.payTaxes(account, _taxRateNumerator, _taxRateDenominator);
+    }
+
+    function _payMoreTaxes(Account memory account, uint64 taxesPaid)
+        internal
+        view
+        returns (Account memory, uint64)
+    {
+        return
+            Taxes.payMoreTaxes(
+                account,
+                taxesPaid,
+                _taxRateNumerator,
+                _taxRateDenominator
+            );
+    }
+
     function _buy(address buyerAddress, PixelBuyArgs memory args) internal {
         PixelBuyArgs[] memory argss = new PixelBuyArgs[](1);
         argss[0] = args;
@@ -655,12 +668,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         uint64 initialSaleRevenue = 0;
 
         // pay taxes of buyer so that balance is up to date and we can safely update tax base
-        (buyer, taxesPaid) = Taxes.payMoreTax(
-            buyer,
-            taxesPaid,
-            _taxRateNumerator,
-            _taxRateDenominator
-        );
+        (buyer, taxesPaid) = _payMoreTaxes(buyer, taxesPaid);
 
         for (uint256 i = 0; i < args.length; i++) {
             // Make sure pixel ids are sorted and, in particular, no pixel is bought twice.
@@ -681,7 +689,10 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
             // reduce buyer's balance and increase buyer's tax base
             buyer.balance = ClampedMath.subInt128(buyer.balance, price);
-            require(args[i].newPrice <= type(uint64).max - buyer.taxBase, "GraffitETH2: pixel price too high, tax base max exceeded");
+            require(
+                args[i].newPrice <= type(uint64).max - buyer.taxBase,
+                "GraffitETH2: pixel price too high, tax base max exceeded"
+            );
             buyer.taxBase += args[i].newPrice;
 
             address sellerAddress;
@@ -712,12 +723,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                     // Pay tax for seller so that we can safely update its balance and tax base.
                     // We only have to do this once per seller as no time passes during execution
                     // and thus no new tax debt accumulates.
-                    (seller, taxesPaid) = Taxes.payMoreTax(
-                        seller,
-                        taxesPaid,
-                        _taxRateNumerator,
-                        _taxRateDenominator
-                    );
+                    (seller, taxesPaid) = _payMoreTaxes(seller, taxesPaid);
                 }
 
                 // update seller balance and tax base
@@ -782,11 +788,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     function _depositTo(address depositor, address account) internal {
         Account memory acc = _accounts[account];
         uint64 taxPaid;
-        (acc, taxPaid) = Taxes.payTaxes(
-            acc,
-            _taxRateNumerator,
-            _taxRateDenominator
-        );
+        (acc, taxPaid) = _payTaxes(acc);
 
         require(
             msg.value % (1 gwei) == 0,
@@ -809,10 +811,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                 tax = taxesOwed;
             }
             taxPaid += tax;
-            acc.totalTaxesPaid = ClampedMath.addUint64(
-                acc.totalTaxesPaid,
-                tax
-            );
+            acc.totalTaxesPaid = ClampedMath.addUint64(acc.totalTaxesPaid, tax);
         }
         acc.balance = ClampedMath.addInt128(acc.balance, amount);
 
@@ -842,11 +841,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     ) internal {
         Account memory acc = _accounts[account];
         uint64 taxPaid;
-        (acc, taxPaid) = Taxes.payTaxes(
-            acc,
-            _taxRateNumerator,
-            _taxRateDenominator
-        );
+        (acc, taxPaid) = _payTaxes(acc);
 
         require(
             acc.balance >= amount,
@@ -925,24 +920,17 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         Account memory sender = _accounts[owner];
         Account memory receiver = _accounts[claimer];
 
-        (sender, taxesPaid) = Taxes.payMoreTax(
-            sender,
-            taxesPaid,
-            _taxRateNumerator,
-            _taxRateDenominator
-        );
-        (receiver, taxesPaid) = Taxes.payMoreTax(
-            receiver,
-            taxesPaid,
-            _taxRateNumerator,
-            _taxRateDenominator
-        );
+        (sender, taxesPaid) = _payMoreTaxes(sender, taxesPaid);
+        (receiver, taxesPaid) = _payMoreTaxes(receiver, taxesPaid);
 
         uint64 price = getNominalPrice(pixelID);
         require(price <= maxPrice, "GraffitETH2: pixel is too expensive");
 
         assert(sender.taxBase >= price);
-        require(price <= type(uint64).max - receiver.taxBase, "GraffitETH2: pixel price too high, tax base max exceeded");
+        require(
+            price <= type(uint64).max - receiver.taxBase,
+            "GraffitETH2: pixel price too high, tax base max exceeded"
+        );
         sender.taxBase -= price;
         receiver.taxBase += price;
 
@@ -1112,15 +1100,12 @@ library Taxes {
         acc.balance = ClampedMath.subInt128(acc.balance, unaccountedTax);
         assert(block.timestamp >= acc.lastTaxPayment);
         acc.lastTaxPayment = uint64(block.timestamp);
-        acc.totalTaxesPaid = ClampedMath.addUint64(
-            acc.totalTaxesPaid,
-            taxPaid
-        );
+        acc.totalTaxesPaid = ClampedMath.addUint64(acc.totalTaxesPaid, taxPaid);
 
         return (acc, taxPaid);
     }
 
-    function payMoreTax(
+    function payMoreTaxes(
         Account memory acc,
         uint64 taxesPaid,
         uint256 taxRateNumerator,
