@@ -589,8 +589,11 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                 _mint(owner, pixelID);
             }
 
-            // TODO: increase tax base
+            Account memory acc = _accounts[owner];
+            acc = _increaseTaxBase(acc, price);
+
             _pixelPrices[pixelID] = price;
+            _accounts[owner] = acc;
             emit PriceChanged({pixelID: pixelID, owner: owner, price: price});
             emit ColorChanged({pixelID: pixelID, owner: owner, color: color});
         }
