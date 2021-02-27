@@ -5,8 +5,6 @@ pragma abicoder v2;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "hardhat/console.sol";
-
 // GraffitETH is an NFT contract in which each token represents a pixel. The owner has the right
 // to change the pixel color. Pixel ownership is governed by the Harberger tax mechanism, i.e.,
 // - every pixel can be bought at any time at a price the owner has to set
@@ -79,11 +77,6 @@ struct PixelBuyArgs {
     uint64 maxPrice;
     uint64 newPrice;
     uint8 color;
-}
-
-struct Pixel {
-    uint64 nominalPrice;
-    bool primordial;
 }
 
 // RugPull is a safety hatch. It allows the owner to withdraw all funds from a contract in case of
@@ -237,7 +230,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     // during initialization the owner can set owners, prices, and colors of pixels.
     bool _initializing;
 
-    mapping(uint256 => Pixel) private _pixels;
+    mapping(uint256 => uint64) private _pixelPrices;
 
     mapping(address => Account) private _accounts;
     mapping(uint256 => Earmark) private _earmarks;
@@ -280,12 +273,6 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         return _exists(pixelID);
     }
 
-    /// @dev Check if the given pixel is primordial, i.e., it was created during initialization
-    ///     and hasn't been changed since and, thus, no taxes have to be paid for it.
-    function isPrimordial(uint256 pixelID) public view returns (bool) {
-        return _pixels[pixelID].primordial;
-    }
-
     /// @dev Get the nominal price of a pixel in GWei. The nominal price is the price at which the
     ///     owner wants to sell it (the actual price might be different if the owner is indebted),
     ///     or the initial price if there is no owner yet.
@@ -293,7 +280,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         if (!_exists(pixelID)) {
             return _initialPrice;
         }
-        return _pixels[pixelID].nominalPrice;
+        return _pixelPrices[pixelID];
     }
 
     /// @dev Get the price for which anyone can buy a pixel in GWei. For non-existant pixels it is
@@ -309,7 +296,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             return 0;
         }
 
-        return _pixels[pixelID].nominalPrice;
+        return _pixelPrices[pixelID];
     }
 
     /// @dev Get the maximum valid pixel id.
@@ -459,21 +446,13 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             _taxRateDenominator
         );
 
-        Pixel memory oldPixel = _pixels[pixelID];
-        if (!oldPixel.primordial) {
-            // Owners don't pay taxes for primordial pixels and thus their prices are not
-            // reflected in the owner's tax base. We therefore only subtract the price if the
-            // pixel is not primordial.
-            assert(account.taxBase >= oldPixel.nominalPrice);
-            account.taxBase -= oldPixel.nominalPrice;
-        }
+        uint64 oldPrice = _pixelPrices[pixelID];
+        assert(account.taxBase >= oldPrice);
+        account.taxBase -= oldPrice;
         require(newPrice <= type(uint64).max - account.taxBase, "GraffitETH2: pixel price too high, tax base max exceeded");
         account.taxBase += newPrice;
 
-        _pixels[pixelID] = Pixel({
-            nominalPrice: newPrice,
-            primordial: false
-        });
+        _pixelPrices[pixelID] = newPrice;
         _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxPaid);
         _accounts[msg.sender] = account;
 
@@ -618,10 +597,9 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             } else {
                 _mint(owner, pixelID);
             }
-            _pixels[pixelID] = Pixel({
-                nominalPrice: price,
-                primordial: true
-            });
+
+            // TODO: increase tax base
+            _pixelPrices[pixelID] = price;
             emit PriceChanged({pixelID: pixelID, owner: owner, price: price});
             emit ColorChanged({pixelID: pixelID, owner: owner, color: color});
         }
@@ -744,12 +722,9 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
                 // update seller balance and tax base
                 seller.balance = ClampedMath.addInt128(seller.balance, price);
-                Pixel memory oldPixel = _pixels[args[i].pixelID];
-                if (!oldPixel.primordial) {
-                    // only subtract price from tax base for non-primordial pixels
-                    assert(seller.taxBase >= oldPixel.nominalPrice);
-                    seller.taxBase -= oldPixel.nominalPrice;
-                }
+                uint64 oldPrice = _pixelPrices[args[i].pixelID];
+                assert(seller.taxBase >= oldPrice);
+                seller.taxBase -= oldPrice;
                 sellers[sellerIndex] = seller;
 
                 // perform transfer
@@ -770,10 +745,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             }
 
             // update nominal price
-            _pixels[args[i].pixelID] = Pixel({
-                nominalPrice: args[i].newPrice,
-                primordial: false
-            });
+            _pixelPrices[args[i].pixelID] = args[i].newPrice;
 
             emit Bought({
                 pixelID: args[i].pixelID,

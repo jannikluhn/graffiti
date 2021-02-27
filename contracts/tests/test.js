@@ -130,7 +130,6 @@ describe("GraffitETH2 init", function () {
     expect(await c.getPrice(3)).to.equal(4);
     expect(await c.ownerOf(3)).to.equal(a1);
     expect(await c.totalSupply()).to.equal(1);
-    expect(await c.isPrimordial(3)).to.be.true;
 
     tx = c.init([5, 3, 10], [a1, a2, a1], [1, 2, 3], [9, 8, 7])
     await expect(tx).to.emit(c, "PriceChanged").withArgs(5, a1, 1)
@@ -145,9 +144,6 @@ describe("GraffitETH2 init", function () {
     expect(await c.ownerOf(5)).to.equal(a1);
     expect(await c.ownerOf(3)).to.equal(a2);
     expect(await c.ownerOf(10)).to.equal(a1);
-    expect(await c.isPrimordial(5)).to.be.true;
-    expect(await c.isPrimordial(3)).to.be.true;
-    expect(await c.isPrimordial(10)).to.be.true;
     expect(await c.totalSupply()).to.equal(3);
   });
 
@@ -171,25 +167,6 @@ describe("GraffitETH2 init", function () {
     await expect(c.stopInitialization())
     await expect(c.init([], [], [], []))
       .to.be.revertedWith("GraffitETH2: initialization phase already over");
-  });
-
-  it("should create tax free pixels until first price change", async function () {
-    await c.init([0, 1], [a1, a1], [100, 100], [0, 0]);
-    expect(await c.getTaxBase(a1)).to.be.equal(0);
-
-    await skipOneMonth();
-    await c.payTaxes(a1);
-    expect(await c.getTotalTaxesPaidBy(a1)).to.be.equal(0);
-    expect(await c.getTotalTaxesPaid()).to.be.equal(0);
-
-    await c.setPrice(0, 500);
-    expect(await c.isPrimordial(0)).to.be.false;
-    expect(await c.getTaxBase(a1)).to.be.equal(500);
-
-    await c2.depositAndBuy([1, 100, 1000, 0], {value: gWeiToWei(100)});
-    expect(await c.isPrimordial(1)).to.be.false;
-    expect(await c.getTaxBase(a1)).to.be.equal(500);
-    expect(await c.getTaxBase(a2)).to.be.equal(1000);
   });
 });
 
