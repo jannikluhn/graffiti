@@ -16,6 +16,7 @@ const width = 5;
 const height = 5;
 const taxRateNumerator = 12;
 const taxRateDenominator = 365 * 24 * 60 * 60 * 100;
+const taxStartTime = 0;
 const initialPrice = parseEtherToGWei("0.1");
 const rugPullHeadsUp = 30 * 24 * 24 * 60;  // 30 days
   
@@ -27,6 +28,7 @@ async function setup() {
     height,
     taxRateNumerator,
     taxRateDenominator,
+    taxStartTime,
     initialPrice,
     rugPullHeadsUp,
   );
@@ -93,6 +95,7 @@ describe("GraffitETH2 deployment", function () {
       height,
       taxRateNumerator,
       taxRateDenominator,
+      taxStartTime,
       initialPrice,
       rugPullHeadsUp,
     )).to.be.revertedWith("GraffitETH2: width must not be zero");
@@ -101,6 +104,7 @@ describe("GraffitETH2 deployment", function () {
       0,
       taxRateNumerator,
       taxRateDenominator,
+      taxStartTime,
       initialPrice,
       rugPullHeadsUp,
     )).to.be.revertedWith("GraffitETH2: height must not be zero");
@@ -112,9 +116,23 @@ describe("GraffitETH2 deployment", function () {
       height,
       taxRateNumerator,
       0,
+      taxStartTime,
       initialPrice,
       rugPullHeadsUp,
     )).to.be.revertedWith("GraffitETH2: tax rate denominator must not be zero");
+  });
+
+  it("should set tax start time", async function () {
+    const c = await cFactory.deploy(
+      width,
+      height,
+      taxRateNumerator,
+      taxRateDenominator,
+      123,
+      initialPrice,
+      rugPullHeadsUp,
+    );
+    expect(await c.getTaxStartTime()).to.be.equal(123);
   });
 });
 
@@ -707,6 +725,28 @@ describe("GraffitETH taxes", function () {
     await c1.deposit({ value: gWeiToWei(balance.mul(-1)) });
     expect(await c.getTotalTaxesPaid()).to.equal(parseEtherToGWei("100").sub(balance));
     expect(await c.getTotalTaxesPaidBy(a1)).to.equal(parseEtherToGWei("100").sub(balance));
+  });
+
+  it("should only be paid from tax start time onwards", async function () {
+    const taxStartTime = (await ethers.provider.getBlock()).timestamp + 10 * 365 * 24 * 60 * 60;
+    const c = await cFactory.deploy(
+      width,
+      height,
+      taxRateNumerator,
+      taxRateDenominator,
+      taxStartTime,
+      initialPrice,
+      rugPullHeadsUp,
+    );
+
+    await c.depositAndBuy(
+      [0, initialPrice, parseEtherToGWei("100"), 0],
+      { value: ethers.utils.parseEther("100.1") },
+    );
+    await network.provider.send("evm_setNextBlockTimestamp", [taxStartTime + 3 * 365 * 24 * 60 * 60 / 12]);
+    await network.provider.send("evm_mine", []);
+    const balance = await c.getBalance(a1);
+    expect(balance.sub(parseEtherToGWei("97")).abs()).to.be.lte(5000);
   });
 });
 

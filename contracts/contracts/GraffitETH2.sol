@@ -223,6 +223,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     // the tax rate per second is _taxRateNumerator / _taxRateDenominator
     uint256 private _taxRateNumerator;
     uint256 private _taxRateDenominator;
+    uint64 private _taxStartTime; // timestamp before which no taxes have to be paid
 
     uint256 private _maxPixelID; // pixel ids range from 0 to _maxPixelID (inclusive)
     uint64 private _initialPrice; // initial price at which pixels are first sold
@@ -248,6 +249,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         uint128 height,
         uint256 taxRateNumerator,
         uint256 taxRateDenominator,
+        uint64 taxStartTime,
         uint64 initialPrice,
         uint256 rugPullHeadsUp
     ) ERC721("Pixel", "PXL") RugPull(rugPullHeadsUp) {
@@ -266,6 +268,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         _maxPixelID = width * height - 1;
         _taxRateNumerator = taxRateNumerator;
         _taxRateDenominator = taxRateDenominator;
+        _taxStartTime = taxStartTime;
         _initialPrice = initialPrice;
     }
 
@@ -312,6 +315,12 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     /// @dev Get the tax rate per second as nominator-denominator-tuple.
     function getTaxRate() public view returns (uint256, uint256) {
         return (_taxRateNumerator, _taxRateDenominator);
+    }
+
+    /// @dev Get the time from which on taxes have to be paid. Before this time, no taxes have to
+    ///     be paid.
+    function getTaxStartTime() public view returns (uint64) {
+        return _taxStartTime;
     }
 
     /// @dev Get the initial pixel price in GWei.
@@ -632,7 +641,13 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         view
         returns (Account memory, uint64)
     {
-        return Taxes.payTaxes(account, _taxRateNumerator, _taxRateDenominator);
+        return
+            Taxes.payTaxes(
+                account,
+                _taxRateNumerator,
+                _taxRateDenominator,
+                _taxStartTime
+            );
     }
 
     function _payMoreTaxes(Account memory account, uint64 taxesPaid)
@@ -645,7 +660,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                 account,
                 taxesPaid,
                 _taxRateNumerator,
-                _taxRateDenominator
+                _taxRateDenominator,
+                _taxStartTime
             );
     }
 
@@ -1094,10 +1110,9 @@ library Taxes {
         uint64 startTime,
         uint64 endTime
     ) internal pure returns (uint64) {
-        require(
-            endTime >= startTime,
-            "GraffitETH2: end time must be later than start time"
-        );
+        if (endTime <= startTime) {
+            return 0;
+        }
         uint256 num =
             uint256(endTime - startTime) * uint256(taxBase) * taxRateNumerator;
         uint256 taxes = num / taxRateDenominator;
@@ -1116,14 +1131,20 @@ library Taxes {
     function payTaxes(
         Account memory acc,
         uint256 taxRateNumerator,
-        uint256 taxRateDenominator
+        uint256 taxRateDenominator,
+        uint64 taxStartTime
     ) internal view returns (Account memory, uint64) {
+        uint64 startTime = acc.lastTaxPayment;
+        if (startTime < taxStartTime) {
+            startTime = taxStartTime;
+        }
+
         uint64 unaccountedTaxes =
             computeTaxes(
                 taxRateNumerator,
                 taxRateDenominator,
                 acc.taxBase,
-                acc.lastTaxPayment,
+                startTime,
                 uint64(block.timestamp)
             );
 
@@ -1160,10 +1181,16 @@ library Taxes {
         Account memory acc,
         uint64 taxesPaid,
         uint256 taxRateNumerator,
-        uint256 taxRateDenominator
+        uint256 taxRateDenominator,
+        uint64 taxStartTime
     ) internal view returns (Account memory, uint64) {
         uint64 addedTaxes;
-        (acc, addedTaxes) = payTaxes(acc, taxRateNumerator, taxRateDenominator);
+        (acc, addedTaxes) = payTaxes(
+            acc,
+            taxRateNumerator,
+            taxRateDenominator,
+            taxStartTime
+        );
         taxesPaid = ClampedMath.addUint64(taxesPaid, addedTaxes);
         return (acc, taxesPaid);
     }
