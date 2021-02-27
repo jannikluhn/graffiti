@@ -439,13 +439,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         (account, taxPaid) = _payTaxes(account);
 
         uint64 oldPrice = _pixelPrices[pixelID];
-        assert(account.taxBase >= oldPrice);
-        account.taxBase -= oldPrice;
-        require(
-            newPrice <= type(uint64).max - account.taxBase,
-            "GraffitETH2: pixel price too high, tax base max exceeded"
-        );
-        account.taxBase += newPrice;
+        account = _decreaseTaxBase(account, oldPrice);
+        account = _increaseTaxBase(account, newPrice);
 
         _pixelPrices[pixelID] = newPrice;
         _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxPaid);
@@ -646,6 +641,47 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             );
     }
 
+    function _increaseTaxBase(Account memory account, uint64 newPixelPrice)
+        internal
+        pure
+        returns (Account memory)
+    {
+        require(
+            newPixelPrice <= type(uint64).max - account.taxBase,
+            "GraffitETH2: pixel price too high, tax base max exceeded"
+        );
+        account.taxBase += newPixelPrice;
+        return account;
+    }
+
+    function _decreaseTaxBase(Account memory account, uint64 oldPixelPrice)
+        internal
+        pure
+        returns (Account memory)
+    {
+        assert(account.taxBase >= oldPixelPrice);
+        account.taxBase -= oldPixelPrice;
+        return account;
+    }
+
+    function _increaseBalance(Account memory account, uint64 amount)
+        internal
+        pure
+        returns (Account memory)
+    {
+        account.balance = ClampedMath.addInt128(account.balance, amount);
+        return account;
+    }
+
+    function _decreaseBalance(Account memory account, uint64 amount)
+        internal
+        pure
+        returns (Account memory)
+    {
+        account.balance = ClampedMath.subInt128(account.balance, amount);
+        return account;
+    }
+
     function _buy(address buyerAddress, PixelBuyArgs memory args) internal {
         PixelBuyArgs[] memory argss = new PixelBuyArgs[](1);
         argss[0] = args;
@@ -688,12 +724,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             );
 
             // reduce buyer's balance and increase buyer's tax base
-            buyer.balance = ClampedMath.subInt128(buyer.balance, price);
-            require(
-                args[i].newPrice <= type(uint64).max - buyer.taxBase,
-                "GraffitETH2: pixel price too high, tax base max exceeded"
-            );
-            buyer.taxBase += args[i].newPrice;
+            buyer = _decreaseBalance(buyer, price);
+            buyer = _increaseTaxBase(buyer, args[i].newPrice);
 
             address sellerAddress;
             if (_exists(args[i].pixelID)) {
@@ -727,10 +759,9 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                 }
 
                 // update seller balance and tax base
-                seller.balance = ClampedMath.addInt128(seller.balance, price);
                 uint64 oldPrice = _pixelPrices[args[i].pixelID];
-                assert(seller.taxBase >= oldPrice);
-                seller.taxBase -= oldPrice;
+                seller = _increaseBalance(seller, price);
+                seller = _decreaseTaxBase(seller, oldPrice);
                 sellers[sellerIndex] = seller;
 
                 // perform transfer
@@ -813,7 +844,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             taxPaid += tax;
             acc.totalTaxesPaid = ClampedMath.addUint64(acc.totalTaxesPaid, tax);
         }
-        acc.balance = ClampedMath.addInt128(acc.balance, amount);
+        acc = _increaseBalance(acc, amount);
 
         _accounts[account] = acc;
         _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxPaid);
@@ -847,7 +878,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             acc.balance >= amount,
             "GraffitETH2: cannot withdraw more than balance"
         );
-        acc.balance = ClampedMath.subInt128(acc.balance, amount);
+        acc = _decreaseBalance(acc, amount);
 
         uint256 transferValue = uint256(amount) * (1 gwei);
         assert(transferValue / (1 gwei) == amount);
@@ -926,13 +957,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         uint64 price = getNominalPrice(pixelID);
         require(price <= maxPrice, "GraffitETH2: pixel is too expensive");
 
-        assert(sender.taxBase >= price);
-        require(
-            price <= type(uint64).max - receiver.taxBase,
-            "GraffitETH2: pixel price too high, tax base max exceeded"
-        );
-        sender.taxBase -= price;
-        receiver.taxBase += price;
+        sender = _decreaseTaxBase(sender, price);
+        receiver = _increaseTaxBase(receiver, price);
 
         uint64 amount;
         if (sender.balance >= em.amount) {
@@ -945,8 +971,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             }
         }
         require(amount >= minAmount, "GraffitETH2: amount is too small");
-        sender.balance = ClampedMath.subInt128(sender.balance, amount);
-        receiver.balance = ClampedMath.addInt128(receiver.balance, amount);
+        sender = _decreaseBalance(sender, amount);
+        receiver = _increaseBalance(receiver, amount);
 
         _accounts[owner] = sender;
         _accounts[claimer] = receiver;
