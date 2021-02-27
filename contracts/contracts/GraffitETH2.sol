@@ -841,11 +841,14 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             if (taxesOwed >= amount) {
                 taxes = amount;
             } else {
-                assert(taxesOwed <= type(uint64).max);  // taxesOwed < amount <= uint64.max
+                assert(taxesOwed <= type(uint64).max); // taxesOwed < amount <= uint64.max
                 taxes = uint64(taxesOwed);
             }
             taxesPaid = ClampedMath.addUint64(taxesPaid, taxes);
-            acc.totalTaxesPaid = ClampedMath.addUint64(acc.totalTaxesPaid, taxes);
+            acc.totalTaxesPaid = ClampedMath.addUint64(
+                acc.totalTaxesPaid,
+                taxes
+            );
         }
         acc = _increaseBalance(acc, amount);
 
@@ -1129,7 +1132,10 @@ library Taxes {
         acc.balance = ClampedMath.subInt128(acc.balance, unaccountedTaxes);
         assert(block.timestamp >= acc.lastTaxPayment);
         acc.lastTaxPayment = uint64(block.timestamp);
-        acc.totalTaxesPaid = ClampedMath.addUint64(acc.totalTaxesPaid, taxesPaid);
+        acc.totalTaxesPaid = ClampedMath.addUint64(
+            acc.totalTaxesPaid,
+            taxesPaid
+        );
 
         return (acc, taxesPaid);
     }
