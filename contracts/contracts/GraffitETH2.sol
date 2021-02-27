@@ -1130,6 +1130,7 @@ library Taxes {
         if (acc.balance >= unaccountedTaxes) {
             taxesPaid = unaccountedTaxes;
         } else if (acc.balance >= 0) {
+            assert(acc.balance <= type(uint64).max); // balance < unaccountedTaxes <= uint64.max
             taxesPaid = uint64(acc.balance);
         } else {
             taxesPaid = 0;
