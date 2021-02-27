@@ -360,7 +360,7 @@ describe("GraffitETH withdrawing", function () {
     await network.provider.send("evm_increaseTime", [31 * 24 * 60 * 60]);
     await network.provider.send("evm_mine", []);
 
-    await expect(c.withdrawAll())
+    await expect(c.withdrawMax())
       .to.emit(c, "Withdrawn");
     expect(await c.getBalance(a1)).to.equal(0);
   });
@@ -741,7 +741,7 @@ describe("Owner withdrawal", function () {
   });
 
   it("should allow withdrawing everyting", async function () {
-    await c.withdrawAllOwner();
+    await c.withdrawMaxOwner();
     expect(await c.getTotalWithdrawnByOwner()).to.equal(parseEtherToGWei("100"));
     expect(await c.getTotalTaxesPaid()).to.equal(parseEtherToGWei("99.9"));
     expect(await c.getTotalInitialSaleRevenue()).to.equal(parseEtherToGWei("0.1"));

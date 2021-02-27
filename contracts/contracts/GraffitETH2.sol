@@ -326,7 +326,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         return _accounts[account].lastTaxPayment;
     }
 
-    /// @dev Get the current balance of an account in GWei. This includes all tax paymenst up to
+    /// @dev Get the current balance of an account in GWei. This includes all tax payments up to
     ///     now, including tax debt since lastTaxPayment, i.e., tax debt not reflected in the
     ///     balance stored in the contract state.
     function getBalance(address account) public view returns (int128) {
@@ -483,14 +483,14 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
     /// @dev Withdraw the maximum possible amount from the caller's account and send it to the
     ///     given receiver address.
-    function withdrawAllTo(address receiver) public {
-        _withdrawAll(msg.sender, receiver);
+    function withdrawMaxTo(address receiver) public {
+        _withdrawMax(msg.sender, receiver);
     }
 
     /// @dev Withdraw the maximum possible amount from the caller's account and send it to the
     ///     caller.
-    function withdrawAll() public {
-        _withdrawAll(msg.sender, msg.sender);
+    function withdrawMax() public {
+        _withdrawMax(msg.sender, msg.sender);
     }
 
     /// @dev Withdraw a part of the taxes and income from initial sales and send it to the given
@@ -509,7 +509,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
     /// @dev Withdraw all of the taxes and income from initial sales and send it to the caller.
     ///     Only the contract owner is allowed to do this.
-    function withdrawAllOwner() public onlyOwner {
+    function withdrawMaxOwner() public onlyOwner {
         _withdrawOwner(getOwnerWithdrawableAmount(), msg.sender);
     }
 
@@ -862,13 +862,19 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         });
     }
 
-    function _withdrawAll(address account, address receiver) internal {
+    function _withdrawMax(address account, address receiver) internal {
         int128 balance = getBalance(account);
         require(
             balance >= 0,
             "GraffitETH2: account balance must not be negative"
         );
-        _withdraw(account, uint64(balance), receiver);
+        uint64 amount;
+        if (balance >= type(uint64).max) {
+            amount = type(uint64).max;
+        } else {
+            amount = uint64(balance);
+        }
+        _withdraw(account, amount, receiver);
     }
 
     function _withdraw(
@@ -971,6 +977,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             amount = em.amount;
         } else {
             if (sender.balance >= 0) {
+                assert(sender.balance <= type(uint64).max); // balance < em.amount <= uint64.max
                 amount = uint64(sender.balance);
             } else {
                 amount = 0;
