@@ -435,15 +435,15 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         );
 
         Account memory account = _accounts[msg.sender];
-        uint64 taxPaid;
-        (account, taxPaid) = _payTaxes(account);
+        uint64 taxesPaid;
+        (account, taxesPaid) = _payTaxes(account);
 
         uint64 oldPrice = _pixelPrices[pixelID];
         account = _decreaseTaxBase(account, oldPrice);
         account = _increaseTaxBase(account, newPrice);
 
         _pixelPrices[pixelID] = newPrice;
-        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxPaid);
+        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
         _accounts[msg.sender] = account;
 
         emit PriceChanged({pixelID: pixelID, owner: owner, price: newPrice});
@@ -453,11 +453,11 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     ///     the time between last tax payment and now.
     function payTaxes(address account) public {
         Account memory acc = _accounts[account];
-        uint64 taxPaid;
-        (acc, taxPaid) = _payTaxes(acc);
+        uint64 taxesPaid;
+        (acc, taxesPaid) = _payTaxes(acc);
 
         _accounts[account] = acc;
-        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxPaid);
+        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
     }
 
     /// @dev Deposit money to the given account.
@@ -874,8 +874,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         address receiver
     ) internal {
         Account memory acc = _accounts[account];
-        uint64 taxPaid;
-        (acc, taxPaid) = _payTaxes(acc);
+        uint64 taxesPaid;
+        (acc, taxesPaid) = _payTaxes(acc);
 
         require(
             acc.balance >= amount,
@@ -889,7 +889,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         require(success, "GraffitETH2: withdraw call reverted");
 
         _accounts[account] = acc;
-        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxPaid);
+        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
 
         emit Withdrawn({
             account: account,
@@ -1069,7 +1069,7 @@ library ClampedMath {
 }
 
 library Taxes {
-    function computeTax(
+    function computeTaxes(
         uint256 taxRateNumerator,
         uint256 taxRateDenominator,
         uint64 taxBase,
@@ -1082,16 +1082,16 @@ library Taxes {
         );
         uint256 num =
             uint256(endTime - startTime) * uint256(taxBase) * taxRateNumerator;
-        uint256 tax = num / taxRateDenominator;
-        assert(tax <= num);
+        uint256 taxes = num / taxRateDenominator;
+        assert(taxes <= num);
 
         uint64 res;
-        if (tax <= type(uint64).max) {
-            res = uint64(tax);
+        if (taxes <= type(uint64).max) {
+            res = uint64(taxes);
         } else {
             res = type(uint64).max;
         }
-        assert(res == tax || (tax > res && res == type(uint64).max));
+        assert(res == taxes || (taxes > res && res == type(uint64).max));
         return res;
     }
 
@@ -1100,8 +1100,8 @@ library Taxes {
         uint256 taxRateNumerator,
         uint256 taxRateDenominator
     ) internal view returns (Account memory, uint64) {
-        uint64 unaccountedTax =
-            computeTax(
+        uint64 unaccountedTaxes =
+            computeTaxes(
                 taxRateNumerator,
                 taxRateDenominator,
                 acc.taxBase,
@@ -1109,29 +1109,29 @@ library Taxes {
                 uint64(block.timestamp)
             );
 
-        // Compute the tax that's actually paid. This is usually just `unaccountedTax`, unless the
-        // account cannot afford it in part or in full.
-        uint64 taxPaid;
-        if (acc.balance >= unaccountedTax) {
-            taxPaid = unaccountedTax;
+        // Compute the taxes that are actually paid. This is usually just `unaccountedTax`, unless
+        // the account cannot afford it in part or in full.
+        uint64 taxesPaid;
+        if (acc.balance >= unaccountedTaxes) {
+            taxesPaid = unaccountedTaxes;
         } else if (acc.balance >= 0) {
-            taxPaid = uint64(acc.balance);
+            taxesPaid = uint64(acc.balance);
         } else {
-            taxPaid = 0;
+            taxesPaid = 0;
         }
-        assert(taxPaid <= unaccountedTax);
+        assert(taxesPaid <= unaccountedTaxes);
         assert(
-            (acc.balance >= 0 && taxPaid <= acc.balance) ||
-                (acc.balance < 0 && taxPaid == 0)
+            (acc.balance >= 0 && taxesPaid <= acc.balance) ||
+                (acc.balance < 0 && taxesPaid == 0)
         );
 
         // Update the account record
-        acc.balance = ClampedMath.subInt128(acc.balance, unaccountedTax);
+        acc.balance = ClampedMath.subInt128(acc.balance, unaccountedTaxes);
         assert(block.timestamp >= acc.lastTaxPayment);
         acc.lastTaxPayment = uint64(block.timestamp);
-        acc.totalTaxesPaid = ClampedMath.addUint64(acc.totalTaxesPaid, taxPaid);
+        acc.totalTaxesPaid = ClampedMath.addUint64(acc.totalTaxesPaid, taxesPaid);
 
-        return (acc, taxPaid);
+        return (acc, taxesPaid);
     }
 
     function payMoreTaxes(
@@ -1140,9 +1140,9 @@ library Taxes {
         uint256 taxRateNumerator,
         uint256 taxRateDenominator
     ) internal view returns (Account memory, uint64) {
-        uint64 taxPaid;
-        (acc, taxPaid) = payTaxes(acc, taxRateNumerator, taxRateDenominator);
-        taxesPaid = ClampedMath.addUint64(taxesPaid, taxPaid);
+        uint64 addedTaxes;
+        (acc, addedTaxes) = payTaxes(acc, taxRateNumerator, taxRateDenominator);
+        taxesPaid = ClampedMath.addUint64(taxesPaid, addedTaxes);
         return (acc, taxesPaid);
     }
 }
