@@ -253,6 +253,11 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     ) ERC721("Pixel", "PXL") RugPull(rugPullHeadsUp) {
         require(width > 0, "GraffitETH2: width must not be zero");
         require(height > 0, "GraffitETH2: height must not be zero");
+        // this avoids a theoretical overflow during tax computation
+        require(
+            taxRateNumerator <= type(uint64).max,
+            "GraffitETH2: tax rate numerator must not be too large"
+        );
         require(
             taxRateDenominator > 0,
             "GraffitETH2: tax rate denominator must not be zero"
