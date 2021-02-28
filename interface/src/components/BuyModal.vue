@@ -1,5 +1,5 @@
 <template>
-  <div class="modal is-fullwidth" v-bind:class="{'is-active': active}">
+  <div class="modal is-fullwidth buy" v-bind:class="{'is-active': active}">
     <div class="modal-background"></div>
       <div class="modal-card">
         <header class="modal-card-head">

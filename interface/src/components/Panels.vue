@@ -1,10 +1,16 @@
 <template>
   <div class="is-overlay">
+    <div id="i" v-on:click="aboutModalActive = true">?</div>
+    <AboutModal
+      v-if="aboutModalActive"
+      v-bind:active="aboutModalActive"
+      v-on:close="aboutModalActive = false"
+    />
     <div>
+      <div v-if="cursorPixel" id="coords">{{ cursorPixel[0] }}, {{ cursorPixel[1] }}</div>
       <div
         v-if="!noWeb3 && !wrongNetwork"
-        class="is-flex is-flex-wrap-wrap is-flex-direction-column is-align-content-flex-start mt-2 ml-2"
-        style="transform: scale(0.85); transform-origin: top left;"
+        class="is-flex is-flex-wrap-wrap is-flex-direction-column is-align-content-flex-start interface"
       >
         <ConnectPanel
           v-on:error="onError($event)"
@@ -72,16 +78,7 @@
         using Metamask, find instructions
         <a href="https://www.xdaichain.com/for-users/wallets/metamask/metamask-setup">here</a>.
       </div>
-
-      <div v-if="cursorPixel" id="coords">{{ cursorPixel[0] }}, {{ cursorPixel[1] }}</div>
     </div>
-
-    <div id="i" v-on:click="aboutModalActive = true">?</div>
-    <AboutModal
-      v-if="aboutModalActive"
-      v-bind:active="aboutModalActive"
-      v-on:close="aboutModalActive = false"
-    />
   </div>
 </template>
 
