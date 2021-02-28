@@ -363,17 +363,27 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     }
 
     /// @dev Get the total amount of taxes paid in GWei.
-    function getTotalTaxesPaid() public view returns (uint256) {
+    function getTotalTaxesPaid() public view returns (uint64) {
         return _totalTaxesPaid;
     }
 
     /// @dev Get the total amount of taxes paid by the given account in GWei.
-    function getTotalTaxesPaidBy(address account)
+    function getTotalTaxesPaidBy(address account) public view returns (uint64) {
+        return _accounts[account].totalTaxesPaid;
+    }
+
+    /// @dev Get the total taxes paid of the given account in GWei, assuming an immediate tax
+    ///     payment. The amount is virtual in the sense that it cannot be withdrawn without calling
+    ///     payTaxes first.
+    function getVirtualTotalTaxesPaidBy(address account)
         public
         view
-        returns (uint256)
+        returns (uint64)
     {
-        return _accounts[account].totalTaxesPaid;
+        Account memory acc = _accounts[account];
+        uint64 taxPaid;
+        (acc, taxPaid) = _payTaxes(acc);
+        return acc.totalTaxesPaid;
     }
 
     /// @dev Get the maximum amount of funds (from both initial pixel sales and from taxes) in
