@@ -114,7 +114,10 @@ export default {
       try {
         let signer = this.$provider.getSigner(this.account)
         let contractV1 = this.$contractV1.connect(signer)
-        let tx = await contractV1.withdraw(weiToGWei(this.withdrawAmount))
+        let tx = await contractV1.withdraw(
+          weiToGWei(this.withdrawAmount),
+          {gasLimit: 200000},
+        )
         await tx.wait()
       } catch(err) {
         this.$emit('error', 'Failed to send withdraw transaction: ' + err.message)

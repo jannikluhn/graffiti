@@ -24,7 +24,7 @@ if (window.ethereum) {
 }
 
 const apolloClient = new ApolloClient({
-  uri: 'https://api.thegraph.com/subgraphs/name/jannikluhn/graffiteth',
+  uri: 'https://api.thegraph.com/subgraphs/name/jannikluhn/graffiti-goerli',
   cache: new InMemoryCache(),
 })
 Vue.prototype.$apolloClient = apolloClient

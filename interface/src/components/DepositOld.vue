@@ -77,7 +77,7 @@ export default {
       try {
         let signer = this.$provider.getSigner(this.account)
         let contractV1 = this.$contractV1.connect(signer)
-        let tx = await contractV1.deposit({value: this.amount})
+        let tx = await contractV1.deposit({value: this.amount, gasLimit: 200000})
         this.amountInput = ""
         await tx.wait()
       } catch(err) {

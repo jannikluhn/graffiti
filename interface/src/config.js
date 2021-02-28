@@ -1,8 +1,8 @@
 const gridSize = [151, 151]
 const taxRate = 12 * 0.01  // per year
 
-const addressV1 = "0xfbC22278A96299D91d41C453234d97b4F5Eb9B2d";
-const addressV2 = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const addressV1 = "0x52784170525CC0b8306982c75AEDe1Bf3265c06a";
+const addressV2 = "0xA181213ac490c80919bF7B5274f970731f64Bb2D";
 
 export {
     gridSize,

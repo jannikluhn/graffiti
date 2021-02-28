@@ -3,12 +3,12 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Graffiti
+    name: GraffitETH2
     network: goerli
     source:
-      address: "0x52784170525CC0b8306982c75AEDe1Bf3265c06a"
-      startBlock: 4266075
-      abi: GraffitETH
+      address: "0xA181213ac490c80919bF7B5274f970731f64Bb2D"
+      startBlock: 4363034
+      abi: GraffitETH2
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -16,17 +16,17 @@ dataSources:
       entities:
         - Graffiti
       abis:
-        - name: GraffitETH
-          file: ./abis/GraffitETH.json
+        - name: GraffitETH2
+          file: ./abis/GraffitETH2.json
       eventHandlers:
-        - event: ColorChange(uint256,uint8)
-          handler: handleColorChange
-        - event: PriceChange(uint256,uint64)
-          handler: handlePriceChange
-        - event: Buy(uint256,address,address,uint64)
-          handler: handleBuy
-        - event: EarmarkUpdate(uint256,address,uint64)
-          handler: handleEarmarkUpdate
-        - event: PixelClaim(uint256,uint64)
-          handler: handlePixelClaim
+        - event: ColorChanged(indexed uint256,indexed address,uint8)
+          handler: handleColorChanged
+        - event: PriceChanged(indexed uint256,indexed address,uint64)
+          handler: handlePriceChanged
+        - event: Bought(indexed uint256,indexed address,indexed address,uint64)
+          handler: handleBought
+        - event: Earmarked(indexed uint256,indexed address,indexed address,uint64)
+          handler: handleEarmarked
+        - event: PixelClaimed(indexed uint256,indexed address,indexed address,uint64)
+          handler: handlePixelClaimed
       file: ./src/mapping.ts
