@@ -144,26 +144,26 @@ describe("GraffitETH2 init", function () {
 
     let tx = c.init([3], [a1], [4], [5]);
     await expect(tx).to.emit(c, "PriceChanged").withArgs(3, a1, 4);
-    await expect(tx).to.emit(c, "ColorChanged").withArgs(3, a1, 5)
+    await expect(tx).to.emit(c, "ColorChanged").withArgs(3, a1, 5);
     expect(await c.getNominalPrice(3)).to.equal(4);
     expect(await c.ownerOf(3)).to.equal(a1);
     expect(await c.totalSupply()).to.equal(1);
     expect(await c.getTaxBase(a1)).to.equal(4);
 
-    tx = c.init([5, 3, 10], [a1, a2, a1], [1, 2, 3], [9, 8, 7])
-    await expect(tx).to.emit(c, "PriceChanged").withArgs(5, a1, 1)
-    await expect(tx).to.emit(c, "PriceChanged").withArgs(3, a2, 2)
-    await expect(tx).to.emit(c, "PriceChanged").withArgs(10, a1, 3)
-    await expect(tx).to.emit(c, "ColorChanged").withArgs(5, a1, 9)
-    await expect(tx).to.emit(c, "ColorChanged").withArgs(3, a2, 8)
+    tx = c.init([5, 2, 10], [a1, a2, a1], [1, 2, 3], [9, 8, 7]);
+    await expect(tx).to.emit(c, "PriceChanged").withArgs(5, a1, 1);
+    await expect(tx).to.emit(c, "PriceChanged").withArgs(2, a2, 2);
+    await expect(tx).to.emit(c, "PriceChanged").withArgs(10, a1, 3);
+    await expect(tx).to.emit(c, "ColorChanged").withArgs(5, a1, 9);
+    await expect(tx).to.emit(c, "ColorChanged").withArgs(2, a2, 8);
     await expect(tx).to.emit(c, "ColorChanged").withArgs(10, a1, 7);
     expect(await c.getNominalPrice(5)).to.equal(1);
-    expect(await c.getNominalPrice(3)).to.equal(2);
+    expect(await c.getNominalPrice(2)).to.equal(2);
     expect(await c.getNominalPrice(10)).to.equal(3);
     expect(await c.ownerOf(5)).to.equal(a1);
-    expect(await c.ownerOf(3)).to.equal(a2);
+    expect(await c.ownerOf(2)).to.equal(a2);
     expect(await c.ownerOf(10)).to.equal(a1);
-    expect(await c.totalSupply()).to.equal(3);
+    expect(await c.totalSupply()).to.equal(4);
     expect(await c.getTaxBase(a1)).to.equal(8);
     expect(await c.getTaxBase(a2)).to.equal(2);
   });
@@ -188,6 +188,12 @@ describe("GraffitETH2 init", function () {
     await expect(c.stopInitialization())
     await expect(c.init([], [], [], []))
       .to.be.revertedWith("GraffitETH2: initialization phase already over");
+  });
+
+  it("should only work once per pixel", async function () {
+    await c.init([1], [a1], [1], [2]);
+    await expect(c.init([1], [a2], [2], [3]))
+      .to.be.revertedWith("GraffitETH2: pixel already initialized");
   });
 });
 

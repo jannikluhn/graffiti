@@ -592,11 +592,11 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             uint64 price = prices[i];
             uint8 color = colors[i];
 
-            if (_exists(pixelID)) {
-                _transfer(ownerOf(pixelID), owner, pixelID);
-            } else {
-                _mint(owner, pixelID);
-            }
+            require(
+                !_exists(pixelID),
+                "GraffitETH2: pixel already initialized"
+            );
+            _mint(owner, pixelID);
 
             Account memory acc = _accounts[owner];
             uint64 taxesPaid;
@@ -606,7 +606,10 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             _pixelPrices[pixelID] = price;
             _accounts[owner] = acc;
             if (taxesPaid > 0) {
-                _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
+                _totalTaxesPaid = ClampedMath.addUint64(
+                    _totalTaxesPaid,
+                    taxesPaid
+                );
             }
             emit PriceChanged({pixelID: pixelID, owner: owner, price: price});
             emit ColorChanged({pixelID: pixelID, owner: owner, color: color});
