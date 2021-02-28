@@ -350,6 +350,12 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         return acc.balance;
     }
 
+    /// @dev Get the balance of the given account as it is stored in the contract. This does not
+    ///     include outstanding tax payments, so it may be greater than the actual balance.
+    function getRecordedBalance(address account) public view returns (int128) {
+        return _accounts[account].balance;
+    }
+
     /// @dev Get the total money withdrawn by the owner in GWei, both from taxes and initial pixel
     ///     sales.
     function getTotalWithdrawnByOwner() public view returns (uint256) {
