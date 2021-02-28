@@ -537,6 +537,12 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         _withdrawOwner(amount, msg.sender);
     }
 
+    /// @dev Withdraw all of the taxes and income from initial sales and send it to the given
+    ///     address. Only the contract owner is allowed to do this.
+    function withdrawMaxOwnerTo(address receiver) public onlyOwner {
+        _withdrawOwner(getOwnerWithdrawableAmount(), receiver);
+    }
+
     /// @dev Withdraw all of the taxes and income from initial sales and send it to the caller.
     ///     Only the contract owner is allowed to do this.
     function withdrawMaxOwner() public onlyOwner {
