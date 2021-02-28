@@ -72,11 +72,6 @@
         using Metamask, find instructions
         <a href="https://www.xdaichain.com/for-users/wallets/metamask/metamask-setup">here</a>.
       </div>
-      <div
-        class="notification is-dark connection-notification m-5"
-      >
-        We're investigating a bug, please don't use GraffitETH.lol for now! 💩 💩 💩
-      </div>
 
       <div v-if="cursorPixel" id="coords">{{ cursorPixel[0] }}, {{ cursorPixel[1] }}</div>
     </div>
