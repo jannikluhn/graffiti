@@ -599,10 +599,15 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             }
 
             Account memory acc = _accounts[owner];
+            uint64 taxesPaid;
+            (acc, taxesPaid) = _payTaxes(acc);
             acc = _increaseTaxBase(acc, price);
 
             _pixelPrices[pixelID] = price;
             _accounts[owner] = acc;
+            if (taxesPaid > 0) {
+                _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
+            }
             emit PriceChanged({pixelID: pixelID, owner: owner, price: price});
             emit ColorChanged({pixelID: pixelID, owner: owner, color: color});
         }
