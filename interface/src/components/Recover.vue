@@ -12,16 +12,16 @@
           <strong>{{ balanceStr }}</strong> in the old version.
         </p>
         <p>
-          You can safely withdraw your balance, but due to the nature of the bug this must happen
+          You can safely recover your balance, but due to the nature of the bug this must happen
           in small chunks of up to 18 xDai. Press the button below to withdraw the next chunk.
           Wait for the transaction to be confirmed and your balance to be updated before pressing
           it again.
         </p>
         <p>
-          Taxes that you already paid will be refunded in full over the following weeks. Pixels you
-          owned in the previous version are yours in the new version, too. As a little apology
-          gift, you won't have to pay any taxes for them as long as you don't change their price
-          or until they are bought from you.
+          Taxes that you already paid will be refunded in full over the course of the following
+          weeks. They will appear as deposits in the new contract. Pixels you owned in the
+          previous version are yours in the new version, too. Taxes have been disabled until
+          Monday, 8th of March.
         </p>
         <p>
           This panel will disappear as soon as all of your balance is withdrawn.
