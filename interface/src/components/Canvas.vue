@@ -137,7 +137,7 @@ export default {
     })
 
     if (this.$provider !== null) {
-      this.$contract.on("ColorChange", (id, _, color) => {
+      this.$contract.on("ColorChanged", (id, _, color) => {
         if (this.imageData) {
           this.setPixel(id.toNumber(), color)
           this.offscreenCtx.putImageData(this.imageData, 0, 0)

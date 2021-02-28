@@ -1,5 +1,9 @@
 <template>
-  <Panel title="Recover Balance" class="is-danger">
+  <Panel
+    v-if="account && balanceNonDusty"
+    title="Recover Balance"
+    class="is-danger"
+  >
     <div class="panel-block">
       <div class="content">
         <p>
@@ -10,6 +14,8 @@
         <p>
           You can safely withdraw your balance, but due to the nature of the bug this must happen
           in small chunks of up to 18 xDai. Press the button below to withdraw the next chunk.
+          Wait for the transaction to be confirmed and your balance to be updated before pressing
+          it again.
         </p>
         <p>
           Taxes that you already paid will be refunded in full over the following weeks. Pixels you
@@ -41,15 +47,15 @@
 import Panel from './Panel.vue'
 import { ethers } from 'ethers'
 import { computeMonthlyTax, weiToGWei } from '../utils'
+import { gWeiToWei } from '../utils'
 
 const maxSafeWithdrawal = ethers.utils.parseEther("18")
+const dustThreshold = ethers.utils.parseEther("0.001")
 
 export default {
   name: "RecoverPanel",
   props: [
     "account",
-    "balance",
-    "taxBase",
   ],
   components: {
     Panel,
@@ -57,10 +63,24 @@ export default {
   data() {
     return {
       waitingForTx: false,
+      balance: null,
+      taxBase: null,
     }
   },
 
+  watch: {
+    account: {
+      async handler() {
+        this.updateBalance()
+      },
+      immediate: true,
+    },
+  },
+
   computed: {
+    balanceNonDusty() {
+      return this.balance !== null && this.balance.gte(dustThreshold)
+    },
     balanceStr() {
       if (this.balance) {
         return ethers.utils.formatEther(this.balance) + " xDai"
@@ -89,16 +109,40 @@ export default {
       if (!this.balance || !this.taxBase) {
         return
       }
+
       this.waitingForTx = true
       try {
         let signer = this.$provider.getSigner(this.account)
-        let contract = this.$contract.connect(signer)
-        await contract.withdraw(weiToGWei(this.withdrawAmount))
+        let contractV1 = this.$contractV1.connect(signer)
+        let tx = await contractV1.withdraw(weiToGWei(this.withdrawAmount))
+        await tx.wait()
       } catch(err) {
         this.$emit('error', 'Failed to send withdraw transaction: ' + err.message)
       }
+
+      await this.updateBalance();
+
       this.waitingForTx = false
     },
+
+    async updateBalance() {
+      if (!this.account) {
+        this.balance = null;
+        this.taxBase = null;
+        return
+      }
+
+      try {
+        let balanceGWei = await this.$contractV1.getBalance(this.account)
+        let taxBaseGWei = await this.$contractV1.getTaxBase(this.account)
+        this.balance = gWeiToWei(balanceGWei)
+        this.taxBase = gWeiToWei(taxBaseGWei)
+      } catch (err) {
+        this.balance = null
+        this.taxBase = null
+        this.$emit('error', 'Failed to query account state in v1 contract: ' + err.message)
+      }
+    }
   },
 }
 </script>

@@ -296,12 +296,13 @@ export default {
         let signer = this.$provider.getSigner(this.account)
         let contract = this.$contract.connect(signer)
         await contract.depositAndBuy(
-          this.pixelID,
-          weiToGWei(this.price),
-          weiToGWei(this.newPrice),
-          this.color,
-          {value: this.deposit,
-        }
+          [
+            this.pixelID,
+            weiToGWei(this.price),
+            weiToGWei(this.newPrice),
+            this.color,
+          ],
+          {value: this.deposit}
         )
         this.newPriceInput = ""
       } catch(err) {

@@ -16,9 +16,7 @@
         <Recover
           v-on:error="onError($event)"
           v-bind:account="account"
-          v-bind:balance="balance"
-          v-bind:taxBase="taxBase"
-          v-if="account && balanceNonDusty"
+          v-if="account"
         />
 
         <AccountPanel
@@ -94,12 +92,10 @@ import PixelPanel from './PixelPanel.vue'
 import OwnedPixelPanel from './OwnedPixelPanel.vue'
 import AboutModal from './AboutModal.vue'
 import Recover from './Recover.vue'
-import { ethers } from 'ethers'
 
 import { gWeiToWei } from '../utils'
 
 const balancePollInterval = 4000
-const dustThreshold = ethers.utils.parseEther("0.001")
 
 export default {
   name: "Panels",
@@ -135,7 +131,7 @@ export default {
     }
     pollBalanceRepeatedly()
 
-    this.$contract.on("Buy", (_, seller, buyer) => {
+    this.$contract.on("Bought", (_, seller, buyer) => {
       if (this.account == seller || this.account == buyer) {
         this.$contract.getTaxBase(this.account).then((taxBase) => {
           this.taxBase = gWeiToWei(taxBase)
@@ -192,12 +188,6 @@ export default {
       }
       this.errors = newErrors
     }
-  },
-
-  computed: {
-    balanceNonDusty() {
-      return this.balance !== null && this.balance.gte(dustThreshold)
-    },
   },
 }
 </script>
