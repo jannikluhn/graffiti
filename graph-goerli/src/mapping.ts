@@ -27,7 +27,7 @@ export function handleColorChanged(event: ColorChanged): void {
   pixel.save();
 }
 
-export function handleBough(event: Bought): void {
+export function handleBought(event: Bought): void {
   log.debug("buy {}", [event.params.pixelID.toHex()]);
   let id = event.params.pixelID.toHex()
   let pixel = Pixel.load(id);
