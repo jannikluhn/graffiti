@@ -431,26 +431,31 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     //
 
     /// @dev Edit the canvas buy buying new pixels and changing price and color of ones already
-    ///     owned.
+    ///     owned. The given buyer address must be either the sender or the sender must have been
+    ///     approved by the buyer address.
     function edit(
+        address buyerAddress,
         PixelBuyArgs[] memory buyArgss,
         SetColorArgs[] memory setColorArgss,
         SetPriceArgs[] memory setPriceArgss
     ) public {
-        _buyMany(msg.sender, buyArgss);
+        _buyMany(msg.sender, buyerAddress, buyArgss);
         _setColorMany(msg.sender, setColorArgss);
         _setPriceMany(msg.sender, setPriceArgss);
     }
 
     /// @dev Deposit some funds and edit the canvas by buying new pixels and changing price and
-    ///     color of ones already owned.
+    ///     color of ones already owned. Only the buyer address or an account approved for all by
+    ///     the buyer address can call this function. Deposited funds and bought pixels will go to
+    ///     the given buyer address.
     function depositAndEdit(
+        address buyerAddress,
         PixelBuyArgs[] memory buyArgss,
         SetColorArgs[] memory setColorArgss,
         SetPriceArgs[] memory setPriceArgss
     ) public payable {
-        _depositTo(msg.sender, msg.sender);
-        _buyMany(msg.sender, buyArgss);
+        _depositTo(msg.sender, buyerAddress);
+        _buyMany(msg.sender, buyerAddress, buyArgss);
         _setColorMany(msg.sender, setColorArgss);
         _setPriceMany(msg.sender, setPriceArgss);
     }
@@ -694,9 +699,15 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         return account;
     }
 
-    function _buyMany(address buyerAddress, PixelBuyArgs[] memory argss)
-        internal
-    {
+    function _buyMany(
+        address sender,
+        address buyerAddress,
+        PixelBuyArgs[] memory argss
+    ) internal {
+        require(
+            sender == buyerAddress || isApprovedForAll(buyerAddress, sender),
+            "GraffitETH2: sender is neither buyer nor approved"
+        );
         if (argss.length == 0) {
             return;
         }
