@@ -79,6 +79,16 @@ struct PixelBuyArgs {
     uint8 color;
 }
 
+struct SetColorArgs {
+    uint256 pixelID;
+    uint8 newColor;
+}
+
+struct SetPriceArgs {
+    uint256 pixelID;
+    uint64 newPrice;
+}
+
 // RugPull is a safety hatch. It allows the owner to withdraw all funds from a contract in case of
 // a bug, in particular to be able to withdraw stuck funds. This action must be announced a certain
 // time in advance (e.g., a month, configurable) in order to allow users that don't trust the owner
@@ -420,63 +430,29 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     // Public interface
     //
 
-    /// @dev Buy a pixel for its current price and set the new price in GWei and color.according
-    ///     to the arguments. The pixel will only be bought if the price does not exceed the given
-    ///     max price.
-    function buy(PixelBuyArgs memory args) public {
-        _buy(msg.sender, args);
+    /// @dev Edit the canvas buy buying new pixels and changing price and color of ones already
+    ///     owned.
+    function edit(
+        PixelBuyArgs[] memory buyArgss,
+        SetColorArgs[] memory setColorArgss,
+        SetPriceArgs[] memory setPriceArgss
+    ) public {
+        _buyMany(msg.sender, buyArgss);
+        _setColorMany(msg.sender, setColorArgss);
+        _setPriceMany(msg.sender, setPriceArgss);
     }
 
-    /// @dev Buy many pixels at once.
-    function buyMany(PixelBuyArgs[] memory args) public {
-        _buyMany(msg.sender, args);
-    }
-
-    /// @dev Deposit and buy in a single call.
-    function depositAndBuy(PixelBuyArgs memory args) public payable {
+    /// @dev Deposit some funds and edit the canvas by buying new pixels and changing price and
+    ///     color of ones already owned.
+    function depositAndEdit(
+        PixelBuyArgs[] memory buyArgss,
+        SetColorArgs[] memory setColorArgss,
+        SetPriceArgs[] memory setPriceArgss
+    ) public payable {
         _depositTo(msg.sender, msg.sender);
-        _buy(msg.sender, args);
-    }
-
-    /// @dev Deposit and buy many pixels in a single call.
-    function depositAndBuyMany(PixelBuyArgs[] memory args) public payable {
-        _depositTo(msg.sender, msg.sender);
-        _buyMany(msg.sender, args);
-    }
-
-    /// @dev Set the color of the given pixel. Only the pixel owner can do this.
-    function setColor(uint256 pixelID, uint8 color) public {
-        require(_exists(pixelID), "GraffitETH2: pixel does not exist");
-        address owner = ownerOf(pixelID);
-        require(
-            msg.sender == owner,
-            "GraffitETH2: only pixel owner can set color"
-        );
-        emit ColorChanged({pixelID: pixelID, owner: owner, color: color});
-    }
-
-    /// @dev Set the price of a pixel in GWei. Only the pixel owner can do this.
-    function setPrice(uint256 pixelID, uint64 newPrice) public {
-        require(_exists(pixelID));
-        address owner = ownerOf(pixelID);
-        require(
-            msg.sender == owner,
-            "GraffitETH2: only pixel owner can set price"
-        );
-
-        Account memory account = _accounts[msg.sender];
-        uint64 taxesPaid;
-        (account, taxesPaid) = _payTaxes(account);
-
-        uint64 oldPrice = _pixelPrices[pixelID];
-        account = _decreaseTaxBase(account, oldPrice);
-        account = _increaseTaxBase(account, newPrice);
-
-        _pixelPrices[pixelID] = newPrice;
-        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
-        _accounts[msg.sender] = account;
-
-        emit PriceChanged({pixelID: pixelID, owner: owner, price: newPrice});
+        _buyMany(msg.sender, buyArgss);
+        _setColorMany(msg.sender, setColorArgss);
+        _setPriceMany(msg.sender, setPriceArgss);
     }
 
     /// @dev Update the balance of the account stored in the account state to reflect tax debt for
@@ -736,22 +712,19 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         return account;
     }
 
-    function _buy(address buyerAddress, PixelBuyArgs memory args) internal {
-        PixelBuyArgs[] memory argss = new PixelBuyArgs[](1);
-        argss[0] = args;
-
-        _buyMany(buyerAddress, argss);
-    }
-
-    function _buyMany(address buyerAddress, PixelBuyArgs[] memory args)
+    function _buyMany(address buyerAddress, PixelBuyArgs[] memory argss)
         internal
     {
+        if (argss.length == 0) {
+            return;
+        }
+
         // keep track of buyer and seller accounts in memory so that we can persist them to the
         // state eventually
         Account memory buyer = _accounts[buyerAddress];
         uint256 numSellers = 0; // number of distinct sellers known so far
-        address[] memory sellerAddresses = new address[](args.length);
-        Account[] memory sellers = new Account[](args.length);
+        address[] memory sellerAddresses = new address[](argss.length);
+        Account[] memory sellers = new Account[](argss.length);
 
         // also keep track of taxes paid and income from initial sales
         uint64 taxesPaid = 0;
@@ -760,16 +733,16 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         // pay taxes of buyer so that balance is up to date and we can safely update tax base
         (buyer, taxesPaid) = _payMoreTaxes(buyer, taxesPaid);
 
-        for (uint256 i = 0; i < args.length; i++) {
+        for (uint256 i = 0; i < argss.length; i++) {
             // Make sure pixel ids are sorted and, in particular, no pixel is bought twice.
             require(
-                i == 0 || args[i].pixelID > args[i - 1].pixelID,
+                i == 0 || argss[i].pixelID > argss[i - 1].pixelID,
                 "GraffitETH2: pixel ids not sorted"
             );
 
-            uint64 price = getPrice(args[i].pixelID);
+            uint64 price = getPrice(argss[i].pixelID);
             require(
-                price <= args[i].maxPrice,
+                price <= argss[i].maxPrice,
                 "GraffitETH2: pixel price exceeds max price"
             );
             require(
@@ -779,11 +752,11 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
             // reduce buyer's balance and increase buyer's tax base
             buyer = _decreaseBalance(buyer, price);
-            buyer = _increaseTaxBase(buyer, args[i].newPrice);
+            buyer = _increaseTaxBase(buyer, argss[i].newPrice);
 
             address sellerAddress;
-            if (_exists(args[i].pixelID)) {
-                sellerAddress = ownerOf(args[i].pixelID);
+            if (_exists(argss[i].pixelID)) {
+                sellerAddress = ownerOf(argss[i].pixelID);
                 require(
                     sellerAddress != buyerAddress,
                     "GraffitETH2: buyer and seller are the same"
@@ -813,14 +786,14 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                 }
 
                 // update seller balance and tax base
-                uint64 oldPrice = _pixelPrices[args[i].pixelID];
+                uint64 oldPrice = _pixelPrices[argss[i].pixelID];
                 seller = _increaseBalance(seller, price);
                 seller = _decreaseTaxBase(seller, oldPrice);
                 sellers[sellerIndex] = seller;
 
                 // perform transfer
-                _transfer(sellerAddress, buyerAddress, args[i].pixelID);
-                _earmark(args[i].pixelID, buyerAddress, address(0), 0); // cancel any earmark
+                _transfer(sellerAddress, buyerAddress, argss[i].pixelID);
+                _earmark(argss[i].pixelID, buyerAddress, address(0), 0); // cancel any earmark
             } else {
                 sellerAddress = address(0);
                 initialSaleRevenue = ClampedMath.addUint64(
@@ -829,30 +802,30 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                 );
 
                 require(
-                    args[i].pixelID <= _maxPixelID,
+                    argss[i].pixelID <= _maxPixelID,
                     "GraffitETH2: max pixel ID exceeded"
                 );
-                _mint(buyerAddress, args[i].pixelID); // create the pixel
+                _mint(buyerAddress, argss[i].pixelID); // create the pixel
             }
 
             // update nominal price
-            _pixelPrices[args[i].pixelID] = args[i].newPrice;
+            _pixelPrices[argss[i].pixelID] = argss[i].newPrice;
 
             emit Bought({
-                pixelID: args[i].pixelID,
+                pixelID: argss[i].pixelID,
                 seller: sellerAddress,
                 buyer: buyerAddress,
                 price: price
             });
             emit ColorChanged({
-                pixelID: args[i].pixelID,
+                pixelID: argss[i].pixelID,
                 owner: buyerAddress,
-                color: args[i].color
+                color: argss[i].color
             });
             emit PriceChanged({
-                pixelID: args[i].pixelID,
+                pixelID: argss[i].pixelID,
                 owner: buyerAddress,
-                price: args[i].newPrice
+                price: argss[i].newPrice
             });
         }
 
@@ -870,7 +843,71 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         );
     }
 
+    function _setColorMany(address sender, SetColorArgs[] memory argss)
+        internal
+    {
+        for (uint256 i = 0; i < argss.length; i++) {
+            uint256 pixelID = argss[i].pixelID;
+            uint8 newColor = argss[i].newColor;
+
+            require(_exists(pixelID), "GraffitETH2: pixel does not exist");
+            address owner = ownerOf(pixelID);
+            require(
+                sender == owner,
+                "GraffitETH2: only pixel owner can set color"
+            );
+
+            emit ColorChanged({
+                pixelID: pixelID,
+                owner: owner,
+                color: newColor
+            });
+        }
+    }
+
+    function _setPriceMany(address sender, SetPriceArgs[] memory argss)
+        internal
+    {
+        if (argss.length == 0) {
+            return;
+        }
+
+        Account memory account = _accounts[msg.sender];
+        uint64 taxesPaid;
+        (account, taxesPaid) = _payTaxes(account);
+
+        for (uint256 i = 0; i < argss.length; i++) {
+            uint256 pixelID = argss[i].pixelID;
+            uint64 newPrice = argss[i].newPrice;
+
+            require(_exists(pixelID));
+            address owner = ownerOf(pixelID);
+            require(
+                msg.sender == owner,
+                "GraffitETH2: only pixel owner can set price"
+            );
+
+            uint64 oldPrice = _pixelPrices[pixelID];
+            account = _decreaseTaxBase(account, oldPrice);
+            account = _increaseTaxBase(account, newPrice);
+
+            _pixelPrices[pixelID] = newPrice;
+            emit PriceChanged({
+                pixelID: pixelID,
+                owner: owner,
+                price: newPrice
+            });
+        }
+
+        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
+        _accounts[msg.sender] = account;
+    }
+
     function _depositTo(address depositor, address account) internal {
+        if (msg.value == 0) {
+            return;
+        }
+
         Account memory acc = _accounts[account];
         uint64 taxesPaid;
         (acc, taxesPaid) = _payTaxes(acc);

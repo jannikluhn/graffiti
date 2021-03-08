@@ -297,8 +297,10 @@ describe("GraffitETH depositing", function () {
 
   it("should pay taxes if balance is negative", async function () {
     // get account in the red by buying pixel and advancing time
-    await c.depositAndBuy(
-      [0, parseEtherToGWei("0.1"), parseEtherToGWei("1000"), 0],
+    await c.depositAndEdit(
+      [[0, parseEtherToGWei("0.1"), parseEtherToGWei("1000"), 0]],
+      [],
+      [],
       { value: ethers.utils.parseEther("0.1") },
     );
     await network.provider.send("evm_increaseTime", [31 * 24 * 60 * 60]);
@@ -368,8 +370,10 @@ describe("GraffitETH withdrawing", function () {
       .to.be.revertedWith("GraffitETH2: cannot withdraw more than balance");
     
     // pay taxes to get negative balance
-    await c.buy(
-      [0, parseEtherToGWei("0.1"), parseEtherToGWei("1000"), 0],
+    await c.edit(
+      [[0, parseEtherToGWei("0.1"), parseEtherToGWei("1000"), 0]],
+      [],
+      []
     );
     await network.provider.send("evm_increaseTime", [2 * 31 * 24 * 60 * 60]);
     await network.provider.send("evm_mine", []);
@@ -381,8 +385,10 @@ describe("GraffitETH withdrawing", function () {
   it("should withdraw everything", async function () {
     // deposit and pay some taxes to get odd balance
     await c.deposit({ value: ethers.utils.parseEther("123") });
-    await c.buy(
-      [0, parseEtherToGWei("0.1"), parseEtherToGWei("1000"), 0],
+    await c.edit(
+      [[0, parseEtherToGWei("0.1"), parseEtherToGWei("1000"), 0]],
+      [],
+      [],
     );
     await network.provider.send("evm_increaseTime", [31 * 24 * 60 * 60]);
     await network.provider.send("evm_mine", []);
@@ -404,7 +410,7 @@ describe("GraffitETH buying", function () {
   it("should work for new pixels", async function () {
     const newPrice = parseEtherToGWei("10");
     const newColor = 2;
-    let tx = c1.buy([0, initialPrice, newPrice, newColor]);
+    let tx = c1.edit([[0, initialPrice, newPrice, newColor]], [], []);
     await expect(tx).to.emit(c, "Bought").withArgs(0, ethers.constants.AddressZero, a1, initialPrice);
     await expect(tx).to.emit(c, "Transfer").withArgs(ethers.constants.AddressZero, a1, 0);
     await expect(tx).to.emit(c, "PriceChanged").withArgs(0, a1, newPrice);
@@ -419,7 +425,7 @@ describe("GraffitETH buying", function () {
       [2, initialPrice.mul(2), parseEtherToGWei("5"), 5],
       [width * height - 1, initialPrice, 1, 10],
     ];
-    tx = c2.buyMany(argss);
+    tx = c2.edit(argss, [], []);
     for (const args of argss) {
       await expect(tx).to.emit(c, "Bought").withArgs(args[0], ethers.constants.AddressZero, a2, initialPrice);
       await expect(tx).to.emit(c, "Transfer").withArgs(ethers.constants.AddressZero, a2, args[0]);
@@ -434,10 +440,10 @@ describe("GraffitETH buying", function () {
   });
 
   it("should work for existing pixels", async function () {
-    await c1.buy([0, initialPrice, parseEtherToGWei("5"), 0]);
+    await c1.edit([[0, initialPrice, parseEtherToGWei("5"), 0]], [], []);
 
     let args = [0, parseEtherToGWei("5"), parseEtherToGWei("10"), 5];
-    let tx = c2.buy(args);
+    let tx = c2.edit([args], [], []);
     await expect(tx).to.emit(c2, "Bought").withArgs(args[0], a1, a2, args[1]);
     await expect(tx).to.emit(c, "Transfer").withArgs(a1, a2, args[0]);
     await expect(tx).to.emit(c2, "PriceChanged").withArgs(args[0], a2, args[2]);
@@ -459,7 +465,7 @@ describe("GraffitETH buying", function () {
       [7, initialPrice, parseEtherToGWei("3"), 2],
       [9, initialPrice, parseEtherToGWei("8"), 1],
     ];
-    let tx = c1.buyMany(argss);
+    let tx = c1.edit(argss, [], []);
     for (const args of argss) {
       await expect(tx).to.emit(c, "Bought").withArgs(args[0], ethers.constants.AddressZero, a1, initialPrice);
       await expect(tx).to.emit(c, "Transfer").withArgs(ethers.constants.AddressZero, a1, args[0]);
@@ -480,7 +486,7 @@ describe("GraffitETH buying", function () {
       [11, initialPrice, parseEtherToGWei("0.5"), 2],
     ];
     let sellers = [a1, ethers.constants.AddressZero, a1, ethers.constants.AddressZero];
-    tx = c2.buyMany(argss);
+    tx = c2.edit(argss, [], []);
     for (let i = 0; i < 4; i++) {
       await expect(tx).to.emit(c, "Bought").withArgs(argss[i][0], sellers[i], a2, argss[i][1]);
       await expect(tx).to.emit(c, "Transfer").withArgs(sellers[i], a2, argss[i][0]);
@@ -503,7 +509,7 @@ describe("GraffitETH buying", function () {
       [11, parseEtherToGWei("0.5"), parseEtherToGWei("1.5"), 3],
     ];
     sellers = [a1, a2, a1, a2];
-    tx = c3.buyMany(argss);
+    tx = c3.edit(argss, [], []);
     for (let i = 0; i < 4; i++) {
       await expect(tx).to.emit(c, "Bought").withArgs(argss[i][0], sellers[i], a3, argss[i][1]);
       await expect(tx).to.emit(c, "Transfer").withArgs(sellers[i], a3, argss[i][0]);
@@ -523,7 +529,7 @@ describe("GraffitETH buying", function () {
   });
 
   it("should be free for pixels of indebted owners", async function () {
-    await c1.buy([0, initialPrice, parseEtherToGWei("10000"), 0]);
+    await c1.edit([[0, initialPrice, parseEtherToGWei("10000"), 0]], [], []);
     await network.provider.send("evm_increaseTime", [31 * 24 * 60 * 60]);
     await network.provider.send("evm_mine", []);
     let a1BalanceBefore = await c.getBalance(a1);
@@ -531,7 +537,7 @@ describe("GraffitETH buying", function () {
     expect(await c.getPrice(0)).to.equal(0);
 
     let newPrice = parseEtherToGWei("1");
-    let tx = c2.buy([0, 0, newPrice, 0]);
+    let tx = c2.edit([[0, 0, newPrice, 0]], [], []);
     await expect(tx).to.emit(c, "Bought").withArgs(0, a1, a2, 0);
     await expect(tx).to.emit(c, "Transfer").withArgs(a1, a2, 0);
     await expect(tx).to.emit(c, "PriceChanged").withArgs(0, a2, newPrice);
@@ -543,55 +549,55 @@ describe("GraffitETH buying", function () {
   });
 
   it("should fail if balance is not sufficient", async function () {
-    await c1.buyMany([
+    await c1.edit([
       [0, initialPrice, parseEtherToGWei("30"), 0],
       [1, initialPrice, parseEtherToGWei("80"), 0],
       [2, initialPrice, parseEtherToGWei("130"), 0],
-    ]);
-    await expect(c2.buy([2, parseEtherToGWei("130"), 0, 0]))
+    ], [], []);
+    await expect(c2.edit([[2, parseEtherToGWei("130"), 0, 0]], [], []))
       .to.be.revertedWith("GraffitETH2: buyer cannot afford pixel");
-    await expect(c2.buyMany([[0, parseEtherToGWei("30"), 0, 0], [1, parseEtherToGWei("80"), 0, 0]]))
+    await expect(c2.edit([[0, parseEtherToGWei("30"), 0, 0], [1, parseEtherToGWei("80"), 0, 0]], [], []))
       .to.be.revertedWith("GraffitETH2: buyer cannot afford pixel");
   });
 
   it("should fail if pixel id is too big", async function () {
-    await expect(c1.buy([width * height, initialPrice, 0, 0]))
+    await expect(c1.edit([[width * height, initialPrice, 0, 0]], [], []))
       .to.be.revertedWith("GraffitETH2: max pixel ID exceeded");
   });
 
   it("should fail if pixel ids are not ordered", async function () {
-    await expect(c1.buyMany([[1, initialPrice, 0, 0], [3, initialPrice, 0, 0], [2, initialPrice, 0, 0]]))
+    await expect(c1.edit([[1, initialPrice, 0, 0], [3, initialPrice, 0, 0], [2, initialPrice, 0, 0]], [], []))
       .to.be.revertedWith("GraffitETH2: pixel ids not sorted");
-    await expect(c1.buyMany([[1, initialPrice, 0, 0], [1, initialPrice, 0, 0]]))
+    await expect(c1.edit([[1, initialPrice, 0, 0], [1, initialPrice, 0, 0]], [], []))
       .to.be.revertedWith("GraffitETH2: pixel ids not sorted");
   });
 
   it("should fail if max price is exceeded", async function () {
-    await expect(c1.buy([0, initialPrice.sub(1), 0, 0]))
+    await expect(c1.edit([[0, initialPrice.sub(1), 0, 0]], [], []))
       .to.be.revertedWith("GraffitETH2: pixel price exceeds max price");
     
-    await c1.buyMany([
+    await c1.edit([
       [0, initialPrice, 10, 0],
       [1, initialPrice, 20, 0],
       [2, initialPrice, 30, 0],
-    ]);
-    await expect(c2.buy([1, 19, 0, 0]))
+    ], [], []);
+    await expect(c2.edit([[1, 19, 0, 0]], [], []))
       .to.be.revertedWith("GraffitETH2: pixel price exceeds max price");
-    await expect(c2.buyMany([
+    await expect(c2.edit([
       [0, 10, 0, 0],
       [1, 19, 0, 0],
       [1, 30, 0, 0],
-    ]))
+    ], [], []))
       .to.be.revertedWith("GraffitETH2: pixel price exceeds max price");
   });
 
   it("should fail if pixels are bought from oneself", async function () {
-    await c1.buy([0, initialPrice, 0, 0]);
-    await expect(c1.buy([0, parseEtherToGWei("1"), 0, 0]))
+    await c1.edit([[0, initialPrice, 0, 0]], [], []);
+    await expect(c1.edit([[0, parseEtherToGWei("1"), 0, 0]], [], []))
       .to.be.revertedWith("GraffitETH2: buyer and seller are the same");
 
-    await c2.buy([1, initialPrice, 0, 0]);
-    await expect(c2.buyMany([0, 0, 0, 0], [1, 0, 0, 0]))
+    await c2.edit([[1, initialPrice, 0, 0]], [], []);
+    await expect(c2.edit([[0, 0, 0, 0], [1, 0, 0, 0]], [], []))
       .to.be.reverted;
   });
 });
@@ -601,11 +607,11 @@ describe("GraffitETH taxes", function () {
   beforeEach(async function () {
     await c1.deposit({ value: ethers.utils.parseEther("100.3") });
     await c2.deposit({ value: ethers.utils.parseEther("100") });
-    await c1.buyMany([
+    await c1.edit([
       [0, initialPrice, parseEtherToGWei("1"), 0],
       [1, initialPrice, parseEtherToGWei("199"), 0],
       [2, initialPrice, parseEtherToGWei("800"), 0],
-    ]);
+    ], [], []);
     expect(await c1.getTaxBase(a1)).to.be.equal(parseEtherToGWei("1000"));
     expect(await c1.getBalance(a1)).to.be.equal(parseEtherToGWei("100"));
     expect(await c1.getTotalTaxesPaid()).to.be.equal(0);
@@ -627,7 +633,7 @@ describe("GraffitETH taxes", function () {
     expect((await c1.getTotalTaxesPaid())).to.be.equal(taxes);
     expect(await c1.getTotalTaxesPaidBy(a1)).to.be.equal(taxes);
 
-    await c1.setPrice(2, parseEtherToGWei("1800"));
+    await c1.edit([], [], [[2, parseEtherToGWei("1800")]]);
     await skipOneMonth();
     await c1.payTaxes(a1);
 
@@ -647,7 +653,7 @@ describe("GraffitETH taxes", function () {
     expect(await c1.getTotalTaxesPaid()).to.be.equal(0);
     expect(await c1.getTotalTaxesPaidBy(a1)).to.be.equal(0);
 
-    await c1.setPrice(0, 0);
+    await c1.edit([], [], [[0, 0]]);
 
     expect(await c1.getBalance(a1)).to.be.lte(balance);
     expect(await c1.getTotalTaxesPaid()).to.be.gte(taxes);
@@ -663,7 +669,7 @@ describe("GraffitETH taxes", function () {
     expect(await c1.getTotalTaxesPaid()).to.be.equal(0);
     expect(await c1.getTotalTaxesPaidBy(a1)).to.be.equal(0);
 
-    await c1.buy([10, initialPrice, 0, 0]);
+    await c1.edit([[10, initialPrice, 0, 0]], [], []);
 
     expect(await c1.getBalance(a1)).to.be.lte(balance);
     expect(await c1.getTotalTaxesPaid()).to.be.gte(taxes);
@@ -679,7 +685,7 @@ describe("GraffitETH taxes", function () {
     expect(await c1.getTotalTaxesPaid()).to.be.equal(0);
     expect(await c1.getTotalTaxesPaidBy(a1)).to.be.equal(0);
 
-    await c2.buy([0, parseEtherToGWei("1"), 0, 0]);
+    await c2.edit([[0, parseEtherToGWei("1"), 0, 0]], [], []);
 
     expect(await c1.getBalance(a1)).to.be.lte(balance.add(parseEtherToGWei("1")));
     expect(await c1.getTotalTaxesPaid()).to.be.gte(taxes);
@@ -690,7 +696,7 @@ describe("GraffitETH taxes", function () {
     let totalTaxesPaid = await c.getTotalTaxesPaid();
     let taxesPaidBy1 = await c.getTotalTaxesPaidBy(a1);
     let taxesPaidBy2 = await c.getTotalTaxesPaidBy(a2);
-    await c2.buy([10, initialPrice, parseEtherToGWei("1000"), 0]);
+    await c2.edit([[10, initialPrice, parseEtherToGWei("1000"), 0]], [], []);
     await c2.earmark(10, a1, 0);
     await skipOneMonth();
     await c1.claim(10, parseEtherToGWei("1000"), 0);
@@ -745,8 +751,10 @@ describe("GraffitETH taxes", function () {
       rugPullHeadsUp,
     );
 
-    await c.depositAndBuy(
-      [0, initialPrice, parseEtherToGWei("100"), 0],
+    await c.depositAndEdit(
+      [[0, initialPrice, parseEtherToGWei("100"), 0]],
+      [],
+      [],
       { value: ethers.utils.parseEther("100.1") },
     );
     await network.provider.send("evm_setNextBlockTimestamp", [taxStartTime + 3 * 365 * 24 * 60 * 60 / 12]);
@@ -760,7 +768,7 @@ describe("Owner withdrawal", function () {
   beforeEach(setup);
   beforeEach(async function () {
     await c1.deposit({ value: ethers.utils.parseEther("100") });
-    await c1.buy([0, initialPrice, parseEtherToGWei("20000"), 0]);
+    await c1.edit([[0, initialPrice, parseEtherToGWei("20000"), 0]], [], []);
     await skipOneMonth();
     await c1.payTaxes(a1);
   });
@@ -802,28 +810,28 @@ describe("Setting price", function () {
   beforeEach(setup);
   beforeEach(async function () {
     await c.deposit({value: ethers.utils.parseEther("100")});
-    await c.buyMany([
+    await c.edit([
       [0, initialPrice, parseEtherToGWei("10"), 0],
       [1, initialPrice, parseEtherToGWei("30"), 0],
-    ]);
+    ], [], []);
   })
 
   it("should update price", async function () {
     expect(await c.getPrice(0)).to.equal(parseEtherToGWei("10"));
-    await expect(c.setPrice(0, parseEtherToGWei("20")))
+    await expect(c.edit([], [], [[0, parseEtherToGWei("20")]]))
       .to.emit(c, "PriceChanged").withArgs(0, a1, parseEtherToGWei("20"));
     expect(await c.getPrice(0)).to.equal(parseEtherToGWei("20"));
   });
 
   it("should update tax base", async function () {
     expect(await c.getTaxBase(a1)).to.equal(parseEtherToGWei("40"));
-    await expect(c.setPrice(0, parseEtherToGWei("20")))
+    await expect(c.edit([], [], [[0, parseEtherToGWei("20")]]))
       .to.emit(c, "PriceChanged").withArgs(0, a1, parseEtherToGWei("20"));
     expect(await c.getTaxBase(a1)).to.equal(parseEtherToGWei("50"));
   });
 
   it("should only be possible to owner", async function () {
-    await expect(c2.setPrice(0, parseEtherToGWei("20")))
+    await expect(c2.edit([], [], [[0, parseEtherToGWei("20")]]))
       .to.be.revertedWith("GraffitETH2: only pixel owner can set price");
   });
 });
@@ -832,16 +840,16 @@ describe("Setting color", function () {
   beforeEach(setup);
   beforeEach(async function () {
     await c.deposit({ value: ethers.utils.parseEther("100") });
-    await c.buy([0, initialPrice, parseEtherToGWei("10"), 0]);
+    await c.edit([[0, initialPrice, parseEtherToGWei("10"), 0]], [], []);
   });
 
   it("should change color", async function () {
-    await expect(c.setColor(0, 2))
+    await expect(c.edit([], [[0, 2]], []))
       .to.emit(c, "ColorChanged").withArgs(0, a1, 2);
   });
 
   it("should only be possible to owner", async function () {
-    await expect(c2.setColor(0, 2))
+    await expect(c2.edit([], [[0, 2]], []))
       .to.be.revertedWith("GraffitETH2: only pixel owner can set color");
   });
 });
@@ -851,7 +859,7 @@ describe("Earmarking", function () {
   beforeEach(async function () {
     await c.deposit({ value: ethers.utils.parseEther("100") });
     await c3.deposit({ value: ethers.utils.parseEther("100") });
-    await c.buy([0, initialPrice, parseEtherToGWei("10"), 0]);
+    await c.edit([[0, initialPrice, parseEtherToGWei("10"), 0]], [], []);
   });
   
   it("should earmark pixel", async function () {
@@ -868,7 +876,7 @@ describe("Earmarking", function () {
 
   it("should be reset when pixel is bought", async function () {
     await c.earmark(0, a2, parseEtherToGWei("10"));
-    await expect(c3.buy([0, parseEtherToGWei("10"), 0, 0]))
+    await expect(c3.edit([[0, parseEtherToGWei("10"), 0, 0]], [], []))
       .to.emit(c, "Earmarked").withArgs(0, a3, ethers.constants.AddressZero, 0);
     expect(await c.getEarmarkReceiver(0)).to.be.equal(ethers.constants.AddressZero);
     expect(await c.getEarmarkAmount(0)).to.be.equal(0);
@@ -884,7 +892,7 @@ describe("Claiming", function () {
   beforeEach(setup);
   beforeEach(async function () {
     await c.deposit({ value: ethers.utils.parseEther("100") });
-    await c.buy([0, initialPrice, parseEtherToGWei("20"), 0]);
+    await c.edit([[0, initialPrice, parseEtherToGWei("20"), 0]], [], []);
     await c.earmark(0, a2, parseEtherToGWei("10"));
   });
 
