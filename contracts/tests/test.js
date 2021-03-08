@@ -339,7 +339,7 @@ describe("GraffitETH withdrawing", function () {
     for (const amount of amounts) {
       const chainBalance = await ethers.provider.getBalance(a1);
       const contractBalance = await c.getBalance(a1);
-      await expect(await c.withdraw(amount, {gasPrice: 0}))
+      await expect(await c.withdraw(a1, amount, a1, {gasPrice: 0}))
         .to.emit(c, "Withdrawn").withArgs(a1, a1, amount, contractBalance.sub(amount));
       expect(await c.getBalance(a1)).to.equal(contractBalance.sub(amount));
       expect(await ethers.provider.getBalance(a1)).to.equal(chainBalance.add(gWeiToWei(amount)));
@@ -357,7 +357,7 @@ describe("GraffitETH withdrawing", function () {
     for (const amount of amounts) {
       const chainBalance = await ethers.provider.getBalance(a2);
       const contractBalance = await c.getBalance(a1);
-      await expect(await c.withdrawTo(amount, a2))
+      await expect(await c.withdraw(a1, amount, a2))
         .to.emit(c, "Withdrawn").withArgs(a1, a2, amount, contractBalance.sub(amount));
       expect(await c.getBalance(a1)).to.equal(contractBalance.sub(amount));
       expect(await ethers.provider.getBalance(a2)).to.equal(chainBalance.add(gWeiToWei(amount)));
@@ -366,7 +366,7 @@ describe("GraffitETH withdrawing", function () {
 
   it("should fail when trying to withdraw more than balance", async function () {
     await c.deposit({ value: ethers.utils.parseEther("10") });
-    await expect(c.withdraw(parseEtherToGWei("10.1")))
+    await expect(c.withdraw(a1, parseEtherToGWei("10.1"), a1))
       .to.be.revertedWith("GraffitETH2: cannot withdraw more than balance");
     
     // pay taxes to get negative balance
@@ -378,7 +378,7 @@ describe("GraffitETH withdrawing", function () {
     await network.provider.send("evm_increaseTime", [2 * 31 * 24 * 60 * 60]);
     await network.provider.send("evm_mine", []);
 
-    await expect(c.withdraw(0))
+    await expect(c.withdraw(a1, 0, a1))
       .to.be.revertedWith("GraffitETH2: cannot withdraw more than balance");
   });
 
@@ -393,9 +393,22 @@ describe("GraffitETH withdrawing", function () {
     await network.provider.send("evm_increaseTime", [31 * 24 * 60 * 60]);
     await network.provider.send("evm_mine", []);
 
-    await expect(c.withdrawMax())
+    await expect(c.withdrawMax(a1, a1))
       .to.emit(c, "Withdrawn");
     expect(await c.getBalance(a1)).to.equal(0);
+  });
+
+  it("should not work for random account", async function () {
+    await c.deposit({ value: ethers.utils.parseEther("123") });
+    await expect(c2.withdraw(a1, 0, a2))
+      .to.be.revertedWith("GraffitETH2: sender not allowed to withdraw");
+  });
+
+  it("should work for all-approved account", async function () {
+    await c.deposit({ value: ethers.utils.parseEther("123") });
+    await c.setApprovalForAll(a2, true);
+    await expect(c2.withdraw(a1, 0, a2))
+      .to.emit(c, "Withdrawn");
   });
 });
 
@@ -709,7 +722,7 @@ describe("GraffitETH taxes", function () {
     await skipOneMonth();
     let totalTaxesPaid = await c.getTotalTaxesPaid();
     let taxesPaid = await c.getTotalTaxesPaidBy(a1);
-    await c1.withdraw(parseEtherToGWei("1"));
+    await c1.withdraw(a1, parseEtherToGWei("1"), a1);
     expect(await c.getTotalTaxesPaid()).to.be.not.equal(totalTaxesPaid);
     expect(await c.getTotalTaxesPaidBy(a1)).to.be.not.equal(taxesPaid);
   });
@@ -776,29 +789,29 @@ describe("Owner withdrawal", function () {
   it("should send funds to receiver", async function () {
     expect(await c.getTotalWithdrawnByOwner()).to.equal(0);
     let b0 = await ethers.provider.getBalance(a1);
-    await expect(c.withdrawOwner(parseEtherToGWei("1"), {gasPrice: 0}))
+    await expect(c.withdrawOwner(parseEtherToGWei("1"), a1, {gasPrice: 0}))
       .to.emit(c, "TaxWithdrawn").withArgs(parseEtherToGWei("1"), a1);
     expect((await ethers.provider.getBalance(a1)).sub(b0)).to.equal(ethers.utils.parseEther("1"));
     expect(await c.getTotalWithdrawnByOwner()).to.equal(parseEtherToGWei("1"));
   });
 
   it("should only be allowed by owner", async function () {
-    await expect(c2.withdrawOwner(1))
+    await expect(c2.withdrawOwner(1, a2))
       .to.be.revertedWith("Ownable: caller is not the owner");
   });
 
   it("should limit withdrawal to what exists", async function () {
-    await expect(c.withdrawOwner(parseEtherToGWei("101")))
+    await expect(c.withdrawOwner(parseEtherToGWei("101"), a1))
       .to.be.revertedWith("GraffitETH2: not enough funds to withdraw");
     
-    await c.withdrawOwner(parseEtherToGWei("99"));
+    await c.withdrawOwner(parseEtherToGWei("99"), a1);
       
-    await expect(c.withdrawOwner(parseEtherToGWei("2")))
+    await expect(c.withdrawOwner(parseEtherToGWei("2"), a1))
       .to.be.revertedWith("GraffitETH2: not enough funds to withdraw");
   });
 
   it("should allow withdrawing everyting", async function () {
-    await c.withdrawMaxOwner();
+    await c.withdrawMaxOwner(a1);
     expect(await c.getTotalWithdrawnByOwner()).to.equal(parseEtherToGWei("100"));
     expect(await c.getTotalTaxesPaid()).to.equal(parseEtherToGWei("99.9"));
     expect(await c.getTotalInitialSaleRevenue()).to.equal(parseEtherToGWei("0.1"));
@@ -830,9 +843,15 @@ describe("Setting price", function () {
     expect(await c.getTaxBase(a1)).to.equal(parseEtherToGWei("50"));
   });
 
-  it("should only be possible to owner", async function () {
+  it("should not be possible by random account", async function () {
     await expect(c2.edit([], [], [[0, parseEtherToGWei("20")]]))
-      .to.be.revertedWith("GraffitETH2: only pixel owner can set price");
+      .to.be.revertedWith("GraffitETH2: only pixel owner or approved account can set price");
+  });
+
+  it("should be possible by approved account", async function () {
+    await c.approve(a2, 0);
+    await expect(c2.edit([], [], [[0, parseEtherToGWei("20")]]))
+      .to.emit(c, "PriceChanged").withArgs(0, a1, parseEtherToGWei("20"));
   });
 });
 
@@ -848,9 +867,15 @@ describe("Setting color", function () {
       .to.emit(c, "ColorChanged").withArgs(0, a1, 2);
   });
 
-  it("should only be possible to owner", async function () {
+  it("should not be possible by random account", async function () {
     await expect(c2.edit([], [[0, 2]], []))
-      .to.be.revertedWith("GraffitETH2: only pixel owner can set color");
+      .to.be.revertedWith("GraffitETH2: only pixel owner or approved account can set color");
+  });
+
+  it("should be possible by approved account", async function () {
+    await c.approve(a2, 0);
+    await expect(c2.edit([], [[0, 2]], []))
+      .to.emit(c, "ColorChanged").withArgs(0, a1, 2);
   });
 });
 
@@ -882,9 +907,15 @@ describe("Earmarking", function () {
     expect(await c.getEarmarkAmount(0)).to.be.equal(0);
   });
 
-  it("should only be possible by owner", async function () {
+  it("should not be possible by random account", async function () {
     await expect(c2.earmark(0, a2, parseEtherToGWei("10")))
-      .to.be.revertedWith("GraffitETH2: only pixel owner can set earmark");
+      .to.be.revertedWith("GraffitETH2: only pixel owner or approved account can set earmark");
+  });
+
+  it("should be possible by approved account", async function () {
+    await c.approve(a2, 0);
+    await expect(c.earmark(0, a2, parseEtherToGWei("10")))
+      .to.emit(c, "Earmarked").withArgs(0, a1, a2, parseEtherToGWei("10"));
   });
 });
 
@@ -928,13 +959,13 @@ describe("Claiming", function () {
   it("should fail if amount is too low", async function () {
     await expect(c2.claim(0, parseEtherToGWei("20"), parseEtherToGWei("10").add(1)))
       .to.be.revertedWith("GraffitETH2: amount is too small");
-    await c.withdraw(parseEtherToGWei("95"));
+    await c.withdraw(a1, parseEtherToGWei("95"), a1);
     await expect(c2.claim(0, parseEtherToGWei("20"), parseEtherToGWei("8")))
       .to.be.revertedWith("GraffitETH2: amount is too small");
   });
 
   it("should not transfer more than current owner has", async function () {
-    await c.withdraw(parseEtherToGWei("95"));
+    await c.withdraw(a1, parseEtherToGWei("95"), a1);
     let b = await c.getBalance(a1);
     await c2.claim(0, parseEtherToGWei("20"), 0);
     expect((await c2.getBalance(a2)).sub(b).abs()).to.be.lte(5000);

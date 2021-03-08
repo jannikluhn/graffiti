@@ -476,53 +476,35 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         _depositTo(msg.sender, msg.sender);
     }
 
-    /// @dev Withdraw an amount of GWei from the caller's account and send it to the given
-    ///     receiver address.
-    function withdrawTo(uint64 amount, address receiver) public {
-        _withdraw(msg.sender, amount, receiver);
+    /// @dev Withdraw an amount of GWei from the given account and send it to the given receiver
+    ///     address. Only the account itself or an account "approved for all" by the account can
+    ///     call this function
+    function withdraw(
+        address account,
+        uint64 amount,
+        address receiver
+    ) public {
+        _withdraw(msg.sender, account, amount, receiver);
     }
 
-    /// @dev Withdraw an amount of GWei from the caller's account and send it to the caller.
-    function withdraw(uint64 amount) public {
-        _withdraw(msg.sender, amount, msg.sender);
-    }
-
-    /// @dev Withdraw the maximum possible amount from the caller's account and send it to the
-    ///     given receiver address.
-    function withdrawMaxTo(address receiver) public {
-        _withdrawMax(msg.sender, receiver);
-    }
-
-    /// @dev Withdraw the maximum possible amount from the caller's account and send it to the
-    ///     caller.
-    function withdrawMax() public {
-        _withdrawMax(msg.sender, msg.sender);
+    /// @dev Withdraw the maximum possible amount of GWei from the given account and send it to
+    ///     the given receiver address. Only the account itself or an account "approved for all"
+    ///     by the owner can call this function.
+    function withdrawMax(address account, address receiver) public {
+        _withdrawMax(msg.sender, account, receiver);
     }
 
     /// @dev Withdraw a part of the taxes and income from initial sales and send it to the given
     ///     receiver address. The withdrawal amount is specified in GWei. Only the contract
     ///     owner is allowed to do this.
-    function withdrawOwnerTo(uint64 amount, address receiver) public onlyOwner {
+    function withdrawOwner(uint64 amount, address receiver) public onlyOwner {
         _withdrawOwner(amount, receiver);
-    }
-
-    /// @dev Withdraw a part of the taxes and income from initial sales and send it to the caller.
-    ///     The withdrawal amount is specified in GWei. Only the contract owner is allowed to do
-    ///     this.
-    function withdrawOwner(uint64 amount) public onlyOwner {
-        _withdrawOwner(amount, msg.sender);
     }
 
     /// @dev Withdraw all of the taxes and income from initial sales and send it to the given
     ///     address. Only the contract owner is allowed to do this.
-    function withdrawMaxOwnerTo(address receiver) public onlyOwner {
+    function withdrawMaxOwner(address receiver) public onlyOwner {
         _withdrawOwner(getOwnerWithdrawableAmount(), receiver);
-    }
-
-    /// @dev Withdraw all of the taxes and income from initial sales and send it to the caller.
-    ///     Only the contract owner is allowed to do this.
-    function withdrawMaxOwner() public onlyOwner {
-        _withdrawOwner(getOwnerWithdrawableAmount(), msg.sender);
     }
 
     /// @dev Earmark a pixel so that the specified account can claim it. Only the pixel owner can
@@ -536,8 +518,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         require(_exists(pixelID), "GraffitETH2: pixel does not exist");
         address owner = ownerOf(pixelID);
         require(
-            msg.sender == owner,
-            "GraffitETH2: only pixel owner can set earmark"
+            _isApprovedOrOwner(msg.sender, pixelID),
+            "GraffitETH2: only pixel owner or approved account can set earmark"
         );
         require(receiver != owner, "GraffitETH2: cannot earmark for owner");
 
@@ -853,8 +835,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             require(_exists(pixelID), "GraffitETH2: pixel does not exist");
             address owner = ownerOf(pixelID);
             require(
-                sender == owner,
-                "GraffitETH2: only pixel owner can set color"
+                _isApprovedOrOwner(sender, pixelID),
+                "GraffitETH2: only pixel owner or approved account can set color"
             );
 
             emit ColorChanged({
@@ -872,9 +854,9 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             return;
         }
 
-        Account memory account = _accounts[msg.sender];
+        address accountAddress;
+        Account memory account;
         uint64 taxesPaid;
-        (account, taxesPaid) = _payTaxes(account);
 
         for (uint256 i = 0; i < argss.length; i++) {
             uint256 pixelID = argss[i].pixelID;
@@ -883,9 +865,25 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             require(_exists(pixelID));
             address owner = ownerOf(pixelID);
             require(
-                msg.sender == owner,
-                "GraffitETH2: only pixel owner can set price"
+                _isApprovedOrOwner(sender, pixelID),
+                "GraffitETH2: only pixel owner or approved account can set price"
             );
+
+            if (i == 0) {
+                accountAddress = owner;
+                account = _accounts[owner];
+                (account, taxesPaid) = _payTaxes(account);
+            } else {
+                // To keep the code simple, all pixels need to be owned by the same account.
+                // Otherwise, we'd have to keep a list of updated accounts in memory instead of
+                // just a single one, similar to what the buy function does. It's unlikely that
+                // someone will want to change the price of pixels owned by two or more different
+                // accounts (via one or more approvals), so we can live with it.
+                require(
+                    owner == accountAddress,
+                    "GraffitETH2: pixels owned by different accounts"
+                );
+            }
 
             uint64 oldPrice = _pixelPrices[pixelID];
             account = _decreaseTaxBase(account, oldPrice);
@@ -900,7 +898,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         }
 
         _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
-        _accounts[msg.sender] = account;
+        _accounts[accountAddress] = account;
     }
 
     function _depositTo(address depositor, address account) internal {
@@ -953,7 +951,11 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         });
     }
 
-    function _withdrawMax(address account, address receiver) internal {
+    function _withdrawMax(
+        address sender,
+        address account,
+        address receiver
+    ) internal {
         int128 balance = getBalance(account);
         require(
             balance >= 0,
@@ -965,14 +967,19 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         } else {
             amount = uint64(balance);
         }
-        _withdraw(account, amount, receiver);
+        _withdraw(sender, account, amount, receiver);
     }
 
     function _withdraw(
+        address sender,
         address account,
         uint64 amount,
         address receiver
     ) internal {
+        require(
+            sender == account || isApprovedForAll(account, sender),
+            "GraffitETH2: sender not allowed to withdraw"
+        );
         Account memory acc = _accounts[account];
         uint64 taxesPaid;
         (acc, taxesPaid) = _payTaxes(acc);
