@@ -59,9 +59,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 // transferred to them.
 //
 // We inherit the approve and approve-for-all functionality from the ERC721 standard. Accounts that
-// are approved for an individual pixel can set its price and color and earmark it. In addition,
-// accounts approved for all, have access to the approver's balance, i.e., can withdraw and buy
-// pixels on their behalf.
+// are approved for an individual pixel can set its price and color. In addition, accounts approved
+// for all, have access to the approver's balance, i.e., can withdraw, buy pixels, and earmark on
+// their behalf.
 
 // Every user of the system gets one account that tracks their balance and tax payments.
 struct Account {
@@ -529,9 +529,9 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         _withdrawOwner(getOwnerWithdrawableAmount(), receiver);
     }
 
-    /// @dev Earmark a pixel so that the specified account can claim it. Only the pixel owner can
-    ///     earmark a pixel. In addition to the pixel, the receiver can also claim the specified
-    ///     amount in GWei from the deposit.
+    /// @dev Earmark a pixel so that the specified account can claim it. Only the pixel owner or an
+    ///     all-approved account can earmark a pixel. In addition to the pixel, the receiver can
+    ///     also claim the specified amount in GWei from the deposit.
     function earmark(
         uint256 pixelID,
         address receiver,
@@ -540,7 +540,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         require(_exists(pixelID), "GraffitETH2: pixel does not exist");
         address owner = ownerOf(pixelID);
         require(
-            _isApprovedOrOwner(msg.sender, pixelID),
+            msg.sender == owner || isApprovedForAll(owner, msg.sender),
             "GraffitETH2: only pixel owner or approved account can set earmark"
         );
         require(receiver != owner, "GraffitETH2: cannot earmark for owner");
