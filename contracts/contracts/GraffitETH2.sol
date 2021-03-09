@@ -13,14 +13,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 // In order to facilitate tax payments, the contract manages accounts. Each account stores a
 // balance and the tax base. The tax base is the sum of the prices of all pixels the account owns.
 // It is used to calculate the tax burden (tax base * tax rate per second = tax burden per second).
-// The balance is increased by depositing and decreased by withdrawing or paying taxes. The account
-// also stores the time at which the last tax payment has been carried out. This is used to
-// calculate the timespan for which taxes have to be paid next time. The contract ensures that
-// taxes are paid whenever the balance or tax base changes. This means that the "missing" tax is
-// always simply tax base * tax rate * time since last tax payment.
+// The balance is increased by depositing or by selling pixels. It is decreased by withdrawing, by
+// paying taxes, and by buying pixels.
 //
-// Account balances beomce negative if the deposit does not cover the tax burden. In this case, new
-// deposits go directly to the tax receiver's account until the account balance is zero again.
+// The account also stores the time at which the last tax payment has been carried out. This is
+// used to calculate the timespan for which taxes have to be paid next time. The contract ensures
+// that taxes are paid whenever the balance or tax base changes. This means that the "missing" tax
+// is always simply tax base * tax rate * time since last tax payment.
+//
+// Account balances become negative if the deposit does not cover the tax burden. In this case,
+// new deposits go directly to the tax receiver's account until the account balance is zero again.
 //
 // If an account balance is negative (i.e. taxes have not been paid), the account's pixels can be
 // bought for free by anyone with a non-negative balance.
@@ -30,12 +32,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 // below the minimum) we just treat them as if they would be exactly at the maximum (minimum). This
 // means very large or very low numbers are not necessarily accurate. However, the positive maximum
 // is realistically never going to be reached (it corresponds to ~18B ETH/xDai). The negative
-// maximum can be reached by setting a pixel price extermely high and accumulating the debt. In
-// this case, the clamping would save the account some taxes, but only when it's already so much in
-// debt that it will likely never be repaid anyway.
+// maximum can be reached by setting a pixel price extremely high and accumulating the debt. In
+// this case, the clamping would save the account some taxes, but only when it's already so much
+// in debt that it will likely never be repaid anyway.
 //
-// The clamping math is an alternative to the usual approach of reverting transactions when
-// numbers run out of bounds. The latter might be a way for an owner to prevent their pixels being
+// The clamping math is an alternative to the usual approach of reverting transactions when numbers
+// run out of bounds. The latter might be a way for an owner to prevent their pixels from being
 // sold.
 //
 // The main exception from using clamped math is for calculating the tax base as the sum of all
@@ -55,6 +57,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 // earmark stores the receiver's address and an additional amount. The receiver can claim any
 // pixel that is earmarked to them. If they do, the pixel as well as the deposit amount is
 // transferred to them.
+//
+// We inherit the approve and approve-for-all functionality from the ERC721 standard. Accounts that
+// are approved for an individual pixel can set its price and color and earmark it. In addition,
+// accounts approved for all, have access to the approver's balance, i.e., can withdraw and buy
+// pixels on their behalf.
 
 // Every user of the system gets one account that tracks their balance and tax payments.
 struct Account {
@@ -71,7 +78,7 @@ struct Earmark {
     uint64 amount;
 }
 
-// Struct grouping arguments for buy functions used to circumvent stack limit.
+// Structs grouping arguments used to circumvent stack limit.
 struct PixelBuyArgs {
     uint256 pixelID;
     uint64 maxPrice;
@@ -239,7 +246,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     uint64 private _initialPrice; // initial price at which pixels are first sold
 
     // during initialization the owner can set owners, prices, and colors of pixels.
-    bool _initializing;
+    bool private _initializing;
 
     mapping(uint256 => uint64) private _pixelPrices;
 
@@ -286,7 +293,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     // Getters (functions that let other random contracts and stuff read the state)
     //
 
-    /// @dev check is a pixel exists, i.e., has an owner.
+    /// @dev Check if a pixel exists, i.e., has an owner.
     function exists(uint256 pixelID) public view returns (bool) {
         return _exists(pixelID);
     }
@@ -327,8 +334,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         return (_taxRateNumerator, _taxRateDenominator);
     }
 
-    /// @dev Get the time from which on taxes have to be paid. Before this time, no taxes have to
-    ///     be paid.
+    /// @dev Get the time from which on taxes have to be paid.
     function getTaxStartTime() public view returns (uint64) {
         return _taxStartTime;
     }
@@ -340,19 +346,20 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
     /// @dev Get the tax base in GWei of an account. The tax base is the sum of the nominal prices
     ///     of all pixels owned by the account. The tax an account has to pay per time interval is
-    ///     the tax rate times the tax base.
+    ///     the tax rate times the tax base. Untouched accounts have a tax base of zero.
     function getTaxBase(address account) public view returns (uint64) {
         return _accounts[account].taxBase;
     }
 
-    /// @dev Get the time at which the last tax has been recorded for the given account.
+    /// @dev Get the time at which the last tax payment has been recorded for the given account.
+    ///     For untouched accounts, this returns zero.
     function getLastTaxPayment(address account) public view returns (uint64) {
         return _accounts[account].lastTaxPayment;
     }
 
     /// @dev Get the current balance of an account in GWei. This includes all tax payments up to
     ///     now, including tax debt since lastTaxPayment, i.e., tax debt not reflected in the
-    ///     balance stored in the contract state.
+    ///     balance stored in the contract state. For untouched accounts, this returns 0.
     function getBalance(address account) public view returns (int128) {
         Account memory acc = _accounts[account];
         uint64 taxPaid;
@@ -361,7 +368,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     }
 
     /// @dev Get the balance of the given account as it is stored in the contract. This does not
-    ///     include outstanding tax payments, so it may be greater than the actual balance.
+    ///     include outstanding tax payments, so it may be greater than the actual balance. For
+    ///     untouched accounts, this returns 0.
     function getRecordedBalance(address account) public view returns (int128) {
         return _accounts[account].balance;
     }
@@ -372,19 +380,23 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         return _totalWithdrawnByOwner;
     }
 
-    /// @dev Get the total amount of taxes paid in GWei.
+    /// @dev Get the total amount of taxes paid in GWei. This only include taxes paid explicitly,
+    ///     i.e., it increases whenever the balance stored in the contract decreases due to a tax
+    ///     payment.
     function getTotalTaxesPaid() public view returns (uint64) {
         return _totalTaxesPaid;
     }
 
-    /// @dev Get the total amount of taxes paid by the given account in GWei.
+    /// @dev Get the total amount of taxes paid by the given account in GWei. This only includes
+    ///     taxes paid until the accounts's last tax payment timestamp. For untouched accounts,
+    ///     this returns 0.
     function getTotalTaxesPaidBy(address account) public view returns (uint64) {
         return _accounts[account].totalTaxesPaid;
     }
 
     /// @dev Get the total taxes paid of the given account in GWei, assuming an immediate tax
-    ///     payment. The amount is virtual in the sense that it cannot be withdrawn without calling
-    ///     payTaxes first.
+    ///     payment. The amount is virtual in the sense that it cannot be withdrawn by the
+    ///     contract owner without calling payTaxes first.
     function getVirtualTotalTaxesPaidBy(address account)
         public
         view
@@ -397,7 +409,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     }
 
     /// @dev Get the maximum amount of funds (from both initial pixel sales and from taxes) in
-    ///     GWei that the owner can to withdraw at the moment.
+    ///     GWei that the owner can withdraw at the moment.
     function getOwnerWithdrawableAmount() public view returns (uint64) {
         uint64 totalRevenue =
             ClampedMath.addUint64(_totalTaxesPaid, _totalInitialSaleRevenue);
@@ -411,12 +423,14 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         return _totalInitialSaleRevenue;
     }
 
-    /// @dev Get the address for which a pixel is earmarked.
+    /// @dev Get the address for which a pixel is earmarked. For non-existent pixels or those that
+    ///     haven't been earmarked, this returns the zero address.
     function getEarmarkReceiver(uint256 pixelID) public view returns (address) {
         return _earmarks[pixelID].receiver;
     }
 
-    /// @dev Get the amount a claimer is allowed to take over from the earmarker.
+    /// @dev Get the amount in GWei a claimer is allowed to take over from the earmarker. For
+    ///     non-existent pixels or those that haven't been earmarked, this returns 0.
     function getEarmarkAmount(uint256 pixelID) public view returns (uint64) {
         return _earmarks[pixelID].amount;
     }
@@ -430,9 +444,10 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     // Public interface
     //
 
-    /// @dev Edit the canvas buy buying new pixels and changing price and color of ones already
-    ///     owned. The given buyer address must be either the sender or the sender must have been
-    ///     approved by the buyer address.
+    /// @dev Edit the canvas by buying new pixels and changing price and color of ones already
+    ///     owned. The given buyer address must either be the sender or the sender must have been
+    ///     approved-for-all by the buyer address. Bought pixels will be transferred to the given
+    ///     buyer address. This function works for both existant and non-existant pixels.
     function edit(
         address buyerAddress,
         PixelBuyArgs[] memory buyArgss,
@@ -445,9 +460,10 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     }
 
     /// @dev Deposit some funds and edit the canvas by buying new pixels and changing price and
-    ///     color of ones already owned. Only the buyer address or an account approved for all by
+    ///     color of ones already owned. Only the buyer address or an account approved-for-all by
     ///     the buyer address can call this function. Deposited funds and bought pixels will go to
-    ///     the given buyer address.
+    ///     the given buyer address. This function works for both existant and non-existant pixels.
+    ///     The sent amount must be a multiple of 1 GWei.
     function depositAndEdit(
         address buyerAddress,
         PixelBuyArgs[] memory buyArgss,
@@ -460,8 +476,9 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         _setPriceMany(msg.sender, setPriceArgss);
     }
 
-    /// @dev Update the balance of the account stored in the account state to reflect tax debt for
-    ///     the time between last tax payment and now.
+    /// @dev Explicitly update the balance of the given account to reflect tax debt for the time
+    ///     between last tax payment and now. This function can be called by anyone and in
+    ///     particular the contract owner so that they can withdraw taxes.
     function payTaxes(address account) public {
         Account memory acc = _accounts[account];
         uint64 taxesPaid;
@@ -471,19 +488,19 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
     }
 
-    /// @dev Deposit money to the given account.
+    /// @dev Deposit money to the given account. The amount sent must be a multiple of 1 GWei.
     function depositTo(address account) public payable {
         _depositTo(msg.sender, account);
     }
 
-    /// @dev Deposit money for the sender.
+    /// @dev Deposit money for the sender. The amount sent must be a multiple of 1 GWei.
     function deposit() public payable {
         _depositTo(msg.sender, msg.sender);
     }
 
     /// @dev Withdraw an amount of GWei from the given account and send it to the given receiver
     ///     address. Only the account itself or an account "approved for all" by the account can
-    ///     call this function
+    ///     call this function. The amount must not exceed the account's current balance.
     function withdraw(
         address account,
         uint64 amount,
@@ -513,8 +530,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     }
 
     /// @dev Earmark a pixel so that the specified account can claim it. Only the pixel owner can
-    ///     earmark a pixel. In addition to the pixel, the owner can also gets the specified part
-    ///     of the deposit.
+    ///     earmark a pixel. In addition to the pixel, the receiver can also claim the specified
+    ///     amount in GWei from the deposit.
     function earmark(
         uint256 pixelID,
         address receiver,
@@ -534,8 +551,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     /// @dev Claim a pixel previously earmarked to the caller. This will transfer the pixel to the
     ///     claimer, without changing price or color. In addition, a part of the deposit of the
     ///     original owner will be transferred to the claimer's account, depending on the amount
-    ///     the earmarker allowed and their balance. The pixel is only claimed if its price does
-    ///     not exceed `maxPrice` and the transferred deposit is at least `minAmount`.
+    ///     the earmarker allowed and their balance. The pixel is only claimed if its price in GWei
+    ///     does not exceed `maxPrice` and the transferred deposit is at least `minAmount`.
     function claim(
         uint256 pixelID,
         uint64 maxPrice,
@@ -544,8 +561,9 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         _claim(msg.sender, pixelID, maxPrice, minAmount);
     }
 
-    /// @dev Freely set the initial owner, price, and color of a pixel. Only the owner can do this
-    ///     and only during the initialization phase.
+    /// @dev Freely set the initial owner, price, and color of a set of pixels. Only the owner can
+    ///     do this and only during the initialization phase. Each pixel can only be initialized
+    ///     once.
     function init(
         uint256[] memory pixelIDs,
         address[] memory owners,
@@ -712,8 +730,9 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             return;
         }
 
-        // keep track of buyer and seller accounts in memory so that we can persist them to the
-        // state eventually
+        // Keep track of buyer and seller accounts in memory so that we can persist them to the
+        // state eventually. This is more gas efficient than storing intermediate accounts in the
+        // state.
         Account memory buyer = _accounts[buyerAddress];
         uint256 numSellers = 0; // number of distinct sellers known so far
         address[] memory sellerAddresses = new address[](argss.length);
@@ -768,6 +787,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                 }
                 assert(sellerIndex <= sellers.length);
                 if (sellerIndex == numSellers) {
+                    // Seller account is not in sellers array yet, so take it from state and add it
+                    // to the array.
                     numSellers++;
                     seller = _accounts[sellerAddress];
                     sellerAddresses[sellerIndex] = sellerAddress;
@@ -889,7 +910,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                 // Otherwise, we'd have to keep a list of updated accounts in memory instead of
                 // just a single one, similar to what the buy function does. It's unlikely that
                 // someone will want to change the price of pixels owned by two or more different
-                // accounts (via one or more approvals), so we can live with it.
+                // accounts (possible via one or more approvals), so we can live with it.
                 require(
                     owner == accountAddress,
                     "GraffitETH2: pixels owned by different accounts"
@@ -1018,7 +1039,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     }
 
     /// @dev Earmarks a pixel. The caller should check that the pixel exists and that the current
-    ///     owner requested the earmarking.
+    ///     owner or an approved account requested the earmarking.
     function _earmark(
         uint256 pixelID,
         address owner,
@@ -1081,6 +1102,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         sender = _decreaseTaxBase(sender, price);
         receiver = _increaseTaxBase(receiver, price);
 
+        // Transfer min(balance, em.amount) from owner to claimer, but only if it exceeds
+        // minAmount.
         uint64 amount;
         if (sender.balance >= em.amount) {
             amount = em.amount;
@@ -1198,6 +1221,8 @@ library Taxes {
         if (endTime <= startTime) {
             return 0;
         }
+        // This doesn't overflow because each of the terms is smaller than a uint64. For the
+        // numerator, this is ensured by the constructor of the GraffitETH2 contract.
         uint256 num =
             uint256(endTime - startTime) * uint256(taxBase) * taxRateNumerator;
         uint256 taxes = num / taxRateDenominator;
