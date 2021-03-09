@@ -785,7 +785,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                         break;
                     }
                 }
-                assert(sellerIndex <= sellers.length);
+                assert(sellerIndex <= numSellers);
                 if (sellerIndex == numSellers) {
                     // Seller account is not in sellers array yet, so take it from state and add it
                     // to the array.
