@@ -1022,13 +1022,14 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         );
         acc = _decreaseBalance(acc, amount);
 
+
+        _accounts[account] = acc;
+        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
+
         uint256 transferValue = uint256(amount) * (1 gwei);
         assert(transferValue / (1 gwei) == amount);
         (bool success, ) = receiver.call{value: transferValue}("");
         require(success, "GraffitETH2: withdraw call reverted");
-
-        _accounts[account] = acc;
-        _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
 
         emit Withdrawn({
             account: account,
