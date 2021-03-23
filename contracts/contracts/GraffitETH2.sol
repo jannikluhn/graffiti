@@ -65,7 +65,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 // Every user of the system gets one account that tracks their balance and tax payments.
 struct Account {
-    int128 balance;
+    int64 balance;
     uint64 taxBase;
     uint64 lastTaxPayment;
     uint64 totalTaxesPaid;
@@ -195,13 +195,13 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         address indexed account,
         address indexed depositor,
         uint64 amount,
-        int128 balance
+        int64 balance
     );
     event Withdrawn(
         address indexed account,
         address indexed receiver,
         uint64 amount,
-        int128 balance
+        int64 balance
     );
     event ColorChanged(
         uint256 indexed pixelID,
@@ -360,7 +360,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     /// @dev Get the current balance of an account in GWei. This includes all tax payments up to
     ///     now, including tax debt since lastTaxPayment, i.e., tax debt not reflected in the
     ///     balance stored in the contract state. For untouched accounts, this returns 0.
-    function getBalance(address account) public view returns (int128) {
+    function getBalance(address account) public view returns (int64) {
         Account memory acc = _accounts[account];
         uint64 taxPaid;
         (acc, taxPaid) = _payTaxes(acc);
@@ -370,7 +370,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
     /// @dev Get the balance of the given account as it is stored in the contract. This does not
     ///     include outstanding tax payments, so it may be greater than the actual balance. For
     ///     untouched accounts, this returns 0.
-    function getRecordedBalance(address account) public view returns (int128) {
+    function getRecordedBalance(address account) public view returns (int64) {
         return _accounts[account].balance;
     }
 
@@ -707,7 +707,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         // if the balance is negative, the account owes taxes, so the increase in balance has to
         // go towards taxesPaid
         if (account.balance < 0) {
-            // balance is int128 which can't represent -type(int128).min. Therefore, convert to
+            // balance is int64 which can't represent -type(int64).min. Therefore, convert to
             // int256 before flipping the sign.
             int256 taxesOwed = -int256(account.balance);
             uint64 taxes;
@@ -724,7 +724,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             );
         }
 
-        account.balance = ClampedMath.addInt128(account.balance, amount);
+        account.balance = ClampedMath.addInt64(account.balance, amount);
         return (account, taxesPaid);
     }
 
@@ -733,7 +733,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         pure
         returns (Account memory)
     {
-        account.balance = ClampedMath.subInt128(account.balance, amount);
+        account.balance = ClampedMath.subInt64(account.balance, amount);
         return account;
     }
 
@@ -778,7 +778,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                 "GraffitETH2: pixel price exceeds max price"
             );
             require(
-                buyer.balance >= price,
+                int128(buyer.balance) >= price,
                 "GraffitETH2: buyer cannot afford pixel"
             );
 
@@ -994,17 +994,13 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         address account,
         address receiver
     ) internal {
-        int128 balance = getBalance(account);
+        int64 balance = getBalance(account);
         require(
             balance >= 0,
             "GraffitETH2: account balance must not be negative"
         );
-        uint64 amount;
-        if (balance >= type(uint64).max) {
-            amount = type(uint64).max;
-        } else {
-            amount = uint64(balance);
-        }
+        assert(int128(balance) <= type(uint64).max);
+        uint64 amount = uint64(balance);
         _withdraw(sender, account, amount, receiver);
     }
 
@@ -1023,7 +1019,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         (acc, taxesPaid) = _payTaxes(acc);
 
         require(
-            acc.balance >= amount,
+            int128(acc.balance) >= amount,
             "GraffitETH2: cannot withdraw more than balance"
         );
         acc = _decreaseBalance(acc, amount);
@@ -1111,11 +1107,11 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         // Transfer min(balance, em.amount) from owner to claimer, but only if it exceeds
         // minAmount.
         uint64 amount;
-        if (sender.balance >= em.amount) {
+        if (int128(sender.balance) >= em.amount) {
             amount = em.amount;
         } else {
             if (sender.balance >= 0) {
-                assert(sender.balance <= type(uint64).max); // balance < em.amount <= uint64.max
+                assert(int128(sender.balance) <= type(uint64).max); // balance < em.amount <= uint64.max
                 amount = uint64(sender.balance);
             } else {
                 amount = 0;
@@ -1193,23 +1189,27 @@ library ClampedMath {
         return res;
     }
 
-    function addInt128(int128 a, uint64 b) internal pure returns (int128) {
-        int128 res;
-        if (a <= type(int128).max - b) {
-            res = a + b;
+    function addInt64(int64 a, uint64 b) internal pure returns (int64) {
+        int256 resExact = int256(a) + b;
+        int64 res;
+        if (resExact > type(int64).max) {
+            res = type(int64).max;
         } else {
-            res = type(int128).max;
+            assert(resExact >= type(int64).min);
+            res = int64(resExact);
         }
-        assert(res >= a && ((a >= 0 && res >= b) || (a < 0 && res < b)));
+        assert(res >= a);
         return res;
     }
 
-    function subInt128(int128 a, uint64 b) internal pure returns (int128) {
-        int128 res;
-        if (a >= type(int128).min + b) {
-            res = a - b;
+    function subInt64(int64 a, uint64 b) internal pure returns (int64) {
+        int256 resExact = int256(a) - b;
+        int64 res;
+        if (resExact < type(int64).min) {
+            res = type(int64).min;
         } else {
-            res = type(int128).min;
+            assert(resExact <= type(int64).max);
+            res = int64(resExact);
         }
         assert(res <= a);
         return res;
@@ -1267,22 +1267,22 @@ library Taxes {
         // Compute the taxes that are actually paid. This is usually just `unaccountedTax`, unless
         // the account cannot afford it in part or in full.
         uint64 taxesPaid;
-        if (acc.balance >= unaccountedTaxes) {
+        if (int128(acc.balance) >= unaccountedTaxes) {
             taxesPaid = unaccountedTaxes;
         } else if (acc.balance >= 0) {
-            assert(acc.balance <= type(uint64).max); // balance < unaccountedTaxes <= uint64.max
+            assert(int128(acc.balance) <= type(uint64).max); // balance < unaccountedTaxes <= uint64.max
             taxesPaid = uint64(acc.balance);
         } else {
             taxesPaid = 0;
         }
         assert(taxesPaid <= unaccountedTaxes);
         assert(
-            (acc.balance >= 0 && taxesPaid <= acc.balance) ||
+            (acc.balance >= 0 && taxesPaid <= int128(acc.balance)) ||
                 (acc.balance < 0 && taxesPaid == 0)
         );
 
         // Update the account record
-        acc.balance = ClampedMath.subInt128(acc.balance, unaccountedTaxes);
+        acc.balance = ClampedMath.subInt64(acc.balance, unaccountedTaxes);
         assert(block.timestamp >= acc.lastTaxPayment);
         acc.lastTaxPayment = uint64(block.timestamp);
         acc.totalTaxesPaid = ClampedMath.addUint64(

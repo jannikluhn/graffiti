@@ -1017,8 +1017,6 @@ describe("Claiming", function () {
     let a2TotalTaxesPaidBefore = await c.getTotalTaxesPaidBy(a2);
     expect(a2BalanceBefore).to.be.lte(0);
 
-    console.log((a2BalanceBefore * 1e-9).toString())
-
     await c2.claim(0, parseEtherToGWei("20"), 0);
     expect(await c.getBalance(a2)).to.be.equal(a2BalanceBefore.add(parseEtherToGWei("10")));
     expect(await c.getTotalTaxesPaidBy(a2)).to.be.equal(a2TotalTaxesPaidBefore.add(parseEtherToGWei("10")));
