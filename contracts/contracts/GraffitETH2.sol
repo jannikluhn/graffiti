@@ -699,13 +699,33 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         return account;
     }
 
-    function _increaseBalance(Account memory account, uint64 amount)
-        internal
-        pure
-        returns (Account memory)
-    {
+    function _increaseBalance(
+        Account memory account,
+        uint64 amount,
+        uint64 taxesPaid
+    ) internal pure returns (Account memory, uint64) {
+        // if the balance is negative, the account owes taxes, so the increase in balance has to
+        // go towards taxesPaid
+        if (account.balance < 0) {
+            // balance is int128 which can't represent -type(int128).min. Therefore, convert to
+            // int256 before flipping the sign.
+            int256 taxesOwed = -int256(account.balance);
+            uint64 taxes;
+            if (taxesOwed >= amount) {
+                taxes = amount;
+            } else {
+                assert(taxesOwed <= type(uint64).max); // taxesOwed < amount <= uint64.max
+                taxes = uint64(taxesOwed);
+            }
+            taxesPaid = ClampedMath.addUint64(taxesPaid, taxes);
+            account.totalTaxesPaid = ClampedMath.addUint64(
+                account.totalTaxesPaid,
+                taxes
+            );
+        }
+
         account.balance = ClampedMath.addInt128(account.balance, amount);
-        return account;
+        return (account, taxesPaid);
     }
 
     function _decreaseBalance(Account memory account, uint64 amount)
@@ -801,7 +821,11 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
 
                 // update seller balance and tax base
                 uint64 oldPrice = _pixelPrices[argss[i].pixelID];
-                seller = _increaseBalance(seller, price);
+                (seller, taxesPaid) = _increaseBalance(
+                    seller,
+                    price,
+                    taxesPaid
+                );
                 seller = _decreaseTaxBase(seller, oldPrice);
                 sellers[sellerIndex] = seller;
 
@@ -953,25 +977,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         );
         uint64 amount = uint64(valueGWei);
 
-        // if the account owes taxes pay them from the deposited amount
-        if (acc.balance < 0) {
-            // balance is int128 which can't represent -type(int128).min. Therefore, convert to
-            // int256 before flipping the sign.
-            int256 taxesOwed = -int256(acc.balance);
-            uint64 taxes;
-            if (taxesOwed >= amount) {
-                taxes = amount;
-            } else {
-                assert(taxesOwed <= type(uint64).max); // taxesOwed < amount <= uint64.max
-                taxes = uint64(taxesOwed);
-            }
-            taxesPaid = ClampedMath.addUint64(taxesPaid, taxes);
-            acc.totalTaxesPaid = ClampedMath.addUint64(
-                acc.totalTaxesPaid,
-                taxes
-            );
-        }
-        acc = _increaseBalance(acc, amount);
+        (acc, taxesPaid) = _increaseBalance(acc, amount, taxesPaid);
 
         _accounts[account] = acc;
         _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
@@ -1021,7 +1027,6 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
             "GraffitETH2: cannot withdraw more than balance"
         );
         acc = _decreaseBalance(acc, amount);
-
 
         _accounts[account] = acc;
         _totalTaxesPaid = ClampedMath.addUint64(_totalTaxesPaid, taxesPaid);
@@ -1118,7 +1123,7 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
         }
         require(amount >= minAmount, "GraffitETH2: amount is too small");
         sender = _decreaseBalance(sender, amount);
-        receiver = _increaseBalance(receiver, amount);
+        (receiver, taxesPaid) = _increaseBalance(receiver, amount, taxesPaid);
 
         _accounts[owner] = sender;
         _accounts[claimer] = receiver;

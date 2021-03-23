@@ -1001,6 +1001,29 @@ describe("Claiming", function () {
     await c2.claim(0, parseEtherToGWei("20"), 0);
     expect((await c2.getBalance(a2)).sub(b).abs()).to.be.lte(5000);
   });
+
+  it("should pay taxes if account is indebted", async function () {
+    await c2.deposit({ value: ethers.utils.parseEther("5.1") });
+    await c2.edit(a2, [[1, initialPrice, parseEtherToGWei("10000"), 0]], [], []);
+    await network.provider.send("evm_increaseTime", [31 * 24 * 60 * 60]);
+    await network.provider.send("evm_mine", []);
+
+    // set pixel prices to zero to make sure taxes don't change from now on, simplifying tests
+    await c.edit(a1, [], [], [[0, 0]]);
+    await c2.edit(a2, [], [], [[1, 0]]);
+
+    let a2BalanceBefore = await c.getBalance(a2);
+    let totalTaxesPaidBefore = await c.getTotalTaxesPaid();
+    let a2TotalTaxesPaidBefore = await c.getTotalTaxesPaidBy(a2);
+    expect(a2BalanceBefore).to.be.lte(0);
+
+    console.log((a2BalanceBefore * 1e-9).toString())
+
+    await c2.claim(0, parseEtherToGWei("20"), 0);
+    expect(await c.getBalance(a2)).to.be.equal(a2BalanceBefore.add(parseEtherToGWei("10")));
+    expect(await c.getTotalTaxesPaidBy(a2)).to.be.equal(a2TotalTaxesPaidBefore.add(parseEtherToGWei("10")));
+    expect(await c.getTotalTaxesPaid()).to.be.equal(totalTaxesPaidBefore.add(parseEtherToGWei("10")));
+  });
 });
 
 function weiToGWei(wei) {
