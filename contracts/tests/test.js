@@ -933,7 +933,7 @@ describe("Earmarking", function () {
   it("should be reset when pixel is bought", async function () {
     await c.earmark(0, a2, parseEtherToGWei("10"));
     await expect(c3.edit(a3, [[0, parseEtherToGWei("10"), 0, 0]], [], []))
-      .to.emit(c, "Earmarked").withArgs(0, a3, ethers.constants.AddressZero, 0);
+      .to.emit(c, "Earmarked").withArgs(0, a1, ethers.constants.AddressZero, 0);
     expect(await c.getEarmarkReceiver(0)).to.be.equal(ethers.constants.AddressZero);
     expect(await c.getEarmarkAmount(0)).to.be.equal(0);
   });

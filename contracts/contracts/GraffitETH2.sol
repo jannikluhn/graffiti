@@ -830,8 +830,8 @@ contract GraffitETH2 is ERC721, Ownable, RugPull {
                 sellers[sellerIndex] = seller;
 
                 // perform transfer
+                _earmark(argss[i].pixelID, sellerAddress, address(0), 0); // cancel any earmark
                 _transfer(sellerAddress, buyerAddress, argss[i].pixelID);
-                _earmark(argss[i].pixelID, buyerAddress, address(0), 0); // cancel any earmark
             } else {
                 sellerAddress = address(0);
                 initialSaleRevenue = ClampedMath.addUint64(
