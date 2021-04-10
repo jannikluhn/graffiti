@@ -307,6 +307,9 @@ export default {
           ],
           [],
           [],
+          {
+            value: this.deposit,
+          },
         );
         this.newPriceInput = ""
       } catch(err) {
