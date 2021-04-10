@@ -74,7 +74,12 @@ export default {
       try {
         let signer = this.$provider.getSigner(this.account)
         let contract = this.$contract.connect(signer)
-        await contract.setColor(this.pixelID, colorHexIndices[this.colorHex])
+        await contract.edit(
+          this.account,
+          [],
+          [[this.pixelID, colorHexIndices[this.colorHex]]],
+          [],
+        )
       } catch(err) {
         this.$emit('error', 'Failed to send change color transaction: ' + err.message)
       }

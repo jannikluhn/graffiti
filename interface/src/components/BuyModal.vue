@@ -295,15 +295,19 @@ export default {
       try {
         let signer = this.$provider.getSigner(this.account)
         let contract = this.$contract.connect(signer)
-        await contract.depositAndBuy(
+        await contract.depositAndEdit(
+          this.account,
           [
-            this.pixelID,
-            weiToGWei(this.price),
-            weiToGWei(this.newPrice),
-            this.color,
+            [
+              this.pixelID,
+              weiToGWei(this.price),
+              weiToGWei(this.newPrice),
+              this.color,
+            ],
           ],
-          {value: this.deposit}
-        )
+          [],
+          [],
+        );
         this.newPriceInput = ""
       } catch(err) {
         this.$emit('error', 'Failed to send buy transaction: ' + err.message)
