@@ -58,7 +58,12 @@ export default {
       try {
         let signer = this.$provider.getSigner(this.account)
         let contract = this.$contract.connect(signer)
-        await contract.setPrice(this.pixelID, weiToGWei(this.price))
+        await contract.edit(
+          this.account,
+          [],
+          [],
+          [[this.pixelID, weiToGWei(this.price)]],
+        )
         this.priceInput = ""
       } catch(err) {
         this.$emit('error', 'Failed to send change price transaction: ' + err.message)
