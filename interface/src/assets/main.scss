@@ -71,8 +71,9 @@ $tabs-toggle-link-active-background-color: rgb(173, 173, 173);
 
 .disclaimer {
   font-weight: 700;
-  margin: 30px;
-  color: rgb(247, 99, 82);
+  margin: 4px 12px;
+  color: #fff;
+  font-size: 13px;
 }
 
 .interface {
@@ -83,4 +84,12 @@ $tabs-toggle-link-active-background-color: rgb(173, 173, 173);
   transform: scale(1.18);
   transform-origin: top left;
   z-index: 1000;
+}
+
+.fixed-footer {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  background-color: #f14668;
 }

@@ -153,9 +153,6 @@
                 <li>Follow our Twitter account <a href="https://twitter.com/@graffiteth">@graffiteth</a> for updates!</li>
               </ol>
             </div>
-            <div class="disclaimer">
-              Disclaimer: These contracts are unaudited.<br>We think it’s safe, but who the hell knows, so please don’t put your life savings in here.
-            </div>
           </div>
         </section>
     </div>
