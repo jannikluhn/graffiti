@@ -18,17 +18,6 @@
           v-bind:account="account"
           v-if="!wrongNetwork"
         />
-<!-- 
-        <Recover
-          v-on:error="onError($event)"
-          v-bind:account="account"
-          v-if="account"
-        />
-        <DepositOld
-          v-on:error="onError($event)"
-          v-bind:account="account"
-          v-if="account"
-        /> -->
 
         <AccountPanel
           v-on:error="onError($event)"
@@ -88,8 +77,6 @@ import AccountPanel from './Account/AccountPanel.vue'
 import PixelPanel from './PixelPanel.vue'
 import OwnedPixelPanel from './OwnedPixelPanel.vue'
 import AboutModal from './AboutModal.vue'
-// import Recover from './Recover.vue'
-// import DepositOld from './DepositOld.vue'
 
 import { gWeiToWei } from '../utils'
 
@@ -103,8 +90,6 @@ export default {
     PixelPanel,
     OwnedPixelPanel,
     AboutModal,
-    // Recover,
-    // DepositOld,
   },
   props: [
     "selectedPixel",
