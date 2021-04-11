@@ -3,12 +3,12 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: GraffitETH
+    name: GraffitETH2
     network: xdai
     source:
-      address: "0xc56F6037596116875ABEa6845f60dA88088F06Ea"
-      startBlock: 14502172
-      abi: GraffitETH
+      address: "0xA70e070C350F97200CA28F9FBe0Dc85c2c8ca79E"
+      startBlock: 15485856
+      abi: GraffitETH2
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -16,17 +16,17 @@ dataSources:
       entities:
         - Graffiti
       abis:
-        - name: GraffitETH
-          file: ./abis/GraffitETH.json
+        - name: GraffitETH2
+          file: ./abis/GraffitETH2.json
       eventHandlers:
-        - event: ColorChange(uint256,address,uint8)
-          handler: handleColorChange
-        - event: PriceChange(uint256,address,uint64)
-          handler: handlePriceChange
-        - event: Buy(uint256,address,address,uint64)
-          handler: handleBuy
-        - event: EarmarkUpdate(uint256,address,uint64)
-          handler: handleEarmarkUpdate
-        - event: PixelClaim(uint256,uint64)
-          handler: handlePixelClaim
+        - event: ColorChanged(indexed uint256,indexed address,uint8)
+          handler: handleColorChanged
+        - event: PriceChanged(indexed uint256,indexed address,uint64)
+          handler: handlePriceChanged
+        - event: Bought(indexed uint256,indexed address,indexed address,uint64)
+          handler: handleBought
+        - event: Earmarked(indexed uint256,indexed address,indexed address,uint64)
+          handler: handleEarmarked
+        - event: PixelClaimed(indexed uint256,indexed address,indexed address,uint64)
+          handler: handlePixelClaimed
       file: ./src/mapping.ts

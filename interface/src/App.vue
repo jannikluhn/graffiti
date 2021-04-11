@@ -45,8 +45,8 @@ export default {
       if (!this.network) {
         return null
       }
-      // return this.network.chainId != 100 // xDai
-      return this.network.chainId != 5 // goerli
+      return this.network.chainId != 100 // xDai
+      // return this.network.chainId != 5 // goerli
     }
   },
 

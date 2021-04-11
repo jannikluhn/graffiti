@@ -6,8 +6,8 @@ dataSources:
     name: GraffitETH2
     network: goerli
     source:
-      address: "0xA181213ac490c80919bF7B5274f970731f64Bb2D"
-      startBlock: 4363034
+      address: "0xfceb656aB7279D77a4Da0022FaD841eBfCdd4451"
+      startBlock: 4595046
       abi: GraffitETH2
     mapping:
       kind: ethereum/events
