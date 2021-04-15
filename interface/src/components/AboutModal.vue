@@ -13,7 +13,7 @@
           <div class="tabs is-centered is-small">
             <ul>
               <li v-bind:class="{'is-active': selectedTab==0}" v-on:click="selectedTab=0"><a><strong>About</strong></a></li>
-              <li v-bind:class="{'is-active': selectedTab==1}" v-on:click="selectedTab=1"><a><strong>How-to</strong></a></li>
+              <li v-bind:class="{'is-active': selectedTab==1}" v-on:click="selectedTab=1"><a><strong>How to</strong></a></li>
             </ul>
           </div>
           <div v-if="selectedTab==0">
