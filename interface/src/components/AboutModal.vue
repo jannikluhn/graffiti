@@ -95,7 +95,7 @@
               Nerdy stuff
             </label>
             <p>
-              Contract address: <a href="https://blockscout.com/poa/xdai/address/0xc56F6037596116875ABEa6845f60dA88088F06Ea/transactions">0xc56F6037596116875ABEa6845f60dA88088F06Ea"</a>
+              Contract address: <a href="https://blockscout.com/poa/xdai/address/0xA70e070C350F97200CA28F9FBe0Dc85c2c8ca79E/transactions">0xA70e070C350F97200CA28F9FBe0Dc85c2c8ca79E"</a>
             </p>
             <p>
               Source code: <a href="https://github.com/jannikluhn/graffiti">https://github.com/jannikluhn/graffiti</a>
