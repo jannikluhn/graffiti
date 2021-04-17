@@ -44,6 +44,7 @@ export function handleBought(event: Bought): void {
 }
 
 export function handlePriceChanged(event: PriceChanged): void {
+  log.debug("price changed {}", [event.params.pixelID.toHex()]);
   let id = event.params.pixelID.toHex()
   let pixel = Pixel.load(id);
   if (pixel == null) {
@@ -57,13 +58,15 @@ export function handlePriceChanged(event: PriceChanged): void {
   pixel.save();
 }
 
-export function handleEarmarkUpdate(event: Earmarked): void {
+export function handleEarmarked(event: Earmarked): void {
+  log.debug("earmarked {}", [event.params.pixelID.toHex()]);
   let pixel = Pixel.load(event.params.pixelID.toHex())
   pixel.earmarkedReceiver = event.params.receiver;
   pixel.save();
 }
 
-export function handleClaim(event: PixelClaimed): void {
+export function handlePixelClaimed(event: PixelClaimed): void {
+  log.debug("pixel claimed {}", [event.params.pixelID.toHex()]);
   let pixel = Pixel.load(event.params.pixelID.toHex());
   pixel.owner = pixel.earmarkedReceiver;
   pixel.save();
