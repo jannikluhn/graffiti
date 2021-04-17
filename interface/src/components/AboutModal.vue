@@ -22,7 +22,7 @@
                 What it is
               </label>
               <p>
-                 GraffitETH is the Ethereum graffiti wall, based on the Harberger tax. It’s an experiment in market socialism using Harberger taxes, a collaborative artwork, and a window into Ethereum for the world. Created by <a href="http://marianono.superhi.com/">Maria Nogueira</a>, <a href="https://github.com/jannikluhn">Jannik Luhn</a>, and <a href="https://twitter.com/aleezagroks">Aleeza Howitt</a>.
+                 GraffitETH is the Ethereum graffiti wall, based on the Harberger tax. It’s an experiment in market socialism, a collaborative artwork, and a window into Ethereum for the world. Created by <a href="https://twitter.com/aleezagroks">Aleeza Howitt</a>, <a href="https://github.com/jannikluhn">Jannik Luhn</a>, and <a href="http://marianono.superhi.com/">Maria Nogueira</a>.
               </p>
             </div>
 
@@ -31,10 +31,13 @@
               How it works
             </label>
             <p>
-              GraffitETH is a digital graffiti wall in which pixels are NFTs (non-fungible tokens, a type of digital property) subject to the Harberger tax. What that means: You can paint a pixel by buying the NFT, but anyone else can buy it from you immediately and paint over it. To prevent other people from painting over your pixel, you must set a high price... But you can’t set it too high, since you will have to pay pixel taxes on it!
+              GraffitETH is a digital graffiti wall in which pixels are NFTs (non-fungible tokens, a type of digital property) subject to the Harberger tax.
             </p>
             <p>
-              Anyone can participate and paint the wall. To get started, you’ll need to set up a web3 Ethereum wallet (for managing your crypto assets and interacting with the GraffitETH smart contract) and load it with xDAI (the cryptocurrency used for buying and paying taxes on the pixels, and for paying transaction fees on the xDai blockchain). Check out the User Guide for details.
+              What that means: You can paint a pixel by buying the NFT, but anyone else can buy it from you immediately and paint over it. To prevent other people from painting over your pixel, you must set a high price... But you can’t set it too high, since you will have to pay pixel taxes on it!
+            </p>
+            <p>
+              Anyone can participate and paint the wall. To get started, you’ll need to set up a web3 Ethereum wallet (for managing your crypto assets and interacting with the GraffitETH smart contract) and load it with xDAI (the cryptocurrency used for buying and paying taxes on the pixels, and for paying transaction fees on the xDai blockchain). Check out the How to guide for details.
             </p>
           </div>
 
