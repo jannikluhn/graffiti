@@ -16,7 +16,7 @@
               <li v-bind:class="{'is-active': selectedTab==1}" v-on:click="selectedTab=1"><a><strong>How to</strong></a></li>
             </ul>
           </div>
-          <div v-if="selectedTab==0">
+          <div class="pb-4" v-if="selectedTab==0">
             <div>
               <label class="label">
                 What it is
@@ -116,7 +116,7 @@
           </div>
             
           </div>
-          <div v-if="selectedTab==1">
+          <div class="pb-4" v-if="selectedTab==1">
             <div>
               <label class="label">
               Web3 Setup
