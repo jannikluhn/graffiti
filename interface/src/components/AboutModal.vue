@@ -37,7 +37,7 @@
               What that means: You can paint a pixel by buying the NFT, but anyone else can buy it from you immediately and paint over it. To prevent other people from painting over your pixel, you must set a high price... But you can’t set it too high, since you will have to pay pixel taxes on it!
             </p>
             <p class="mb-2">
-              Anyone can participate and paint the wall. To get started, you’ll need to set up a web3 Ethereum wallet (for managing your crypto assets and interacting with the GraffitETH smart contract) and load it with xDAI (the cryptocurrency used for buying and paying taxes on the pixels, and for paying transaction fees on the xDai blockchain). Check out the How to guide for details.
+              Anyone can participate and paint the wall. To get started, you’ll need to set up a web3 Ethereum wallet (for managing your crypto assets and interacting with the GraffitETH smart contract) and load it with xDAI (the cryptocurrency used for buying and paying taxes on the pixels, and for paying transaction fees on the xDai blockchain). Check out the <a v-on:click="selectedTab=1">How to</a> guide for details.
             </p>
           </div>
 
