@@ -30,13 +30,13 @@
             <label class="label">
               How it works
             </label>
-            <p>
+            <p class="mb-2">
               GraffitETH is a digital graffiti wall in which pixels are NFTs (non-fungible tokens, a type of digital property) subject to the Harberger tax.
             </p>
-            <p>
+            <p class="mb-2">
               What that means: You can paint a pixel by buying the NFT, but anyone else can buy it from you immediately and paint over it. To prevent other people from painting over your pixel, you must set a high price... But you can’t set it too high, since you will have to pay pixel taxes on it!
             </p>
-            <p>
+            <p class="mb-2">
               Anyone can participate and paint the wall. To get started, you’ll need to set up a web3 Ethereum wallet (for managing your crypto assets and interacting with the GraffitETH smart contract) and load it with xDAI (the cryptocurrency used for buying and paying taxes on the pixels, and for paying transaction fees on the xDai blockchain). Check out the How to guide for details.
             </p>
           </div>
@@ -54,7 +54,7 @@
             <label class="label">
               Why the Harberger tax?
             </label>
-            <p>
+            <p class="mb-2">
               The Harberger tax is a market tool theorized to encourage fair property prices, and thus ensure that everyone pays an appropriate amount of taxes. You could consider it a compromise between public and private property ownership. It’s not a new idea, but it has never been put into practice on a large scale.
             </p>
             <p>
@@ -66,7 +66,7 @@
             <label class="label">
               Why are pixel taxes 1% per month?
             </label>
-            <p>
+            <p class="mb-2">
               The Common Ownership Self-Assessed Tax (COST) plan as described in the book <a href="https://assets.press.princeton.edu/chapters/s11222.pdf">Radical Markets by E. Glen Weyl and Eric A. Posner</a> suggests a tax rate of 7% per year: “Because tax rates would, ideally, be adapted to assets based on turnover rates, some assets unlikely to turn over often (family heirlooms and photographs, diaries) would be taxed at very low rates, while others (such as trendy gadgets) would be taxed at high rates. When tax rates are very low, the possessor can prevent others from taking an item by paying a small tax. For typical assets, we estimate that turnover once every fourteen years is reasonable and thus (combined with other factors below) a 7% tax annually is a good target.” (p. 64-65)
             </p>
             <p>
