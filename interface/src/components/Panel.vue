@@ -1,16 +1,14 @@
 <template>
-  <article class="panel is-outlined m-4">
-    <div class="panel-heading">
+  <article>
+    <div>
       {{ title }}
       <chevron-up-icon
         v-if="!folded"
-        class="is-pulled-right"
         size="1.5x"
         v-on:click="folded = true"
       ></chevron-up-icon>
       <chevron-down-icon
         v-if="folded"
-        class="is-pulled-right"
         size="1.5x"
         v-on:click="folded = false"
       ></chevron-down-icon>

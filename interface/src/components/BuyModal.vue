@@ -1,14 +1,13 @@
 <template>
-  <div class="modal is-fullwidth buy" v-bind:class="{'is-active': active}">
-    <div class="modal-background"></div>
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">Buy Pixel</p>
-          <button class="delete" aria-label="close" v-on:click="close()"></button>
+  <div v-bind:class="{'is-active': active}">
+      <div>
+        <header>
+          <p>Buy Pixel</p>
+          <button aria-label="close" v-on:click="close()"></button>
         </header>
 
-        <section class="modal-card-body">
-          <table class="table is-fullwidth has-text-centered">
+        <section>
+          <table>
             <thead>
               <th>Pixel ID</th>
               <th>Coordinates</th>
@@ -24,11 +23,11 @@
           </table>
 
           <form>
-            <div class="field">
-              <label class="label">
+            <div>
+              <label>
                 New Color
               </label>
-              <div class="control">
+              <div>
                 <v-swatches 
                   v-model="colorSwatch" 
                   :swatches="swatches"
@@ -37,13 +36,12 @@
               </div>
             </div>
 
-            <div class="field columns">
-              <div class="column">
-                <label class="label">
+            <div>
+              <div>
+                <label>
                   New Price (xDai)
                 </label>
                 <input
-                  class="input is-expanded"
                   v-bind:class="{
                     'is-danger': newPriceInput && newPriceInvalid,
                   }"
@@ -52,28 +50,27 @@
                   v-model="newPriceInput"
                 >
               </div>
-              <div class="column">
-                <label class="label">
+              <div>
+                <label>
                   Added Monthly Tax
                 </label>
                 <p>{{ formatDAI(addedTax) }}</p>
               </div>
             </div>
 
-            <div v-if="totalTax !== null && !newPriceInvalid && newPrice.gt(0)" class="field has-text-success">
+            <div v-if="totalTax !== null && !newPriceInvalid && newPrice.gt(0)">
               Your monthly tax will increase to {{ formatDAI(totalTax) }}.
             </div>
-            <div v-if="totalTax !== null && !newPriceInvalid && newPrice.eq(0)" class="field has-text-success">
+            <div v-if="totalTax !== null && !newPriceInvalid && newPrice.eq(0)">
               Your monthly tax will remain unchanged at {{ formatDAI(totalTax) }}.
             </div>
 
-            <div class="field columns">
-              <div class="column">
-                <label class="label">
+            <div>
+              <div>
+                <label>
                   Amount to Deposit (xDai)
                 </label>
                 <input
-                  class="input is-expanded"
                   v-bind:class="{
                     'is-danger': depositInput && depositInvalid,
                   }"
@@ -82,25 +79,23 @@
                   v-model="depositInput"
                 >
               </div>
-              <div class="column">
-                <label class="label">
+              <div>
+                <label>
                   Current balance
                 </label>
                 <p>{{ formatDAI(balance) }}</p>
               </div>
             </div>
 
-            <div class="field">
+            <div>
               <p
                 v-if="(newPriceInput != '' && newPriceInvalid) || (depositInput != '' && depositInvalid)"
-                class="has-text-danger"
               >
                 Some of your inputs are invalid. Please make sure the new price and the deposit
                 amount are properly formatted, are not negative, and are not too fractional.
               </p>
               <p
                 v-if="!inputsInvalid && totalDepositCoversCost && totalDepositSufficient"
-                class="has-text-success"
               >
                 The cost of the pixel will be transferred from your deposit to the seller.
                 After the transaction is complete, your balance will be
@@ -112,14 +107,12 @@
               </p>
               <p
                 v-if="!inputsInvalid && !totalDepositCoversCost"
-                class="has-text-danger"
               >
                 Your current balance is insufficient to pay for the pixel. Please increase the
                 deposit amount by at least {{ formatDAI(balanceAfterPayment.mul(-1)) }}.
               </p>
               <p
                 v-if="!inputsInvalid && totalDepositCoversCost && !totalDepositSufficient && !noTaxesPaid"
-                class="has-text-warning"
               >
                 Your current deposit is sufficient to pay for the pixel, but not much will be left
                 to pay for Harberger taxes. If you don't increase your deposit, you risk losing all
@@ -131,14 +124,13 @@
           </form>
         </section>
 
-        <footer class="modal-card-foot">
+        <footer>
           <button
-            class="button is-dark"
             v-bind:class="{'is-loading': waitingForTx}"
             v-bind:disabled="buyButtonDisabled"
             v-on:click="buy()"
           >Buy</button>
-          <button class="button" v-on:click="close()">Cancel</button>
+          <button v-on:click="close()">Cancel</button>
         </footer>
     </div>
   </div>

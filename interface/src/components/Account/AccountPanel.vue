@@ -1,7 +1,7 @@
 <template>
   <Panel title="Account">
-    <div class="panel-block">
-      <table class="table is-fullwidth">
+    <div>
+      <table>
         <tbody>
           <tr>
             <th>Address</th>
@@ -20,10 +20,10 @@
         </tbody>
       </table>
     </div>
-    <div class="panel-block">
-      <form class="is-fullwidth">
-        <div class="field">
-          <label class="label">
+    <div>
+      <form>
+        <div>
+          <label>
             Manage account balance
           </label>
           <DepositField

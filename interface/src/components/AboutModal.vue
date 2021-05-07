@@ -1,24 +1,23 @@
 <template>
-  <div class="modal" v-bind:class="{'is-active': active}">
-    <div class="modal-background"></div>
-      <div class="modal-card info">
-        <header class="modal-card-head">
-          <!-- <p class="modal-card-title">About</p> -->
-          <button class="delete is-pulled-right" aria-label="close" v-on:click="close()"></button>
+  <div v-bind:class="{'is-active': active}">
+    <div></div>
+      <div>
+        <header>
+          <button aria-label="close" v-on:click="close()"></button>
         </header>
-        <section class="modal-card-body">
-          <div class="img">
+        <section>
+          <div>
             <img src="../assets/logoRainbow.svg" width="387px" alt="GraffitETH">
           </div>
-          <div class="tabs is-centered is-small">
+          <div>
             <ul>
               <li v-bind:class="{'is-active': selectedTab==0}" v-on:click="selectedTab=0"><a><strong>About</strong></a></li>
               <li v-bind:class="{'is-active': selectedTab==1}" v-on:click="selectedTab=1"><a><strong>How to</strong></a></li>
             </ul>
           </div>
-          <div class="pb-4" v-if="selectedTab==0">
+          <div v-if="selectedTab==0">
             <div>
-              <label class="label">
+              <label>
                 What it is
               </label>
               <p>
@@ -27,22 +26,22 @@
             </div>
 
           <div>
-            <label class="label">
+            <label>
               How it works
             </label>
-            <p class="mb-2">
+            <p>
               GraffitETH is a digital graffiti wall in which pixels are NFTs (non-fungible tokens, a type of digital property) subject to the Harberger tax.
             </p>
-            <p class="mb-2">
+            <p>
               What that means: You can paint a pixel by buying the NFT, but anyone else can buy it from you immediately and paint over it. To prevent other people from painting over your pixel, you must set a high price... But you can’t set it too high, since you will have to pay pixel taxes on it!
             </p>
-            <p class="mb-2">
+            <p>
               Anyone can participate and paint the wall. To get started, you’ll need to set up a web3 Ethereum wallet (for managing your crypto assets and interacting with the GraffitETH smart contract) and load it with xDAI (the cryptocurrency used for buying and paying taxes on the pixels, and for paying transaction fees on the xDai blockchain). Check out the <a v-on:click="selectedTab=1">How to</a> guide for details.
             </p>
           </div>
 
           <div>
-            <label class="label">
+            <label>
               What do you do with the money?
             </label>
             <p>
@@ -51,10 +50,10 @@
           </div>
 
           <div>
-            <label class="label">
+            <label>
               Why the Harberger tax?
             </label>
-            <p class="mb-2">
+            <p>
               The Harberger tax is a market tool theorized to encourage fair property prices, and thus ensure that everyone pays an appropriate amount of taxes. You could consider it a compromise between public and private property ownership. It’s not a new idea, but it has never been put into practice on a large scale.
             </p>
             <p>
@@ -63,10 +62,10 @@
           </div>
 
           <div>
-            <label class="label">
+            <label>
               Why are pixel taxes 1% per month?
             </label>
-            <p class="mb-2">
+            <p>
               The Common Ownership Self-Assessed Tax (COST) plan as described in the book <a href="https://assets.press.princeton.edu/chapters/s11222.pdf">Radical Markets by E. Glen Weyl and Eric A. Posner</a> suggests a tax rate of 7% per year: “Because tax rates would, ideally, be adapted to assets based on turnover rates, some assets unlikely to turn over often (family heirlooms and photographs, diaries) would be taxed at very low rates, while others (such as trendy gadgets) would be taxed at high rates. When tax rates are very low, the possessor can prevent others from taking an item by paying a small tax. For typical assets, we estimate that turnover once every fourteen years is reasonable and thus (combined with other factors below) a 7% tax annually is a good target.” (p. 64-65)
             </p>
             <p>
@@ -75,7 +74,7 @@
           </div>
 
           <div>
-            <label class="label">
+            <label>
              Why blockchain?
             </label>
             <p>
@@ -84,7 +83,7 @@
           </div>
 
             <div>
-              <label class="label">
+              <label>
                 Why xDai?
               </label>
               <p>
@@ -94,7 +93,7 @@
 
 
           <div>
-            <label class="label">
+            <label>
               Nerdy stuff
             </label>
             <p>
@@ -109,7 +108,7 @@
           </div>
 
           <div>
-            <label class="label">
+            <label>
               Acknowledgements
             </label>
             <p>
@@ -119,9 +118,9 @@
           </div>
             
           </div>
-          <div class="pb-4" v-if="selectedTab==1">
+          <div v-if="selectedTab==1">
             <div>
-              <label class="label">
+              <label>
               Web3 Setup
               </label>
               <ol>
@@ -132,7 +131,7 @@
               </ol>
             </div>
             <div>
-              <label class="label">
+              <label>
                 Paint a Pixel
               </label>
               <ol>
@@ -147,7 +146,7 @@
               </ol>
             </div>
             <div>
-              <label class="label">
+              <label>
                 GraffitETH DAO
               </label>
               <ol>

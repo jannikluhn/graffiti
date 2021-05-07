@@ -1,10 +1,10 @@
 <template>
   <Panel title="Your Pixels">
-    <div v-if="!pixels.length" class="panel-block">
+    <div v-if="!pixels.length">
       <p>You don't seem to own any pixels.</p>
     </div>
-    <div v-else class="panel-block">
-      <div class="select is-fullwidth">
+    <div v-else>
+      <div>
         <select v-on:change="onChange">
           <option
             v-for="pixel in pixels"
@@ -17,8 +17,8 @@
         </select>
       </div>
     </div>
-    <div class="panel-block" v-if="selectedPixel">
-      <table class="table is-fullwidth">
+    <div v-if="selectedPixel">
+      <table>
         <tbody>
           <tr>
             <th>Coordinates</th>
@@ -45,7 +45,7 @@
       </table>
     </div>
 
-    <div class="panel-block" v-if="selectedPixel">
+    <div v-if="selectedPixel">
       <form>
         <ChangeColorField
           v-bind:account="account"

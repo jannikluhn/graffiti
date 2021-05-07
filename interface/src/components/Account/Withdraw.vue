@@ -1,12 +1,11 @@
 <template>
-  <div class="field has-addons">
-    <div class="control">
-      <input class="input" type="text" placeholder="xDai" v-model="amountInput">
-    <p v-if="amountInput && amountInvalid" class="help is-danger">Invalid withdraw amount</p>
+  <div>
+    <div>
+      <input type="text" placeholder="xDai" v-model="amountInput">
+    <p v-if="amountInput && amountInvalid">Invalid withdraw amount</p>
     </div>
-    <div class="control">
+    <div>
       <a
-        class="button is-dark"
         v-bind:class="{'is-loading': waitingForTx}"
         v-bind:disabled="amountInvalid"
         v-on:click="withdraw"

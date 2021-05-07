@@ -3,8 +3,8 @@
     v-if="!account"
     title="Wallet Connection"
   >
-    <div class="panel-block">
-      <button class="button is-fullwidth is-dark" v-bind:class="{'is-loading': waitingForAccount}" v-on:click="connect">
+    <div>
+      <button v-bind:class="{'is-loading': waitingForAccount}" v-on:click="connect">
         Connect
       </button>
     </div>

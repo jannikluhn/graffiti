@@ -1,8 +1,8 @@
 <template>
-  <div class="field is-grouped is-grouped-centered">
-    <div class="control is-expanded">
-      <div class="columns is-centered">
-        <div class="column is-narrow">
+  <div>
+    <div>
+      <div>
+        <div>
           <v-swatches 
             v-model="colorHex" 
             :swatches="swatches"
@@ -12,9 +12,8 @@
         </div>
       </div>
     </div>
-    <div class="control">
+    <div>
       <a
-        class="button is-dark"
         v-bind:class="{'is-loading': waitingForTx}"
         v-on:click="changeColor"
         v-bind:disabled="!colorChanged"

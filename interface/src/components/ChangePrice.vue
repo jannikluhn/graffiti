@@ -1,12 +1,11 @@
 <template>
-  <div class="field has-addons">
-    <div class="control">
-      <input class="input" type="text" placeholder="xDai" v-model="priceInput">
-    <p v-if="priceInput && priceInvalid" class="help is-danger">Invalid price</p>
+  <div>
+    <div>
+      <input type="text" placeholder="xDai" v-model="priceInput">
+    <p v-if="priceInput && priceInvalid">Invalid price</p>
     </div>
-    <div class="control">
+    <div>
       <a
-        class="button is-dark"
         v-bind:class="{'is-loading': waitingForTx}"
         v-bind:disabled="priceInvalid"
         v-on:click="changePrice"

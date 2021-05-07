@@ -2,14 +2,13 @@
   <Panel title="Create Graffiti">
     <div
       v-if="!selectedPixel"
-      class="panel-block"
     >
       <p>Click on a pixel to select it.</p>
     </div>
 
     <div v-else>
-      <div class="panel-block">
-        <table class="table is-fullwidth">
+      <div>
+        <table>
           <tbody>
             <tr>
               <th>Coordinates</th>
@@ -37,9 +36,8 @@
         </table>
       </div>
 
-      <div class="panel-block">
+      <div>
         <button
-          class="button is-dark is-fullwidth"
           v-on:click="onBuyClick"
           v-bind:disabled="!account || selfOwned"
         >
