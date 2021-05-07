@@ -39,12 +39,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-@import '../assets/constants.scss';
-
-.panel {
-  pointer-events: auto;
-  width: $panel-width;
-}
-</style>

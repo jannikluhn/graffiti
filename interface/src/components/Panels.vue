@@ -175,29 +175,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-@import '../assets/constants.scss';
-
-.is-overlay {
-  pointer-events: none;
-}
-
-.is-flex {
-  height: 100vh;
-}
-
-.flex-break {
-  height: 100%;
-}
-
-.error-notification {
-  width: $panel-width;
-  pointer-events: auto;
-}
-
-.connection-notification {
-  width: $panel-width;
-  pointer-events: auto;
-}
-</style>
