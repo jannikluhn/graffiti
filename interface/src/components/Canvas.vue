@@ -49,16 +49,62 @@ function coordsEqual(c1, c2) {
   }
 }
 
+function getInitialPixelSize(canvasSize) {
+  const dim = canvasSize[0] > canvasSize[1] ? 1 : 0;
+  return clampPixelSize(canvasSize[dim] / (gridSize[dim] * 1.1));
+}
+
+function getInitialCanvasOffset(canvasSize, pixelSize) {
+  return subV(
+    divV(canvasSize, 2),
+    mulV(gridSize, pixelSize / 2),
+  );
+}
+
+function clampPixelSize(pixelSize) {
+  return Math.min(
+    Math.max(pixelSize, minPixelSize),
+    maxPixelSize,
+  );
+}
+
+function canvasToPixelCoords(canvasCoords, canvasOffset, pixelSize) {
+  if (!canvasCoords) {
+    return null
+  }
+  const pixelCoords = divV(subV(canvasCoords, canvasOffset), pixelSize);
+  const pixelCoordsRounded = [Math.floor(pixelCoords[0]), Math.floor(pixelCoords[1])];
+  if (pixelCoordsInGrid(pixelCoordsRounded)) {
+    return pixelCoordsRounded;
+  }
+  return null;
+}
+
+function pixelToCanvasCoords(pixelCoords, canvasOffset, pixelSize) {
+  if (!pixelCoords) {
+    return null
+  }
+  return addV(mulV(pixelCoords, pixelSize), canvasOffset);
+}
+
+function clampCanvasOffset(canvasOffset, canvasSize, pixelSize) {
+  let o = [canvasOffset[0], canvasOffset[1]];
+  o[0] = Math.max(o[0], -(gridSize[0] - 1) * pixelSize);
+  o[1] = Math.max(o[1], -(gridSize[1] - 1) * pixelSize);
+  o[0] = Math.min(o[0], canvasSize[0] - pixelSize);
+  o[1] = Math.min(o[1], canvasSize[1] - pixelSize);
+  return o;
+}
+
 export default {
   name: "Canvas",
-  props: ["wrongNetwork"],
 
   data() {
     return {
       ctx: null,
       canvasSize: [0, 0],
       pixelSize: 10,
-      canvasOrigin: [0, 0],
+      lastCanvasOffset: [0, 0],
       selectedPixelCoords: null,
 
       offscreenCanvas: null,
@@ -73,44 +119,30 @@ export default {
 
   computed: {
     mouseDownPixelCoords() {
-      if (!this.mouseDownCanvasCoords) {
-        return null;
-      }
-      return this.canvasToPixelCoords(this.mouseDownCanvasCoords);
+      return canvasToPixelCoords(this.mouseDownCanvasCoords, this.canvasOffset, this.pixelSize);
     },
     mouseMovePixelCoords() {
-      if (!this.mouseMoveCanvasCoords) {
-        return null;
-      }
-      return this.canvasToPixelCoords(this.mouseMoveCanvasCoords);
+      return canvasToPixelCoords(this.mouseMoveCanvasCoords, this.canvasOffset, this.pixelSize);
     },
     mouseUpPixelCoords() {
-      if (!this.mouseUpCanvasCoords) {
-        return null;
-      }
-      return this.canvasToPixelCoords(this.mouseUpCanvasCoords);
+      return canvasToPixelCoords(this.mouseUpCanvasCoords, this.canvasOffset, this.pixelSize);
     },
     dragging() {
       return !!this.mouseDownCanvasCoords;
     },
-    canvasOriginDragged() {
+    canvasOffset() {
       if (!this.mouseDownCanvasCoords || !this.mouseMoveCanvasCoords) {
-        return this.canvasOrigin;
+        return this.lastCanvasOffset;
       }
 
       let o = addV(
-        this.canvasOrigin,
+        this.lastCanvasOffset,
         subV(this.mouseMoveCanvasCoords, this.mouseDownCanvasCoords)
       );
-      o[0] = Math.max(o[0], -mulV(gridSize, this.pixelSize)[0]);
-      o[1] = Math.max(o[1], -mulV(gridSize, this.pixelSize)[1]);
-      return o;
+      return clampCanvasOffset(o, this.canvasSize, this.pixelSize);
     },
     selectedPixelCanvasCoords() {
-      if (!this.selectedPixelCoords) {
-        return null;
-      }
-      return this.pixelToCanvasCoords(this.selectedPixelCoords);
+      return pixelToCanvasCoords(this.selectedPixelCoords, this.canvasOffset, this.pixelSize);
     },
   },
 
@@ -120,14 +152,9 @@ export default {
   mounted() {
     this.ctx = this.$refs.canvas.getContext("2d");
     this.resizeCanvas();
-    this.canvasOrigin = mulV(
-      addV(mulV(gridSize, -this.pixelSize), this.canvasSize),
-      2
-    );
-    this.canvasOrigin = subV(
-      divV(this.canvasSize, 2),
-      mulV(gridSize, this.pixelSize / 2)
-    );
+
+    this.pixelSize = getInitialPixelSize(this.canvasSize);
+    this.lastCanvasOffset = getInitialCanvasOffset(this.canvasSize, this.pixelSize);
 
     this.offscreenCanvas = document.createElement("canvas");
     this.offscreenCanvas.width = gridSize[0];
@@ -166,24 +193,9 @@ export default {
       this.draw();
     },
 
-    canvasToPixelCoords(c) {
-      const pixelCoords = divV(
-        subV(c, this.canvasOriginDragged),
-        this.pixelSize
-      );
-      const p = [Math.floor(pixelCoords[0]), Math.floor(pixelCoords[1])];
-      if (!pixelCoordsInGrid(p)) {
-        return null;
-      }
-      return p;
-    },
-    pixelToCanvasCoords(c) {
-      return addV(mulV(c, this.pixelSize), this.canvasOriginDragged);
-    },
-
     resizeCanvas() {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      const w = this.$refs.canvas.clientWidth;
+      const h = this.$refs.canvas.clientHeight;
       this.canvasSize = [w, h];
       this.$refs.canvas.width = w;
       this.$refs.canvas.height = h;
@@ -203,8 +215,8 @@ export default {
         this.ctx.save();
         this.ctx.imageSmoothingEnabled = false;
         this.ctx.translate(
-          this.canvasOriginDragged[0],
-          this.canvasOriginDragged[1]
+          this.canvasOffset[0],
+          this.canvasOffset[1]
         );
         this.ctx.scale(this.pixelSize, this.pixelSize);
         this.ctx.drawImage(this.offscreenCanvas, 0, 0);
@@ -253,7 +265,7 @@ export default {
     },
 
     zoom(factor, center) {
-      const diff = subV(this.canvasOrigin, center);
+      const diff = subV(this.lastCanvasOffset, center);
       const pixelSizeBefore = this.pixelSize;
       this.pixelSize = this.pixelSize * factor;
       this.pixelSize = Math.max(this.pixelSize, minPixelSize);
@@ -261,7 +273,7 @@ export default {
 
       const realFactor = this.pixelSize / pixelSizeBefore;
       const diffScaled = mulV(diff, realFactor);
-      this.canvasOrigin = addV(center, diffScaled);
+      this.lastCanvasOffset = addV(center, diffScaled);
 
       this.draw();
     },
@@ -300,15 +312,22 @@ export default {
         this.draw();
       }
 
-      this.canvasOrigin = this.canvasOriginDragged;
+      this.lastCanvasOffset = this.canvasOffset;
       this.mouseDownCanvasCoords = null;
     },
 
     onWheel(event) {
       if (!this.mouseDownCanvasCoords) {
-        this.zoom(1 - event.deltaY / 10, [event.pageX, event.pageY]);
+        this.zoom(1 - event.deltaY / 10, mouseCanvasCoords(event));
       }
     },
   },
 };
 </script>
+
+<style lang="scss" scoped>
+canvas {
+  width: 100%;
+  height: 100%;
+}
+</style>
