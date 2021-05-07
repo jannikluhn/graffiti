@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="container">
     <div class="sidebar-container">
-      <SideBar
+      <Sidebar
         v-bind:selectedPixel="selectedPixel"
         v-bind:cursorPixel="cursorPixel"
         v-bind:wrongNetwork="wrongNetwork"
@@ -19,13 +19,13 @@
 
 <script>
 import Canvas from "./components/Canvas.vue";
-import SideBar from "./components/SideBar.vue";
+import Sidebar from "./components/Sidebar.vue";
 
 export default {
   name: "App",
   components: {
     Canvas,
-    SideBar,
+    Sidebar,
   },
 
   data() {
