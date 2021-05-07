@@ -1,9 +1,5 @@
 <template>
-  <SidebarSection
-    title="Create Graffiti"
-  >
-
-  </SidebarSection>
+  <SidebarSection title="Create Graffiti"> </SidebarSection>
 </template>
 
 <script>
@@ -15,5 +11,5 @@ export default {
   components: {
     SidebarSection,
   },
-}
+};
 </script>

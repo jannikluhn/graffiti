@@ -1,9 +1,5 @@
 <template>
-  <SidebarSection
-    title="Account"
-  >
-
-  </SidebarSection>
+  <SidebarSection title="Account"> </SidebarSection>
 </template>
 
 <script>
@@ -15,5 +11,5 @@ export default {
   components: {
     SidebarSection,
   },
-}
+};
 </script>

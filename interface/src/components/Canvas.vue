@@ -55,25 +55,22 @@ function getInitialPixelSize(canvasSize) {
 }
 
 function getInitialCanvasOffset(canvasSize, pixelSize) {
-  return subV(
-    divV(canvasSize, 2),
-    mulV(gridSize, pixelSize / 2),
-  );
+  return subV(divV(canvasSize, 2), mulV(gridSize, pixelSize / 2));
 }
 
 function clampPixelSize(pixelSize) {
-  return Math.min(
-    Math.max(pixelSize, minPixelSize),
-    maxPixelSize,
-  );
+  return Math.min(Math.max(pixelSize, minPixelSize), maxPixelSize);
 }
 
 function canvasToPixelCoords(canvasCoords, canvasOffset, pixelSize) {
   if (!canvasCoords) {
-    return null
+    return null;
   }
   const pixelCoords = divV(subV(canvasCoords, canvasOffset), pixelSize);
-  const pixelCoordsRounded = [Math.floor(pixelCoords[0]), Math.floor(pixelCoords[1])];
+  const pixelCoordsRounded = [
+    Math.floor(pixelCoords[0]),
+    Math.floor(pixelCoords[1]),
+  ];
   if (pixelCoordsInGrid(pixelCoordsRounded)) {
     return pixelCoordsRounded;
   }
@@ -82,7 +79,7 @@ function canvasToPixelCoords(canvasCoords, canvasOffset, pixelSize) {
 
 function pixelToCanvasCoords(pixelCoords, canvasOffset, pixelSize) {
   if (!pixelCoords) {
-    return null
+    return null;
   }
   return addV(mulV(pixelCoords, pixelSize), canvasOffset);
 }
@@ -119,13 +116,25 @@ export default {
 
   computed: {
     mouseDownPixelCoords() {
-      return canvasToPixelCoords(this.mouseDownCanvasCoords, this.canvasOffset, this.pixelSize);
+      return canvasToPixelCoords(
+        this.mouseDownCanvasCoords,
+        this.canvasOffset,
+        this.pixelSize
+      );
     },
     mouseMovePixelCoords() {
-      return canvasToPixelCoords(this.mouseMoveCanvasCoords, this.canvasOffset, this.pixelSize);
+      return canvasToPixelCoords(
+        this.mouseMoveCanvasCoords,
+        this.canvasOffset,
+        this.pixelSize
+      );
     },
     mouseUpPixelCoords() {
-      return canvasToPixelCoords(this.mouseUpCanvasCoords, this.canvasOffset, this.pixelSize);
+      return canvasToPixelCoords(
+        this.mouseUpCanvasCoords,
+        this.canvasOffset,
+        this.pixelSize
+      );
     },
     dragging() {
       return !!this.mouseDownCanvasCoords;
@@ -142,7 +151,11 @@ export default {
       return clampCanvasOffset(o, this.canvasSize, this.pixelSize);
     },
     selectedPixelCanvasCoords() {
-      return pixelToCanvasCoords(this.selectedPixelCoords, this.canvasOffset, this.pixelSize);
+      return pixelToCanvasCoords(
+        this.selectedPixelCoords,
+        this.canvasOffset,
+        this.pixelSize
+      );
     },
   },
 
@@ -154,7 +167,10 @@ export default {
     this.resizeCanvas();
 
     this.pixelSize = getInitialPixelSize(this.canvasSize);
-    this.lastCanvasOffset = getInitialCanvasOffset(this.canvasSize, this.pixelSize);
+    this.lastCanvasOffset = getInitialCanvasOffset(
+      this.canvasSize,
+      this.pixelSize
+    );
 
     this.offscreenCanvas = document.createElement("canvas");
     this.offscreenCanvas.width = gridSize[0];
@@ -214,10 +230,7 @@ export default {
 
         this.ctx.save();
         this.ctx.imageSmoothingEnabled = false;
-        this.ctx.translate(
-          this.canvasOffset[0],
-          this.canvasOffset[1]
-        );
+        this.ctx.translate(this.canvasOffset[0], this.canvasOffset[1]);
         this.ctx.scale(this.pixelSize, this.pixelSize);
         this.ctx.drawImage(this.offscreenCanvas, 0, 0);
         this.ctx.restore();
