@@ -1,27 +1,31 @@
 <template>
-  <div id="app">
-    <Canvas
-      v-on:pixelSelected="onPixelSelected"
-      v-on:cursorPixelChanged="onCursorPixelChanged"
-      v-bind:wrongNetwork="wrongNetwork"
-    />
-    <Panels
-      v-bind:selectedPixel="selectedPixel"
-      v-bind:cursorPixel="cursorPixel"
-      v-bind:wrongNetwork="wrongNetwork"
-    />
+  <div id="app" class="container">
+    <div class="sidebar-container">
+      <SideBar
+        v-bind:selectedPixel="selectedPixel"
+        v-bind:cursorPixel="cursorPixel"
+        v-bind:wrongNetwork="wrongNetwork"
+      />
+    </div>
+    <div class="canvas-container">
+      <Canvas
+        v-on:pixelSelected="onPixelSelected"
+        v-on:cursorPixelChanged="onCursorPixelChanged"
+      />
+    </div>
+    <!-- TODO: errors -->
   </div>
 </template>
 
 <script>
 import Canvas from "./components/Canvas.vue";
-import Panels from "./components/Panels.vue";
+import SideBar from "./components/SideBar.vue";
 
 export default {
   name: "App",
   components: {
     Canvas,
-    Panels,
+    SideBar,
   },
 
   data() {
@@ -60,3 +64,24 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+@import "assets/main.scss";
+
+.container {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.sidebar-container {
+  width: $sidebar-width;
+  height: 100%;
+  overflow: auto;
+}
+
+.canvas-container {
+  flex: 1;
+  height: 100%;
+}
+</style>
