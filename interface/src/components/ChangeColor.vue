@@ -3,8 +3,8 @@
     <div>
       <div>
         <div>
-          <v-swatches 
-            v-model="colorHex" 
+          <v-swatches
+            v-model="colorHex"
             :swatches="swatches"
             show-border
             popover-y="top"
@@ -14,7 +14,7 @@
     </div>
     <div>
       <a
-        v-bind:class="{'is-loading': waitingForTx}"
+        v-bind:class="{ 'is-loading': waitingForTx }"
         v-on:click="changeColor"
         v-bind:disabled="!colorChanged"
       >
@@ -25,8 +25,8 @@
 </template>
 
 <script>
-import VSwatches from 'vue-swatches'
-import { colorHexIndices, colorsHex } from '../utils'
+import VSwatches from "vue-swatches";
+import { colorHexIndices, colorsHex } from "../utils";
 
 export default {
   name: "ChangeColorField",
@@ -34,24 +34,20 @@ export default {
     VSwatches,
   },
 
-  props: [
-    "account",
-    "pixelID",
-    "currentColor",
-  ],
+  props: ["account", "pixelID", "currentColor"],
 
   data() {
     return {
       waitingForTx: false,
-      colorHex: '#ffffff',
+      colorHex: "#ffffff",
       swatches: colorsHex,
-    }
+    };
   },
 
   watch: {
     currentColor: {
       handler() {
-        this.colorHex = this.swatches[this.currentColor]
+        this.colorHex = this.swatches[this.currentColor];
       },
       immediate: true,
     },
@@ -59,31 +55,34 @@ export default {
 
   computed: {
     colorChanged() {
-      return colorHexIndices[this.colorHex] != this.currentColor
+      return colorHexIndices[this.colorHex] != this.currentColor;
     },
   },
 
   methods: {
     async changeColor() {
       if (!this.colorChanged) {
-        return
+        return;
       }
 
-      this.waitingForTx = true
+      this.waitingForTx = true;
       try {
-        let signer = this.$provider.getSigner(this.account)
-        let contract = this.$contract.connect(signer)
+        let signer = this.$provider.getSigner(this.account);
+        let contract = this.$contract.connect(signer);
         await contract.edit(
           this.account,
           [],
           [[this.pixelID, colorHexIndices[this.colorHex]]],
-          [],
-        )
-      } catch(err) {
-        this.$emit('error', 'Failed to send change color transaction: ' + err.message)
+          []
+        );
+      } catch (err) {
+        this.$emit(
+          "error",
+          "Failed to send change color transaction: " + err.message
+        );
       }
-      this.waitingForTx = false
+      this.waitingForTx = false;
     },
   },
-}
+};
 </script>

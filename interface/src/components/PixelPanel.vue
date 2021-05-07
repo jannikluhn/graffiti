@@ -1,8 +1,6 @@
 <template>
   <Panel title="Create Graffiti">
-    <div
-      v-if="!selectedPixel"
-    >
+    <div v-if="!selectedPixel">
       <p>Click on a pixel to select it.</p>
     </div>
 
@@ -37,10 +35,7 @@
       </div>
 
       <div>
-        <button
-          v-on:click="onBuyClick"
-          v-bind:disabled="!account || selfOwned"
-        >
+        <button v-on:click="onBuyClick" v-bind:disabled="!account || selfOwned">
           Buy
         </button>
       </div>
@@ -56,27 +51,22 @@
       v-bind:balance="balance"
       v-bind:taxBase="taxBase"
       v-on:close="buyModalActive = false"
-      v-on:error="(msg) => $emit('error', msg)"
+      v-on:error="msg => $emit('error', msg)"
     />
   </Panel>
 </template>
 
 <script>
-import { ethers } from 'ethers'
-import { pixelCoordsToID, gWeiToWei } from '../utils.js'
-import Panel from './Panel.vue'
-import BuyModal from './BuyModal.vue'
-import AddressLink from './AddressLink.vue'
-import { gridSize } from '../config.js'
+import { ethers } from "ethers";
+import { pixelCoordsToID, gWeiToWei } from "../utils.js";
+import Panel from "./Panel.vue";
+import BuyModal from "./BuyModal.vue";
+import AddressLink from "./AddressLink.vue";
+import { gridSize } from "../config.js";
 
 export default {
   name: "PixelPanel",
-  props: [
-    "selectedPixel",
-    "account",
-    "balance",
-    "taxBase",
-  ],
+  props: ["selectedPixel", "account", "balance", "taxBase"],
   components: {
     Panel,
     BuyModal,
@@ -91,53 +81,58 @@ export default {
       buyModalActive: false,
       formatDAI(value) {
         if (!value) {
-          return "Unknown"
+          return "Unknown";
         }
-        return ethers.utils.formatEther(value) + ' xDai'
+        return ethers.utils.formatEther(value) + " xDai";
       },
-    }
+    };
   },
 
   computed: {
     pixelID() {
-      return pixelCoordsToID(this.selectedPixel, gridSize[0])
+      return pixelCoordsToID(this.selectedPixel, gridSize[0]);
     },
     unknownOwner() {
-      return this.exists === null || (this.exists && this.owner === null)
+      return this.exists === null || (this.exists && this.owner === null);
     },
     selfOwned() {
-      return this.owner !== null && this.owner == this.account
+      return this.owner !== null && this.owner == this.account;
     },
   },
 
   watch: {
     async selectedPixel(newPixel, oldPixel) {
       if (newPixel === null && oldPixel === null) {
-        return
+        return;
       }
-      if (oldPixel !== null && newPixel !== null && newPixel[0] == oldPixel[0] && newPixel[1] == oldPixel[1]) {
-        return
+      if (
+        oldPixel !== null &&
+        newPixel !== null &&
+        newPixel[0] == oldPixel[0] &&
+        newPixel[1] == oldPixel[1]
+      ) {
+        return;
       }
 
-      this.exists = null
-      this.price = null
-      this.owner = null
+      this.exists = null;
+      this.price = null;
+      this.owner = null;
 
       if (this.selectedPixel) {
         try {
-          let priceGWei = await this.$contract.getPrice(this.pixelID)
-          this.price = gWeiToWei(priceGWei)
-          this.exists = await this.$contract.exists(this.pixelID)
+          let priceGWei = await this.$contract.getPrice(this.pixelID);
+          this.price = gWeiToWei(priceGWei);
+          this.exists = await this.$contract.exists(this.pixelID);
           if (this.exists) {
-            this.owner = await this.$contract.ownerOf(this.pixelID)
+            this.owner = await this.$contract.ownerOf(this.pixelID);
           } else {
-            this.owner = null
+            this.owner = null;
           }
-        } catch(err) {
-          this.exists = null
-          this.price = null
-          this.owner = null
-          this.$emit('error', 'Failed to query pixel details: ' + err.message)
+        } catch (err) {
+          this.exists = null;
+          this.price = null;
+          this.owner = null;
+          this.$emit("error", "Failed to query pixel details: " + err.message);
         }
       }
     },
@@ -146,10 +141,10 @@ export default {
   methods: {
     onBuyClick() {
       if (!this.account || this.selfOwned) {
-        return
+        return;
       }
-      this.buyModalActive = true
+      this.buyModalActive = true;
     },
   },
-}
+};
 </script>

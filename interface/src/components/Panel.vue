@@ -18,13 +18,11 @@
 </template>
 
 <script>
-import { ChevronUpIcon, ChevronDownIcon } from 'vue-feather-icons'
+import { ChevronUpIcon, ChevronDownIcon } from "vue-feather-icons";
 
 export default {
   name: "Panel",
-  props: [
-    "title",
-  ],
+  props: ["title"],
 
   components: {
     ChevronUpIcon,
@@ -33,7 +31,7 @@ export default {
   data() {
     return {
       folded: false,
-    }
-  }
-}
+    };
+  },
+};
 </script>

@@ -1,145 +1,175 @@
 <template>
-  <div v-bind:class="{'is-active': active}">
-      <div>
-        <header>
-          <p>Buy Pixel</p>
-          <button aria-label="close" v-on:click="close()"></button>
-        </header>
+  <div v-bind:class="{ 'is-active': active }">
+    <div>
+      <header>
+        <p>Buy Pixel</p>
+        <button aria-label="close" v-on:click="close()"></button>
+      </header>
 
-        <section>
-          <table>
-            <thead>
-              <th>Pixel ID</th>
-              <th>Coordinates</th>
-              <th>Price</th>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{{ pixelID }}</td>
-                <td>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</td>
-                <td>{{ formatDAI(price) }}</td>
-              </tr>
-            </tbody>
-          </table>
+      <section>
+        <table>
+          <thead>
+            <th>Pixel ID</th>
+            <th>Coordinates</th>
+            <th>Price</th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ pixelID }}</td>
+              <td>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</td>
+              <td>{{ formatDAI(price) }}</td>
+            </tr>
+          </tbody>
+        </table>
 
-          <form>
+        <form>
+          <div>
+            <label>
+              New Color
+            </label>
+            <div>
+              <v-swatches
+                v-model="colorSwatch"
+                :swatches="swatches"
+                show-border
+              ></v-swatches>
+            </div>
+          </div>
+
+          <div>
             <div>
               <label>
-                New Color
+                New Price (xDai)
               </label>
-              <div>
-                <v-swatches 
-                  v-model="colorSwatch" 
-                  :swatches="swatches"
-                  show-border
-                ></v-swatches>
-              </div>
+              <input
+                v-bind:class="{
+                  'is-danger': newPriceInput && newPriceInvalid,
+                }"
+                type="text"
+                placeholder="xDai"
+                v-model="newPriceInput"
+              />
             </div>
-
             <div>
-              <div>
-                <label>
-                  New Price (xDai)
-                </label>
-                <input
-                  v-bind:class="{
-                    'is-danger': newPriceInput && newPriceInvalid,
-                  }"
-                  type="text"
-                  placeholder="xDai"
-                  v-model="newPriceInput"
-                >
-              </div>
-              <div>
-                <label>
-                  Added Monthly Tax
-                </label>
-                <p>{{ formatDAI(addedTax) }}</p>
-              </div>
+              <label>
+                Added Monthly Tax
+              </label>
+              <p>{{ formatDAI(addedTax) }}</p>
             </div>
+          </div>
 
-            <div v-if="totalTax !== null && !newPriceInvalid && newPrice.gt(0)">
-              Your monthly tax will increase to {{ formatDAI(totalTax) }}.
-            </div>
-            <div v-if="totalTax !== null && !newPriceInvalid && newPrice.eq(0)">
-              Your monthly tax will remain unchanged at {{ formatDAI(totalTax) }}.
-            </div>
+          <div v-if="totalTax !== null && !newPriceInvalid && newPrice.gt(0)">
+            Your monthly tax will increase to {{ formatDAI(totalTax) }}.
+          </div>
+          <div v-if="totalTax !== null && !newPriceInvalid && newPrice.eq(0)">
+            Your monthly tax will remain unchanged at {{ formatDAI(totalTax) }}.
+          </div>
 
+          <div>
             <div>
-              <div>
-                <label>
-                  Amount to Deposit (xDai)
-                </label>
-                <input
-                  v-bind:class="{
-                    'is-danger': depositInput && depositInvalid,
-                  }"
-                  type="text"
-                  placeholder="xDai"
-                  v-model="depositInput"
-                >
-              </div>
-              <div>
-                <label>
-                  Current balance
-                </label>
-                <p>{{ formatDAI(balance) }}</p>
-              </div>
+              <label>
+                Amount to Deposit (xDai)
+              </label>
+              <input
+                v-bind:class="{
+                  'is-danger': depositInput && depositInvalid,
+                }"
+                type="text"
+                placeholder="xDai"
+                v-model="depositInput"
+              />
             </div>
-
             <div>
-              <p
-                v-if="(newPriceInput != '' && newPriceInvalid) || (depositInput != '' && depositInvalid)"
-              >
-                Some of your inputs are invalid. Please make sure the new price and the deposit
-                amount are properly formatted, are not negative, and are not too fractional.
-              </p>
-              <p
-                v-if="!inputsInvalid && totalDepositCoversCost && totalDepositSufficient"
-              >
-                The cost of the pixel will be transferred from your deposit to the seller.
-                After the transaction is complete, your balance will be
-                {{ formatDAI(balanceAfterPayment) }} which would
-                {{ !noTaxesPaid
-                  ? "cover the Harberger taxes for the next " + taxMonths + " months."
+              <label>
+                Current balance
+              </label>
+              <p>{{ formatDAI(balance) }}</p>
+            </div>
+          </div>
+
+          <div>
+            <p
+              v-if="
+                (newPriceInput != '' && newPriceInvalid) ||
+                  (depositInput != '' && depositInvalid)
+              "
+            >
+              Some of your inputs are invalid. Please make sure the new price
+              and the deposit amount are properly formatted, are not negative,
+              and are not too fractional.
+            </p>
+            <p
+              v-if="
+                !inputsInvalid &&
+                  totalDepositCoversCost &&
+                  totalDepositSufficient
+              "
+            >
+              The cost of the pixel will be transferred from your deposit to the
+              seller. After the transaction is complete, your balance will be
+              {{ formatDAI(balanceAfterPayment) }} which would
+              {{
+                !noTaxesPaid
+                  ? "cover the Harberger taxes for the next " +
+                    taxMonths +
+                    " months."
                   : "last forever as you don't pay any taxes at the moment"
-                }}
-              </p>
-              <p
-                v-if="!inputsInvalid && !totalDepositCoversCost"
-              >
-                Your current balance is insufficient to pay for the pixel. Please increase the
-                deposit amount by at least {{ formatDAI(balanceAfterPayment.mul(-1)) }}.
-              </p>
-              <p
-                v-if="!inputsInvalid && totalDepositCoversCost && !totalDepositSufficient && !noTaxesPaid"
-              >
-                Your current deposit is sufficient to pay for the pixel, but not much will be left
-                to pay for Harberger taxes. If you don't increase your deposit, you risk losing all
-                your pixels in the near future. It is recommended to increase the deposit amount by
-                {{ formatDAI(balanceAfterPayment.sub(totalTax.mul(recommendedMonths)).mul(-1)) }} or
-                more to be on the safe side.
-              </p>
-            </div>
-          </form>
-        </section>
+              }}
+            </p>
+            <p v-if="!inputsInvalid && !totalDepositCoversCost">
+              Your current balance is insufficient to pay for the pixel. Please
+              increase the deposit amount by at least
+              {{ formatDAI(balanceAfterPayment.mul(-1)) }}.
+            </p>
+            <p
+              v-if="
+                !inputsInvalid &&
+                  totalDepositCoversCost &&
+                  !totalDepositSufficient &&
+                  !noTaxesPaid
+              "
+            >
+              Your current deposit is sufficient to pay for the pixel, but not
+              much will be left to pay for Harberger taxes. If you don't
+              increase your deposit, you risk losing all your pixels in the near
+              future. It is recommended to increase the deposit amount by
+              {{
+                formatDAI(
+                  balanceAfterPayment
+                    .sub(totalTax.mul(recommendedMonths))
+                    .mul(-1)
+                )
+              }}
+              or more to be on the safe side.
+            </p>
+          </div>
+        </form>
+      </section>
 
-        <footer>
-          <button
-            v-bind:class="{'is-loading': waitingForTx}"
-            v-bind:disabled="buyButtonDisabled"
-            v-on:click="buy()"
-          >Buy</button>
-          <button v-on:click="close()">Cancel</button>
-        </footer>
+      <footer>
+        <button
+          v-bind:class="{ 'is-loading': waitingForTx }"
+          v-bind:disabled="buyButtonDisabled"
+          v-on:click="buy()"
+        >
+          Buy
+        </button>
+        <button v-on:click="close()">Cancel</button>
+      </footer>
     </div>
   </div>
 </template>
 
 <script>
-import { ethers } from 'ethers'
-import { weiToGWei, weiToEth, colorsHex, colorHexIndices, computeMonthlyTax } from '../utils.js'
-import VSwatches from 'vue-swatches'
+import { ethers } from "ethers";
+import {
+  weiToGWei,
+  weiToEth,
+  colorsHex,
+  colorHexIndices,
+  computeMonthlyTax,
+} from "../utils.js";
+import VSwatches from "vue-swatches";
 
 export default {
   name: "BuyModal",
@@ -151,124 +181,144 @@ export default {
     "account",
     "balance",
     "taxBase",
-    "selectedPixel"
+    "selectedPixel",
   ],
   data() {
-    let newPriceInput = ""
+    let newPriceInput = "";
     if (this.price) {
-      weiToEth(this.price).toString()
+      weiToEth(this.price).toString();
     }
     return {
       newPriceInput: newPriceInput,
       depositInput: "0",
       waitingForTx: false,
-      colorSwatch: '#ffffff',
+      colorSwatch: "#ffffff",
       swatches: colorsHex,
       recommendedMonths: 3,
       formatDAI(value) {
         if (!value) {
-          return "Unknown"
+          return "Unknown";
         }
-        return ethers.utils.formatEther(value) + ' xDai'
+        return ethers.utils.formatEther(value) + " xDai";
       },
-    }
+    };
   },
   computed: {
     newPrice() {
       try {
-        return ethers.utils.parseEther(this.newPriceInput)
-      } catch(err) {
-        return null
+        return ethers.utils.parseEther(this.newPriceInput);
+      } catch (err) {
+        return null;
       }
     },
     newPriceInvalid() {
-      return this.newPrice === null || this.newPrice.lt(0) || this.newPrice.mod(1e9) != 0
+      return (
+        this.newPrice === null ||
+        this.newPrice.lt(0) ||
+        this.newPrice.mod(1e9) != 0
+      );
     },
     deposit() {
       try {
-        return ethers.utils.parseEther(this.depositInput)
-      } catch(err) {
-        return null
+        return ethers.utils.parseEther(this.depositInput);
+      } catch (err) {
+        return null;
       }
     },
     depositInvalid() {
-      return this.deposit === null || this.deposit.lt(0) || this.deposit.mod(1e9) != 0
+      return (
+        this.deposit === null ||
+        this.deposit.lt(0) ||
+        this.deposit.mod(1e9) != 0
+      );
     },
     inputsInvalid() {
-      return this.newPriceInvalid || this.depositInvalid
+      return this.newPriceInvalid || this.depositInvalid;
     },
     color() {
-      return colorHexIndices[this.colorSwatch]
+      return colorHexIndices[this.colorSwatch];
     },
     addedTax() {
       if (this.newPriceInvalid) {
-        return null
+        return null;
       }
-      return computeMonthlyTax(this.newPrice)
+      return computeMonthlyTax(this.newPrice);
     },
     totalTax() {
       if (!this.taxBase) {
-        return null
+        return null;
       }
       if (!this.addedTax) {
-        return computeMonthlyTax(this.taxBase)
+        return computeMonthlyTax(this.taxBase);
       }
-      const taxBase = this.taxBase.add(this.newPrice)
-      return computeMonthlyTax(taxBase)
+      const taxBase = this.taxBase.add(this.newPrice);
+      return computeMonthlyTax(taxBase);
     },
     balanceAfterDeposit() {
       if (!this.balance || !this.deposit) {
-        return null
+        return null;
       }
-      return this.balance.add(this.deposit)
+      return this.balance.add(this.deposit);
     },
     balanceAfterPayment() {
       if (!this.balanceAfterDeposit || !this.price) {
-        return null
+        return null;
       }
-      return this.balanceAfterDeposit.sub(this.price)
+      return this.balanceAfterDeposit.sub(this.price);
     },
     noTaxesPaid() {
       if (this.newPriceInvalid || this.taxBase === null) {
-        return null
+        return null;
       }
-      const taxBase = this.taxBase.add(this.newPrice)
-      return taxBase.eq(0)
+      const taxBase = this.taxBase.add(this.newPrice);
+      return taxBase.eq(0);
     },
     taxMonths() {
-      if (!this.balanceAfterPayment || !this.totalTax || this.newPriceInvalid || this.noTaxesPaid) {
-        return null
+      if (
+        !this.balanceAfterPayment ||
+        !this.totalTax ||
+        this.newPriceInvalid ||
+        this.noTaxesPaid
+      ) {
+        return null;
       }
-      const taxBase = this.taxBase.add(this.newPrice)
-      const taxPerMonth = computeMonthlyTax(taxBase)
-      return this.balanceAfterPayment.div(taxPerMonth)
+      const taxBase = this.taxBase.add(this.newPrice);
+      const taxPerMonth = computeMonthlyTax(taxBase);
+      return this.balanceAfterPayment.div(taxPerMonth);
     },
     totalDepositCoversCost() {
       if (this.balanceAfterPayment === null) {
-        return null
+        return null;
       }
-      return this.balanceAfterPayment.gte(0)
+      return this.balanceAfterPayment.gte(0);
     },
     totalDepositSufficient() {
       if (this.noTaxesPaid) {
-        return true
+        return true;
       }
       if (this.taxMonths === null) {
-        return null
+        return null;
       }
-      return this.totalDepositCoversCost && this.taxMonths.gte(this.recommendedMonths)
+      return (
+        this.totalDepositCoversCost &&
+        this.taxMonths.gte(this.recommendedMonths)
+      );
     },
     buyButtonDisabled() {
-      return this.newPriceInvalid || this.depositInvalid || !this.totalDepositCoversCost
+      return (
+        this.newPriceInvalid ||
+        this.depositInvalid ||
+        !this.totalDepositCoversCost
+      );
     },
   },
   watch: {
     price: {
       handler() {
         if (this.price !== null) {
-          this.newPriceInput = ethers.utils.formatEther(this.price)
+          this.newPriceInput = ethers.utils.formatEther(this.price);
         } else {
-          this.newPriceInput = ""
+          this.newPriceInput = "";
         }
       },
       immediate: true,
@@ -276,17 +326,17 @@ export default {
   },
   methods: {
     close() {
-      this.$emit('close')
+      this.$emit("close");
     },
     async buy() {
       if (this.buyButtonDisabled) {
-        return
+        return;
       }
 
-      this.waitingForTx = true
+      this.waitingForTx = true;
       try {
-        let signer = this.$provider.getSigner(this.account)
-        let contract = this.$contract.connect(signer)
+        let signer = this.$provider.getSigner(this.account);
+        let contract = this.$contract.connect(signer);
         await contract.depositAndEdit(
           this.account,
           [
@@ -301,15 +351,15 @@ export default {
           [],
           {
             value: this.deposit,
-          },
+          }
         );
-        this.newPriceInput = ""
-      } catch(err) {
-        this.$emit('error', 'Failed to send buy transaction: ' + err.message)
+        this.newPriceInput = "";
+      } catch (err) {
+        this.$emit("error", "Failed to send buy transaction: " + err.message);
       }
-      this.waitingForTx = false
-      this.$emit('close')
+      this.waitingForTx = false;
+      this.$emit("close");
     },
   },
-}
+};
 </script>

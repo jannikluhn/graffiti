@@ -1,12 +1,12 @@
 <template>
   <div>
     <div>
-      <input type="text" placeholder="xDai" v-model="amountInput">
-    <p v-if="amountInput && amountInvalid">Invalid deposit amount</p>
+      <input type="text" placeholder="xDai" v-model="amountInput" />
+      <p v-if="amountInput && amountInvalid">Invalid deposit amount</p>
     </div>
     <div>
       <a
-        v-bind:class="{'is-loading': waitingForTx}"
+        v-bind:class="{ 'is-loading': waitingForTx }"
         v-bind:disabled="amountInvalid"
         v-on:click="deposit"
       >
@@ -17,51 +17,54 @@
 </template>
 
 <script>
-import { ethers } from 'ethers'
+import { ethers } from "ethers";
 
 export default {
   name: "DepositField",
-  props: [
-    "account",
-  ],
+  props: ["account"],
 
   data() {
     return {
       amountInput: null,
       waitingForTx: false,
-    }
+    };
   },
 
   computed: {
     amount() {
       try {
-        return ethers.utils.parseEther(this.amountInput)
-      } catch(err) {
-        return null
+        return ethers.utils.parseEther(this.amountInput);
+      } catch (err) {
+        return null;
       }
     },
     amountInvalid() {
-      return this.amount === null || this.amount.lte(0) || this.amount.mod(1e9) != 0
+      return (
+        this.amount === null || this.amount.lte(0) || this.amount.mod(1e9) != 0
+      );
     },
   },
 
   methods: {
     async deposit() {
       if (this.amountInvalid) {
-        return
+        return;
       }
 
-      this.waitingForTx = true
+      this.waitingForTx = true;
       try {
-        let signer = this.$provider.getSigner(this.account)
-        let contract = this.$contract.connect(signer)
-        await contract.deposit({value: this.amount})
-        this.amountInput = ""
-      } catch(err) {
-        this.$emit('error', 'Failed to send deposit transaction: ' + err.message)
+        let signer = this.$provider.getSigner(this.account);
+        let contract = this.$contract.connect(signer);
+        await contract.deposit({ value: this.amount });
+        this.amountInput = "";
+      } catch (err) {
+        this.$emit(
+          "error",
+          "Failed to send deposit transaction: " + err.message
+        );
       }
-      this.waitingForTx = false
+      this.waitingForTx = false;
     },
   },
-}
+};
 </script>

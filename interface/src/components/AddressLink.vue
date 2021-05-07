@@ -3,26 +3,24 @@
 </template>
 
 <script>
-import { shortenAddress } from '../utils.js'
+import { shortenAddress } from "../utils.js";
 
 export default {
   name: "AddressLink",
-  props: [
-    "address",
-  ],
+  props: ["address"],
   computed: {
     shortAddress() {
       if (this.address === null) {
-          return ""
+        return "";
       }
-      return shortenAddress(this.address)
+      return shortenAddress(this.address);
     },
     blockscoutURL() {
-        if (this.address === null) {
-            return ""
-        }
-      return "https://blockscout.com/poa/xdai/address/" + this.address
-    }
+      if (this.address === null) {
+        return "";
+      }
+      return "https://blockscout.com/poa/xdai/address/" + this.address;
+    },
   },
-}
+};
 </script>
