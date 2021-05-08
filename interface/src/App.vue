@@ -84,4 +84,10 @@ export default {
   flex: 1;
   height: 100%;
 }
+
+@media screen and (max-width: $mobile-max-width) {
+  .sidebar-container {
+    display: none;
+  }
+}
 </style>
