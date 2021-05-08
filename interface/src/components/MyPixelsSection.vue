@@ -1,12 +1,12 @@
 <template>
-  <SidebarSection title="Paint"> </SidebarSection>
+  <SidebarSection title="My Pixels"> </SidebarSection>
 </template>
 
 <script>
 import SidebarSection from "./SidebarSection.vue";
 
 export default {
-  name: "PaintSidebarSection",
+  name: "MyPixelsSection",
 
   components: {
     SidebarSection,

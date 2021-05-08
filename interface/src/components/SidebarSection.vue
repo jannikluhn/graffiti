@@ -1,6 +1,6 @@
 <template>
   <section>
-    <h1>{{ title }}</h1>
+    <h1 v-if="title">{{ title }}</h1>
     <slot></slot>
   </section>
 </template>
