@@ -225,8 +225,10 @@ export default {
       window.requestAnimationFrame(() => {
         this.redrawRequested = false;
 
+        this.ctx.save()
         this.ctx.fillStyle = "#eeeeee";
         this.ctx.fillRect(0, 0, this.canvasSize[0], this.canvasSize[1]);
+        this.ctx.restore()
 
         this.ctx.save();
         this.ctx.imageSmoothingEnabled = false;
@@ -234,10 +236,6 @@ export default {
         this.ctx.scale(this.pixelSize, this.pixelSize);
         this.ctx.drawImage(this.offscreenCanvas, 0, 0);
         this.ctx.restore();
-
-        this.ctx.beginPath();
-        this.ctx.fillRect(0, 0, this.pixelSize, this.pixelSize);
-        this.ctx.stroke();
 
         if (this.selectedPixelCanvasCoords) {
           const topLeft = [
