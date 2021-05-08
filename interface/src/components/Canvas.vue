@@ -41,7 +41,7 @@ function mouseCanvasCoords(event) {
 
 function touchCanvasCoords(event) {
   if (event.changedTouches.length != 1) {
-    return null
+    return null;
   }
   const touch = event.changedTouches[0];
   const bounds = event.target.getBoundingClientRect();
@@ -240,10 +240,10 @@ export default {
       window.requestAnimationFrame(() => {
         this.redrawRequested = false;
 
-        this.ctx.save()
+        this.ctx.save();
         this.ctx.fillStyle = "#eeeeee";
         this.ctx.fillRect(0, 0, this.canvasSize[0], this.canvasSize[1]);
-        this.ctx.restore()
+        this.ctx.restore();
 
         this.ctx.save();
         this.ctx.imageSmoothingEnabled = false;
@@ -366,7 +366,10 @@ export default {
 
     onWheel(event) {
       if (!this.mouseDownCanvasCoords) {
-        this.zoom(1 - scrollSpeed * Math.sign(event.deltaY), mouseCanvasCoords(event));
+        this.zoom(
+          1 - scrollSpeed * Math.sign(event.deltaY),
+          mouseCanvasCoords(event)
+        );
       }
     },
   },

@@ -1,10 +1,7 @@
 <template>
   <Panel v-if="!account" title="Wallet Connection">
     <div>
-      <button
-        :class="{ 'is-loading': waitingForAccount }"
-        @click="connect"
-      >
+      <button :class="{ 'is-loading': waitingForAccount }" @click="connect">
         Connect
       </button>
     </div>
