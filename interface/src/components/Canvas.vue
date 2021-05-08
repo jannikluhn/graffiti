@@ -27,6 +27,7 @@ const pixelQuery = gql`
 const minPixelSize = 1;
 const maxPixelSize = 50;
 const selectedLineWidth = 4;
+const scrollSpeed = 0.15;
 
 function mouseCanvasCoords(event) {
   const bounds = event.target.getBoundingClientRect();
@@ -329,7 +330,7 @@ export default {
 
     onWheel(event) {
       if (!this.mouseDownCanvasCoords) {
-        this.zoom(1 - event.deltaY / 10, mouseCanvasCoords(event));
+        this.zoom(1 - scrollSpeed * Math.sign(event.deltaY), mouseCanvasCoords(event));
       }
     },
   },
