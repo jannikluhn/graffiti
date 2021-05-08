@@ -5,6 +5,9 @@
     @mousemove="onMouseMove"
     @mouseup="onMouseUp"
     @wheel="onWheel"
+    @touchstart="onTouchStart"
+    @touchmove="onTouchMove"
+    @touchend="onTouchEnd"
   >
   </canvas>
 </template>
@@ -31,8 +34,19 @@ const scrollSpeed = 0.15;
 
 function mouseCanvasCoords(event) {
   const bounds = event.target.getBoundingClientRect();
-  const x = event.pageX - bounds.left - scrollX;
-  const y = event.pageY - bounds.top - scrollY;
+  const x = event.pageX - bounds.left;
+  const y = event.pageY - bounds.top;
+  return [x, y];
+}
+
+function touchCanvasCoords(event) {
+  if (event.changedTouches.length != 1) {
+    return null
+  }
+  const touch = event.changedTouches[0];
+  const bounds = event.target.getBoundingClientRect();
+  const x = touch.pageX - bounds.left;
+  const y = touch.pageY - bounds.top;
   return [x, y];
 }
 
@@ -322,6 +336,28 @@ export default {
         }
         this.$emit("pixelSelected", this.selectedPixelCoords);
         this.draw();
+      }
+
+      this.lastCanvasOffset = this.canvasOffset;
+      this.mouseDownCanvasCoords = null;
+    },
+
+    onTouchStart(event) {
+      event.preventDefault();
+      this.mouseDownCanvasCoords = touchCanvasCoords(event);
+    },
+    onTouchMove(event) {
+      event.preventDefault();
+      this.mouseMoveCanvasCoords = touchCanvasCoords(event);
+      if (this.dragging) {
+        this.draw();
+      }
+    },
+    onTouchEnd(event) {
+      event.preventDefault();
+
+      if (!this.mouseDownCanvasCoords) {
+        return;
       }
 
       this.lastCanvasOffset = this.canvasOffset;
