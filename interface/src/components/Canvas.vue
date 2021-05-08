@@ -1,10 +1,10 @@
 <template>
   <canvas
     ref="canvas"
-    v-on:mousedown="onMouseDown"
-    v-on:mousemove="onMouseMove"
-    v-on:mouseup="onMouseUp"
-    v-on:wheel="onWheel"
+    @mousedown="onMouseDown"
+    @mousemove="onMouseMove"
+    @mouseup="onMouseUp"
+    @wheel="onWheel"
   >
   </canvas>
 </template>

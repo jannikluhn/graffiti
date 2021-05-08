@@ -2,8 +2,8 @@
   <Panel v-if="!account" title="Wallet Connection">
     <div>
       <button
-        v-bind:class="{ 'is-loading': waitingForAccount }"
-        v-on:click="connect"
+        :class="{ 'is-loading': waitingForAccount }"
+        @click="connect"
       >
         Connect
       </button>

@@ -1,9 +1,9 @@
 <template>
-  <div v-bind:class="{ 'is-active': active }">
+  <div :class="{ 'is-active': active }">
     <div></div>
     <div>
       <header>
-        <button aria-label="close" v-on:click="close()"></button>
+        <button aria-label="close" @click="close()"></button>
       </header>
       <section>
         <div>
@@ -12,14 +12,14 @@
         <div>
           <ul>
             <li
-              v-bind:class="{ 'is-active': selectedTab == 0 }"
-              v-on:click="selectedTab = 0"
+              :class="{ 'is-active': selectedTab == 0 }"
+              @click="selectedTab = 0"
             >
               <a><strong>About</strong></a>
             </li>
             <li
-              v-bind:class="{ 'is-active': selectedTab == 1 }"
-              v-on:click="selectedTab = 1"
+              :class="{ 'is-active': selectedTab == 1 }"
+              @click="selectedTab = 1"
             >
               <a><strong>How to</strong></a>
             </li>
@@ -63,7 +63,7 @@
               load it with xDAI (the cryptocurrency used for buying and paying
               taxes on the pixels, and for paying transaction fees on the xDai
               blockchain). Check out the
-              <a v-on:click="selectedTab = 1">How to</a> guide for details.
+              <a @click="selectedTab = 1">How to</a> guide for details.
             </p>
           </div>
 

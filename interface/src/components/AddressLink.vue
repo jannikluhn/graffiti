@@ -1,5 +1,5 @@
 <template>
-  <a v-bind:href="blockscoutURL">{{ shortAddress }}</a>
+  <a :href="blockscoutURL">{{ shortAddress }}</a>
 </template>
 
 <script>

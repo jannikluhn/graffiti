@@ -5,12 +5,12 @@
       <chevron-up-icon
         v-if="!folded"
         size="1.5x"
-        v-on:click="folded = true"
+        @click="folded = true"
       ></chevron-up-icon>
       <chevron-down-icon
         v-if="folded"
         size="1.5x"
-        v-on:click="folded = false"
+        @click="folded = false"
       ></chevron-down-icon>
     </div>
     <slot v-if="!folded"></slot>

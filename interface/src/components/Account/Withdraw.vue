@@ -6,9 +6,9 @@
     </div>
     <div>
       <a
-        v-bind:class="{ 'is-loading': waitingForTx }"
-        v-bind:disabled="amountInvalid"
-        v-on:click="withdraw"
+        :class="{ 'is-loading': waitingForTx }"
+        :disabled="amountInvalid"
+        @click="withdraw"
       >
         Withdraw
       </a>

@@ -6,9 +6,9 @@
     </div>
     <div>
       <a
-        v-bind:class="{ 'is-loading': waitingForTx }"
-        v-bind:disabled="priceInvalid"
-        v-on:click="changePrice"
+        :class="{ 'is-loading': waitingForTx }"
+        :disabled="priceInvalid"
+        @click="changePrice"
       >
         Change Price
       </a>

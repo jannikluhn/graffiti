@@ -14,9 +14,9 @@
     </div>
     <div>
       <a
-        v-bind:class="{ 'is-loading': waitingForTx }"
-        v-on:click="changeColor"
-        v-bind:disabled="!colorChanged"
+        :class="{ 'is-loading': waitingForTx }"
+        @click="changeColor"
+        :disabled="!colorChanged"
       >
         Change Color
       </a>

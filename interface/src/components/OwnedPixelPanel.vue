@@ -5,12 +5,12 @@
     </div>
     <div v-else>
       <div>
-        <select v-on:change="onChange">
+        <select @change="onChange">
           <option
             v-for="pixel in pixels"
-            v-bind:key="pixel.id"
-            v-bind:value="pixel.id"
-            v-bind:selected="selectedPixel && pixel.id == selectedPixel.id"
+            :key="pixel.id"
+            :value="pixel.id"
+            :selected="selectedPixel && pixel.id == selectedPixel.id"
           >
             {{ hexToIntStr(pixel.id) }}
           </option>
@@ -48,15 +48,15 @@
     <div v-if="selectedPixel">
       <form>
         <ChangeColorField
-          v-bind:account="account"
-          v-bind:pixelID="selectedPixel.id"
-          v-bind:currentColor="selectedPixel.color"
-          v-on:error="msg => $emit('error', msg)"
+          :account="account"
+          :pixelID="selectedPixel.id"
+          :currentColor="selectedPixel.color"
+          @error="msg => $emit('error', msg)"
         />
         <ChangePriceField
-          v-bind:account="account"
-          v-bind:pixelID="selectedPixel.id"
-          v-on:error="msg => $emit('error', msg)"
+          :account="account"
+          :pixelID="selectedPixel.id"
+          @error="msg => $emit('error', msg)"
         />
       </form>
     </div>

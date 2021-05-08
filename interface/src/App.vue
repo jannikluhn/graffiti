@@ -2,15 +2,15 @@
   <div id="app" class="container">
     <div class="sidebar-container">
       <Sidebar
-        v-bind:selectedPixel="selectedPixel"
-        v-bind:cursorPixel="cursorPixel"
-        v-bind:wrongNetwork="wrongNetwork"
+        :selectedPixel="selectedPixel"
+        :cursorPixel="cursorPixel"
+        :wrongNetwork="wrongNetwork"
       />
     </div>
     <div class="canvas-container">
       <Canvas
-        v-on:pixelSelected="onPixelSelected"
-        v-on:cursorPixelChanged="onCursorPixelChanged"
+        @pixelSelected="onPixelSelected"
+        @cursorPixelChanged="onCursorPixelChanged"
       />
     </div>
     <!-- TODO: errors -->

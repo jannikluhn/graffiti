@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div id="i" v-on:click="aboutModalActive = true">?</div>
+    <div id="i" @click="aboutModalActive = true">?</div>
     <AboutModal
       v-if="aboutModalActive"
-      v-bind:active="aboutModalActive"
-      v-on:close="aboutModalActive = false"
+      :active="aboutModalActive"
+      @close="aboutModalActive = false"
     />
     <div>
       <div v-if="cursorPixel" id="coords">
@@ -12,36 +12,36 @@
       </div>
       <div v-if="!noWeb3 && !wrongNetwork">
         <ConnectPanel
-          v-on:error="onError($event)"
-          v-on:accountChanged="onAccountChanged"
-          v-bind:account="account"
+          @error="onError($event)"
+          @accountChanged="onAccountChanged"
+          :account="account"
           v-if="!wrongNetwork"
         />
 
         <AccountPanel
-          v-on:error="onError($event)"
-          v-bind:account="account"
-          v-bind:balance="balance"
-          v-bind:taxBase="taxBase"
+          @error="onError($event)"
+          :account="account"
+          :balance="balance"
+          :taxBase="taxBase"
           v-if="account"
         />
 
         <PixelPanel
-          v-bind:selectedPixel="selectedPixel"
-          v-bind:account="account"
-          v-bind:balance="balance"
-          v-bind:taxBase="taxBase"
-          v-on:error="onError($event)"
+          :selectedPixel="selectedPixel"
+          :account="account"
+          :balance="balance"
+          :taxBase="taxBase"
+          @error="onError($event)"
         />
         <OwnedPixelPanel
           v-if="account"
-          v-bind:account="account"
-          v-bind:canvasSelectedPixel="selectedPixel"
-          v-on:error="onError($event)"
+          :account="account"
+          :canvasSelectedPixel="selectedPixel"
+          @error="onError($event)"
         />
 
-        <div v-for="error in errors" v-bind:key="error.key">
-          <button v-on:click="removeError(error.key)"></button>
+        <div v-for="error in errors" :key="error.key">
+          <button @click="removeError(error.key)"></button>
           {{ error.message }}
         </div>
       </div>

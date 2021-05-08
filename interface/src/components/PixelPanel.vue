@@ -23,7 +23,7 @@
               <td v-if="unknownOwner">Unknown</td>
               <td v-else-if="!exists">None</td>
               <td v-else-if="selfOwned">You</td>
-              <td v-else><AddressLink v-bind:address="owner" /></td>
+              <td v-else><AddressLink :address="owner" /></td>
             </tr>
 
             <tr>
@@ -35,7 +35,7 @@
       </div>
 
       <div>
-        <button v-on:click="onBuyClick" v-bind:disabled="!account || selfOwned">
+        <button @click="onBuyClick" :disabled="!account || selfOwned">
           Buy
         </button>
       </div>
@@ -43,15 +43,15 @@
 
     <BuyModal
       v-if="buyModalActive"
-      v-bind:selectedPixel="selectedPixel"
-      v-bind:active="buyModalActive"
-      v-bind:pixelID="pixelID"
-      v-bind:price="price"
-      v-bind:account="account"
-      v-bind:balance="balance"
-      v-bind:taxBase="taxBase"
-      v-on:close="buyModalActive = false"
-      v-on:error="msg => $emit('error', msg)"
+      :selectedPixel="selectedPixel"
+      :active="buyModalActive"
+      :pixelID="pixelID"
+      :price="price"
+      :account="account"
+      :balance="balance"
+      :taxBase="taxBase"
+      @close="buyModalActive = false"
+      @error="msg => $emit('error', msg)"
     />
   </Panel>
 </template>

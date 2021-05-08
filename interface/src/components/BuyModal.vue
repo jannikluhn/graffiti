@@ -1,9 +1,9 @@
 <template>
-  <div v-bind:class="{ 'is-active': active }">
+  <div :class="{ 'is-active': active }">
     <div>
       <header>
         <p>Buy Pixel</p>
-        <button aria-label="close" v-on:click="close()"></button>
+        <button aria-label="close" @click="close()"></button>
       </header>
 
       <section>
@@ -42,7 +42,7 @@
                 New Price (xDai)
               </label>
               <input
-                v-bind:class="{
+                :class="{
                   'is-danger': newPriceInput && newPriceInvalid,
                 }"
                 type="text"
@@ -71,7 +71,7 @@
                 Amount to Deposit (xDai)
               </label>
               <input
-                v-bind:class="{
+                :class="{
                   'is-danger': depositInput && depositInvalid,
                 }"
                 type="text"
@@ -148,13 +148,13 @@
 
       <footer>
         <button
-          v-bind:class="{ 'is-loading': waitingForTx }"
-          v-bind:disabled="buyButtonDisabled"
-          v-on:click="buy()"
+          :class="{ 'is-loading': waitingForTx }"
+          :disabled="buyButtonDisabled"
+          @click="buy()"
         >
           Buy
         </button>
-        <button v-on:click="close()">Cancel</button>
+        <button @click="close()">Cancel</button>
       </footer>
     </div>
   </div>
