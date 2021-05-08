@@ -58,11 +58,18 @@ function weiToEth(wei) {
   return wei.div("1000000000000000000");
 }
 
-function computeMonthlyTax(value) {
-  const v = ethers.BigNumber.from(value);
+function computeMonthlyTax(taxBase) {
+  const v = ethers.BigNumber.from(taxBase);
   const f = 100000;
   const taxYearly = v.mul(Math.round(taxRate * f)).div(f);
   return taxYearly.div(12);
+}
+
+function formatXDai(wei) {
+  if (wei === null || wei === undefined) {
+    return "Unknown";
+  }
+  return ethers.utils.formatEther(wei) + " xDai";
 }
 
 export {
@@ -76,4 +83,5 @@ export {
   colorsRGBA,
   colorHexIndices,
   computeMonthlyTax,
+  formatXDai,
 };

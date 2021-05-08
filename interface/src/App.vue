@@ -5,6 +5,9 @@
         :selectedPixel="selectedPixel"
         :cursorPixel="cursorPixel"
         :wrongNetwork="wrongNetwork"
+        :account="account"
+        :balance="balance"
+        :taxBase="taxBase"
       />
     </div>
     <div class="canvas-container">
@@ -20,6 +23,9 @@
 <script>
 import Canvas from "./components/Canvas.vue";
 import Sidebar from "./components/Sidebar.vue";
+import { balancePollInterval } from "./config.js";
+import { gWeiToWei } from "./utils.js";
+import { ethers } from "ethers";
 
 export default {
   name: "App",
@@ -33,15 +39,30 @@ export default {
       selectedPixel: null,
       cursorPixel: null,
       network: null,
+      account: null,
+      balance: null,
+      taxBase: null,
     };
   },
 
-  mounted() {
+  created() {
     if (this.$provider !== null) {
-      this.$provider.getNetwork().then(network => {
-        this.network = network;
-      });
+      this.loadNetwork();
+      this.loadAccount();
     }
+
+    let pollBalanceRepeatedly = () => {
+      this.pollBalance().then(
+        window.setTimeout(pollBalanceRepeatedly, balancePollInterval)
+      );
+    };
+    pollBalanceRepeatedly();
+
+    this.$contract.on("Bought", (_, seller, buyer) => {
+      if (this.account == seller || this.account == buyer) {
+        this.loadTaxBase();
+      }
+    });
   },
 
   computed: {
@@ -60,6 +81,64 @@ export default {
     },
     onCursorPixelChanged(coords) {
       this.cursorPixel = coords;
+    },
+    onAccountsChanged(accounts) {
+      this.balance = null;
+      this.taxBase = null;
+      if (accounts.length == 0) {
+        this.account = null;
+      } else {
+        this.account = ethers.utils.getAddress(accounts[0]);
+        this.pollBalance();
+        this.loadTaxBase();
+      }
+    },
+
+    loadNetwork() {
+      this.$provider.getNetwork().then(network => {
+        this.network = network;
+      });
+    },
+    loadAccount() {
+      this.$provider
+        .listAccounts()
+        .then(accounts => {
+          this.onAccountsChanged(accounts);
+        })
+        .catch(() => {
+          // TODO: error
+          // this.$error("Failed to get accounts", error);
+        })
+        .finally(() => {
+          window.ethereum.on("accountsChanged", this.onAccountsChanged);
+        });
+    },
+
+    async pollBalance() {
+      if (!this.account) {
+        this.balance = null;
+        return;
+      }
+
+      try {
+        let balanceGWei = await this.$contract.getBalance(this.account);
+        this.balance = gWeiToWei(balanceGWei);
+      } catch (err) {
+        this.balance = null;
+        // TODO: error
+        // this.onError("Failed to query account balance: " + err.message);
+      }
+    },
+
+    loadTaxBase() {
+      this.$contract
+        .getTaxBase(this.account)
+        .then(taxBase => {
+          this.taxBase = gWeiToWei(taxBase);
+        })
+        .catch(() => {
+          // TODO: error
+        });
     },
   },
 };
