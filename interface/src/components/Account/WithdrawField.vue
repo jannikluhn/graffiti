@@ -5,13 +5,13 @@
       <p v-if="amountInput && amountInvalid">Invalid withdraw amount</p>
     </div>
     <div>
-      <a
+      <button
         :class="{ 'is-loading': waitingForTx }"
         :disabled="amountInvalid"
         @click="withdraw"
       >
         Withdraw
-      </a>
+      </button>
     </div>
   </div>
 </template>

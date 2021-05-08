@@ -16,18 +16,19 @@
         </tr>
       </tbody>
     </table>
-    <button @click="modalActive = true">Show Modal</button>
-    <Modal title="Modal" :active="modalActive" @close="modalActive = false">
-      <p>Modal body</p>
-    </Modal>
+    <div>
+      <DepositField :account="account" />
+      <WithdrawField :account="account" :balance="balance" />
+    </div>
   </SidebarSection>
 </template>
 
 <script>
 import SidebarSection from "./SidebarSection.vue";
 import AddressLink from "./AddressLink.vue";
-import Modal from "./Modal.vue";
 import { computeMonthlyTax, formatXDai } from "../utils";
+import DepositField from "./Account/DepositField.vue";
+import WithdrawField from "./Account/WithdrawField.vue";
 
 export default {
   name: "AccountSidebarSection",
@@ -36,7 +37,8 @@ export default {
   components: {
     AddressLink,
     SidebarSection,
-    Modal,
+    DepositField,
+    WithdrawField,
   },
 
   data() {
@@ -47,7 +49,6 @@ export default {
 
   computed: {
     balanceStr() {
-      console.log(this.account);
       return formatXDai(this.balance);
     },
     monthlyTaxStr() {

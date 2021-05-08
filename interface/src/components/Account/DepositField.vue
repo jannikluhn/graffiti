@@ -5,13 +5,9 @@
       <p v-if="amountInput && amountInvalid">Invalid deposit amount</p>
     </div>
     <div>
-      <a
-        :class="{ 'is-loading': waitingForTx }"
-        :disabled="amountInvalid"
-        @click="deposit"
-      >
+      <button :disabled="amountInvalid" @click="deposit">
         Deposit
-      </a>
+      </button>
     </div>
   </div>
 </template>
