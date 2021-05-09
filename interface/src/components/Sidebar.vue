@@ -6,7 +6,12 @@
         :balance="balance"
         :taxBase="taxBase"
       />
-      <PaintSidebarSection :account="account" :selectedPixel="selectedPixel" />
+      <PaintSidebarSection
+        :account="account"
+        :balance="balance"
+        :taxBase="taxBase"
+        :selectedPixel="selectedPixel"
+      />
       <MyPixelsSection
         :account="account"
         :canvasSelectedPixel="selectedPixel"

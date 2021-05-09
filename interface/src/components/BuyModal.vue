@@ -1,166 +1,129 @@
 <template>
-  <div :class="{ 'is-active': active }">
+  <Modal title="Paint Pixel" @close="close">
     <div>
-      <header>
-        <p>Buy Pixel</p>
-        <button aria-label="close" @click="close()"></button>
-      </header>
-
-      <section>
-        <table>
-          <thead>
-            <th>Pixel ID</th>
-            <th>Coordinates</th>
-            <th>Price</th>
-          </thead>
-          <tbody>
-            <tr>
-              <td>{{ pixelID }}</td>
-              <td>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</td>
-              <td>{{ formatDAI(price) }}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <form>
-          <div>
-            <label>
-              New Color
-            </label>
-            <div>
-              <v-swatches
-                v-model="colorSwatch"
-                :swatches="swatches"
-                show-border
-              ></v-swatches>
-            </div>
-          </div>
-
-          <div>
-            <div>
-              <label>
-                New Price (xDai)
-              </label>
-              <input
-                :class="{
-                  'is-danger': newPriceInput && newPriceInvalid,
-                }"
-                type="text"
-                placeholder="xDai"
-                v-model="newPriceInput"
-              />
-            </div>
-            <div>
-              <label>
-                Added Monthly Tax
-              </label>
-              <p>{{ formatDAI(addedTax) }}</p>
-            </div>
-          </div>
-
-          <div v-if="totalTax !== null && !newPriceInvalid && newPrice.gt(0)">
-            Your monthly tax will increase to {{ formatDAI(totalTax) }}.
-          </div>
-          <div v-if="totalTax !== null && !newPriceInvalid && newPrice.eq(0)">
-            Your monthly tax will remain unchanged at {{ formatDAI(totalTax) }}.
-          </div>
-
-          <div>
-            <div>
-              <label>
-                Amount to Deposit (xDai)
-              </label>
-              <input
-                :class="{
-                  'is-danger': depositInput && depositInvalid,
-                }"
-                type="text"
-                placeholder="xDai"
-                v-model="depositInput"
-              />
-            </div>
-            <div>
-              <label>
-                Current balance
-              </label>
-              <p>{{ formatDAI(balance) }}</p>
-            </div>
-          </div>
-
-          <div>
-            <p
-              v-if="
-                (newPriceInput != '' && newPriceInvalid) ||
-                  (depositInput != '' && depositInvalid)
-              "
-            >
-              Some of your inputs are invalid. Please make sure the new price
-              and the deposit amount are properly formatted, are not negative,
-              and are not too fractional.
-            </p>
-            <p
-              v-if="
-                !inputsInvalid &&
-                  totalDepositCoversCost &&
-                  totalDepositSufficient
-              "
-            >
-              The cost of the pixel will be transferred from your deposit to the
-              seller. After the transaction is complete, your balance will be
-              {{ formatDAI(balanceAfterPayment) }} which would
-              {{
-                !noTaxesPaid
-                  ? "cover the Harberger taxes for the next " +
-                    taxMonths +
-                    " months."
-                  : "last forever as you don't pay any taxes at the moment"
-              }}
-            </p>
-            <p v-if="!inputsInvalid && !totalDepositCoversCost">
-              Your current balance is insufficient to pay for the pixel. Please
-              increase the deposit amount by at least
-              {{ formatDAI(balanceAfterPayment.mul(-1)) }}.
-            </p>
-            <p
-              v-if="
-                !inputsInvalid &&
-                  totalDepositCoversCost &&
-                  !totalDepositSufficient &&
-                  !noTaxesPaid
-              "
-            >
-              Your current deposit is sufficient to pay for the pixel, but not
-              much will be left to pay for Harberger taxes. If you don't
-              increase your deposit, you risk losing all your pixels in the near
-              future. It is recommended to increase the deposit amount by
-              {{
-                formatDAI(
-                  balanceAfterPayment
-                    .sub(totalTax.mul(recommendedMonths))
-                    .mul(-1)
-                )
-              }}
-              or more to be on the safe side.
-            </p>
-          </div>
-        </form>
-      </section>
-
-      <footer>
-        <button
-          :class="{ 'is-loading': waitingForTx }"
-          :disabled="buyButtonDisabled"
-          @click="buy()"
-        >
-          Buy
-        </button>
-        <button @click="close()">Cancel</button>
-      </footer>
+      <table>
+        <thead>
+          <th>Pixel ID</th>
+          <th>Coordinates</th>
+          <th>Price</th>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ pixelID }}</td>
+            <td>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</td>
+            <td>{{ formatDAI(price) }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </div>
+    <div>
+      <label>
+        New Color
+      </label>
+      <div>
+        <v-swatches
+          v-model="colorSwatch"
+          :swatches="swatches"
+          show-border
+        ></v-swatches>
+      </div>
+    </div>
+    <div>
+      <label>
+        New Price (xDai)
+      </label>
+      <input type="text" placeholder="xDai" v-model="newPriceInput" />
+    </div>
+    <div>
+      <div>
+        <label>
+          Added Monthly Tax
+        </label>
+        <p>{{ formatDAI(addedTax) }}</p>
+      </div>
+    </div>
+    <div v-if="totalTax !== null && !newPriceInvalid && newPrice.gt(0)">
+      Your monthly tax will increase to {{ formatDAI(totalTax) }}.
+    </div>
+    <div v-if="totalTax !== null && !newPriceInvalid && newPrice.eq(0)">
+      Your monthly tax will remain unchanged at {{ formatDAI(totalTax) }}.
+    </div>
+    <div>
+      <div>
+        <label>
+          Amount to Deposit (xDai)
+        </label>
+        <input type="text" placeholder="xDai" v-model="depositInput" />
+      </div>
+      <div>
+        <label>
+          Current balance
+        </label>
+        <p>{{ formatDAI(balance) }}</p>
+      </div>
+    </div>
+
+    <div>
+      <p
+        v-if="
+          (newPriceInput != '' && newPriceInvalid) ||
+            (depositInput != '' && depositInvalid)
+        "
+      >
+        Some of your inputs are invalid. Please make sure the new price and the
+        deposit amount are properly formatted, are not negative, and are not too
+        fractional.
+      </p>
+      <p
+        v-if="
+          !inputsInvalid && totalDepositCoversCost && totalDepositSufficient
+        "
+      >
+        The cost of the pixel will be transferred from your deposit to the
+        seller. After the transaction is complete, your balance will be
+        {{ formatDAI(balanceAfterPayment) }} which would
+        {{
+          !noTaxesPaid
+            ? "cover the Harberger taxes for the next " + taxMonths + " months."
+            : "last forever as you don't pay any taxes at the moment"
+        }}
+      </p>
+      <p v-if="!inputsInvalid && !totalDepositCoversCost">
+        Your current balance is insufficient to pay for the pixel. Please
+        increase the deposit amount by at least
+        {{ formatDAI(balanceAfterPayment.mul(-1)) }}.
+      </p>
+      <p
+        v-if="
+          !inputsInvalid &&
+            totalDepositCoversCost &&
+            !totalDepositSufficient &&
+            !noTaxesPaid
+        "
+      >
+        Your current deposit is sufficient to pay for the pixel, but not much
+        will be left to pay for Harberger taxes. If you don't increase your
+        deposit, you risk losing all your pixels in the near future. It is
+        recommended to increase the deposit amount by
+        {{
+          formatDAI(
+            balanceAfterPayment.sub(totalTax.mul(recommendedMonths)).mul(-1)
+          )
+        }}
+        or more to be on the safe side.
+      </p>
+    </div>
+    <div>
+      <button :disabled="buyButtonDisabled" @click="buy()">
+        Buy
+      </button>
+      <button @click="close()">Cancel</button>
+    </div>
+  </Modal>
 </template>
 
 <script>
+import Modal from "./Modal.vue";
 import { ethers } from "ethers";
 import {
   weiToGWei,
@@ -168,21 +131,15 @@ import {
   colorsHex,
   colorHexIndices,
   computeMonthlyTax,
+  pixelCoordsToID,
 } from "../utils.js";
+import { gridSize } from "../config.js";
 import VSwatches from "vue-swatches";
 
 export default {
   name: "BuyModal",
-  components: { VSwatches },
-  props: [
-    "active",
-    "price",
-    "pixelID",
-    "account",
-    "balance",
-    "taxBase",
-    "selectedPixel",
-  ],
+  components: { Modal, VSwatches },
+  props: ["price", "account", "balance", "taxBase", "selectedPixel"],
   data() {
     let newPriceInput = "";
     if (this.price) {
@@ -310,6 +267,12 @@ export default {
         this.depositInvalid ||
         !this.totalDepositCoversCost
       );
+    },
+    pixelID() {
+      if (!this.selectedPixel) {
+        return null;
+      }
+      return pixelCoordsToID(this.selectedPixel, gridSize[0]);
     },
   },
   watch: {

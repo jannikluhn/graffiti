@@ -36,9 +36,13 @@
       <p>Click on a pixel to select it.</p>
     </div>
 
-    <Modal
+    <BuyModal
       v-if="buyModalActive"
-      title="Paint Pixel"
+      :account="account"
+      :price="price"
+      :balance="balance"
+      :taxBase="taxBase"
+      :selectedPixel="selectedPixel"
       @close="buyModalActive = false"
     />
   </SidebarSection>
@@ -47,19 +51,19 @@
 <script>
 import SidebarSection from "./SidebarSection.vue";
 import AddressLink from "./AddressLink.vue";
-import Modal from "./Modal.vue";
+import BuyModal from "./BuyModal.vue";
 import { formatXDai, pixelCoordsToID, gWeiToWei } from "../utils.js";
 import { gridSize } from "../config.js";
 import { ethers } from "ethers";
 
 export default {
   name: "PaintSidebarSection",
-  props: ["selectedPixel", "account"],
+  props: ["selectedPixel", "account", "balance", "taxBase"],
 
   components: {
     SidebarSection,
     AddressLink,
-    Modal,
+    BuyModal,
   },
 
   data() {
