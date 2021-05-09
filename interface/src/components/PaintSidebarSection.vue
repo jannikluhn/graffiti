@@ -39,7 +39,6 @@
     <Modal
       v-if="buyModalActive"
       title="Paint Pixel"
-      :active="buyModalActive"
       @close="buyModalActive = false"
     />
   </SidebarSection>

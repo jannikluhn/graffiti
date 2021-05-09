@@ -1,5 +1,5 @@
 <template>
-  <div v-if="active" @click="onBackgroundClick" class="modal">
+  <div @click="onBackgroundClick" class="modal">
     <div @click="onBodyClick" class="modal-body">
       <h1>{{ title }}</h1>
       <slot></slot>
@@ -10,7 +10,7 @@
 <script>
 export default {
   name: "Modal",
-  props: ["active", "title"],
+  props: ["title"],
 
   methods: {
     onBackgroundClick() {
