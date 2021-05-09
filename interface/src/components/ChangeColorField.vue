@@ -13,13 +13,13 @@
       </div>
     </div>
     <div>
-      <a
+      <button
         :class="{ 'is-loading': waitingForTx }"
         @click="changeColor"
         :disabled="!colorChanged"
       >
         Change Color
-      </a>
+      </button>
     </div>
   </div>
 </template>

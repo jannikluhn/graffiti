@@ -7,7 +7,10 @@
         :taxBase="taxBase"
       />
       <PaintSidebarSection :account="account" :selectedPixel="selectedPixel" />
-      <MyPixelsSection />
+      <MyPixelsSection
+        :account="account"
+        :canvasSelectedPixel="selectedPixel"
+      />
       <HelpSection />
     </div>
     <div v-else>

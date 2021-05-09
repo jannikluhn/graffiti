@@ -5,13 +5,13 @@
       <p v-if="priceInput && priceInvalid">Invalid price</p>
     </div>
     <div>
-      <a
+      <button
         :class="{ 'is-loading': waitingForTx }"
         :disabled="priceInvalid"
         @click="changePrice"
       >
         Change Price
-      </a>
+      </button>
     </div>
   </div>
 </template>
@@ -40,7 +40,7 @@ export default {
       }
     },
     priceInvalid() {
-      return this.price === null || this.price <= 0 || this.price % 1e9 != 0;
+      return this.price === null || this.price < 0 || this.price % 1e9 != 0;
     },
   },
 
