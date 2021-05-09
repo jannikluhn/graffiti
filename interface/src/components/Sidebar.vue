@@ -6,7 +6,7 @@
         :balance="balance"
         :taxBase="taxBase"
       />
-      <PaintSidebarSection />
+      <PaintSidebarSection :account="account" :selectedPixel="selectedPixel" />
       <MyPixelsSection />
       <HelpSection />
     </div>
@@ -43,7 +43,7 @@ import ConnectButton from "./ConnectButton.vue";
 
 export default {
   name: "Sidebar",
-  props: ["wrongNetwork", "account", "balance", "taxBase"],
+  props: ["wrongNetwork", "account", "balance", "taxBase", "selectedPixel"],
 
   components: {
     AccountSidebarSection,
