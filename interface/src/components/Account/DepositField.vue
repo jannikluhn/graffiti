@@ -5,7 +5,7 @@
       <p v-if="amountInput && amountInvalid">Invalid deposit amount</p>
     </div>
     <div>
-      <button :disabled="amountInvalid" @click="deposit">
+      <button class="input-btn" :disabled="amountInvalid" @click="deposit">
         Deposit
       </button>
     </div>

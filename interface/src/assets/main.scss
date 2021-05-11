@@ -1,6 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Mono:wght@400;600&display=swap');
+
+// TYPOGRAPHY
+$pixel-type: 'Press Start 2P', monospace;
+
+// LAYOUT
 $sidebar-width: 350px;
 $mobile-max-width: 700px;
+
+// COLORS
+$red: #FF5F5F;
 $modal-background-color: rgba(0, 0, 0, 0.5);
+$ui-background-color: #F5F5F5;
+$rainbow-gradient: linear-gradient(89.71deg, #3FC500 0.22%, #DEBF1F 33.65%, #FF5F5F 70.25%, #4050E0 102.08%);
+$dark-grey: #4B4B4B;
+$dark-border: 2px solid $dark-grey;
+$section-border: 4px solid $dark-grey;
 
 html {
   height: 100%;
@@ -9,4 +23,51 @@ html {
 body {
   margin: 0;
   height: 100%;
+  color: $dark-grey;
+  font-family: 'Roboto Mono', monospace;
+}
+
+.sidebar-container {
+  background-color: $ui-background-color;
+  padding: 1em 2.5em;
+  text-align: center;
+  height: 100%;
+}
+
+.sidebar-container > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 95%;
+}
+
+h1, button:not(.input-btn) {
+  font-family: $pixel-type;
+  text-transform: uppercase;
+  font-size: 18px;
+  text-align: center;
+}
+
+button:not(.input-btn) {
+  color: $dark-grey;
+  width: 75%;
+  border: $dark-border;
+  padding: 8px 0;
+  margin: 5px auto;
+}
+
+#disclaimer {
+  color: $red;
+}
+
+.small-text {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
+  margin-top: 14px;
+}
+
+section {
+  margin-top: 2em;
+  border-top: $section-border;
 }

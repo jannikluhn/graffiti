@@ -6,6 +6,7 @@
     </div>
     <div>
       <button
+        class="input-btn"
         :class="{ 'is-loading': waitingForTx }"
         :disabled="amountInvalid"
         @click="withdraw"

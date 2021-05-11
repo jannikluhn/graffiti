@@ -6,7 +6,7 @@
     <div>
       <button @click="howtoModalActive = true">How-To</button>
     </div>
-    <div>
+    <div id="disclaimer" class="small-text">
       DISCLAIMER: GraffitETH is unaudited. We think it's safe, but who the hell
       knows.
     </div>
