@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import SidebarSection from "./SidebarSection.vue";
 import AddressLink from "./AddressLink.vue";
 import { computeMonthlyTax, formatXDai } from "../utils";
@@ -32,7 +33,7 @@ import WithdrawField from "./Account/WithdrawField.vue";
 
 export default {
   name: "AccountSidebarSection",
-  props: ["account", "balance", "taxBase"],
+  props: ["balance", "taxBase"],
 
   components: {
     AddressLink,
@@ -55,6 +56,9 @@ export default {
       const monthlyTax = this.taxBase ? computeMonthlyTax(this.taxBase) : null;
       return formatXDai(monthlyTax);
     },
+    ...mapState([
+      "account",
+    ]),
   },
 };
 </script>

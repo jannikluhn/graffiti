@@ -1,19 +1,16 @@
 <template>
-  <div v-if="!noWeb3 && !wrongNetwork && account">
+  <div v-if="!noWeb3 && !wrongChain && account">
     <img src="../assets/logoRainbow.svg" width=90% alt="">
     <AccountSidebarSection
-      :account="account"
       :balance="balance"
       :taxBase="taxBase"
     />
     <PaintSidebarSection
-      :account="account"
       :balance="balance"
       :taxBase="taxBase"
       :selectedPixel="selectedPixel"
     />
     <MyPixelsSection
-      :account="account"
       :canvasSelectedPixel="selectedPixel"
     />
     <HelpSection />
@@ -28,8 +25,8 @@
       <a href="https://metamask.io/">Metamask</a>.
     </p>
 
-    <p v-if="!noWeb3 && wrongNetwork">
-      You are connected to a wrong network. Please change to xDai and refresh
+    <p v-if="!noWeb3 && wrongChain">
+      GraffitETH lives on xDai, but you are connected to a different chain. Please change to xDai and refresh
       the page. If you're using Metamask, find instructions
       <a
         href="https://www.xdaichain.com/for-users/wallets/metamask/metamask-setup"
@@ -42,6 +39,8 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
+import * as config from "../config.js";
 import AccountSidebarSection from "./AccountSidebarSection.vue";
 import PaintSidebarSection from "./PaintSidebarSection.vue";
 import MyPixelsSection from "./MyPixelsSection.vue";
@@ -50,7 +49,7 @@ import ConnectButton from "./ConnectButton.vue";
 
 export default {
   name: "Sidebar",
-  props: ["wrongNetwork", "account", "balance", "taxBase", "selectedPixel"],
+  props: ["balance", "taxBase", "selectedPixel"],
 
   components: {
     AccountSidebarSection,
@@ -64,6 +63,19 @@ export default {
     return {
       noWeb3: this.$provider === null,
     };
+  },
+  computed: {
+    wrongChain() {
+      const chainID = this.$store.state.chainID;
+      if (chainID == null) {
+        return null;
+      }
+      return chainID != config.chainID;
+    },
+
+    ...mapState([
+      "account",
+    ])
   },
 };
 </script>
