@@ -95,9 +95,7 @@ export default {
     priceStr() {
       return formatXDai(this.price);
     },
-    ...mapState([
-      "account",
-    ]),
+    ...mapState(["account"]),
   },
 
   watch: {

@@ -64,9 +64,7 @@ export default {
   },
 
   computed: {
-    ...mapState([
-      "account",
-    ]),
+    ...mapState(["account"]),
   },
 
   methods: {
@@ -82,15 +80,21 @@ export default {
       if (accounts.length == 0) {
         this.$store.commit("changeAccount", null);
       } else {
-        this.$store.commit("changeAccount", ethers.utils.getAddress(accounts[0]));
+        this.$store.commit(
+          "changeAccount",
+          ethers.utils.getAddress(accounts[0])
+        );
         this.pollBalance();
         this.loadTaxBase();
       }
     },
 
     loadChain() {
-      const onChainChanged = (chainID) => {
-        this.$store.commit("changeChain", ethers.BigNumber.from(chainID).toNumber());
+      const onChainChanged = chainID => {
+        this.$store.commit(
+          "changeChain",
+          ethers.BigNumber.from(chainID).toNumber()
+        );
       };
       this.$provider.getNetwork().then(network => {
         onChainChanged(network.chainId);

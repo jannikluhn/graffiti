@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState } from "vuex";
 import SidebarSection from "./SidebarSection.vue";
 import ChangeColorField from "./ChangeColorField.vue";
 import ChangePriceField from "./ChangePriceField.vue";
@@ -84,9 +84,7 @@ export default {
       const idBig = ethers.BigNumber.from(this.selectedPixel.id);
       return idToPixelCoords(idBig, gridSize[0]);
     },
-    ...mapState([
-      "account",
-    ]),
+    ...mapState(["account"]),
   },
 
   watch: {

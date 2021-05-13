@@ -159,9 +159,7 @@ export default {
       const idBig = ethers.BigNumber.from(this.selectedPixel.id);
       return idToPixelCoords(idBig, gridSize[0]);
     },
-    ...mapState([
-      "account",
-    ]),
+    ...mapState(["account"]),
   },
 
   methods: {

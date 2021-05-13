@@ -1,10 +1,10 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from "vue";
+import Vuex from "vuex";
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 export const store = new Vuex.Store({
-  strict: process.env.NODE_ENV !== 'production',
+  strict: process.env.NODE_ENV !== "production",
 
   state: {
     account: null,
@@ -18,5 +18,5 @@ export const store = new Vuex.Store({
     changeChain(state, chainID) {
       state.chainID = chainID;
     },
-  }
-})
+  },
+});

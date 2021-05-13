@@ -1,18 +1,13 @@
 <template>
   <div v-if="!noWeb3 && !wrongChain && account">
-    <img src="../assets/logoRainbow.svg" width=90% alt="">
-    <AccountSidebarSection
-      :balance="balance"
-      :taxBase="taxBase"
-    />
+    <img src="../assets/logoRainbow.svg" width="90%" alt="" />
+    <AccountSidebarSection :balance="balance" :taxBase="taxBase" />
     <PaintSidebarSection
       :balance="balance"
       :taxBase="taxBase"
       :selectedPixel="selectedPixel"
     />
-    <MyPixelsSection
-      :canvasSelectedPixel="selectedPixel"
-    />
+    <MyPixelsSection :canvasSelectedPixel="selectedPixel" />
     <HelpSection />
   </div>
   <div v-else>
@@ -26,8 +21,9 @@
     </p>
 
     <p v-if="!noWeb3 && wrongChain">
-      GraffitETH lives on xDai, but you are connected to a different chain. Please change to xDai and refresh
-      the page. If you're using Metamask, find instructions
+      GraffitETH lives on xDai, but you are connected to a different chain.
+      Please change to xDai and refresh the page. If you're using Metamask, find
+      instructions
       <a
         href="https://www.xdaichain.com/for-users/wallets/metamask/metamask-setup"
         >here</a
@@ -73,9 +69,7 @@ export default {
       return chainID != config.chainID;
     },
 
-    ...mapState([
-      "account",
-    ])
+    ...mapState(["account"]),
   },
 };
 </script>
