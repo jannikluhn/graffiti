@@ -1,13 +1,30 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
 import {
+  GraffitETH2,
   Bought,
   ColorChanged,
   PriceChanged,
   Earmarked,
   PixelClaimed,
+  Deposited,
+  Withdrawn,
 } from "../generated/GraffitETH2/GraffitETH2"
-import { Graffiti, Pixel } from "../generated/schema"
-import { log } from '@graphprotocol/graph-ts'
+import { Graffiti, Pixel, Account } from "../generated/schema"
+import { log, Address } from '@graphprotocol/graph-ts'
+
+function updateAccount(accountAddress: Address, contractAddress: Address): void {
+  let account = Account.load(accountAddress.toHex());
+  if (account == null) {
+    log.info("creating account {}", [accountAddress.toHex()]);
+    account = new Account(accountAddress.toHex());
+  }
+
+  let contract = GraffitETH2.bind(contractAddress);
+  account.recordedBalance = contract.getRecordedBalance(accountAddress);
+  account.lastTaxPayment = contract.getLastTaxPayment(accountAddress).toI32();
+  account.taxBase = contract.getTaxBase(accountAddress);
+  account.save();
+}
 
 export function handleColorChanged(event: ColorChanged): void {
   log.debug("color changed {}", [event.params.pixelID.toHex()]);
@@ -41,6 +58,9 @@ export function handleBought(event: Bought): void {
   pixel.owner = event.params.buyer;
   pixel.earmarkedReceiver = new Bytes(20);
   pixel.save()
+
+  updateAccount(event.params.buyer, event.address);
+  updateAccount(event.params.seller, event.address);
 }
 
 export function handlePriceChanged(event: PriceChanged): void {
@@ -56,6 +76,8 @@ export function handlePriceChanged(event: PriceChanged): void {
   }
   pixel.price = event.params.price;
   pixel.save();
+
+  updateAccount(event.params.owner, event.address);
 }
 
 export function handleEarmarked(event: Earmarked): void {
@@ -70,4 +92,15 @@ export function handlePixelClaimed(event: PixelClaimed): void {
   let pixel = Pixel.load(event.params.pixelID.toHex());
   pixel.owner = pixel.earmarkedReceiver;
   pixel.save();
+
+  updateAccount(event.params.oldOwner, event.address);
+  updateAccount(event.params.newOwner, event.address);
+}
+
+export function handleDeposited(event: Deposited): void {
+  updateAccount(event.params.account, event.address);
+}
+
+export function handleWithdrawn(event: Withdrawn): void {
+  updateAccount(event.params.account, event.address);
 }

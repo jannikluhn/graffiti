@@ -29,4 +29,8 @@ dataSources:
           handler: handleEarmarked
         - event: PixelClaimed(indexed uint256,indexed address,indexed address,uint64)
           handler: handlePixelClaimed
+        - event: Deposited(indexed address,indexed address,uint64,int64)
+          handler: handleDeposited
+        - event: Withdrawn(indexed address,indexed address,uint64,int64)
+          handler: handleWithdrawn
       file: ./src/mapping.ts

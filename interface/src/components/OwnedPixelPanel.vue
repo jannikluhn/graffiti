@@ -65,6 +65,7 @@
 
 <script>
 import { ethers } from "ethers";
+import { mapState } from "vuex";
 import gql from "graphql-tag";
 import {
   gWeiToWei,
@@ -158,6 +159,7 @@ export default {
       const idBig = ethers.BigNumber.from(this.selectedPixel.id);
       return idToPixelCoords(idBig, gridSize[0]);
     },
+    ...mapState(["account"]),
   },
 
   methods: {

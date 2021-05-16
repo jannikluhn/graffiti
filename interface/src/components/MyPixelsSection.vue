@@ -14,13 +14,11 @@
     </div>
     <div v-if="selectedPixel">
       <ChangeColorField
-        :account="account"
         :pixelID="selectedPixel.id"
         :currentColor="selectedPixel.color"
         @error="msg => $emit('error', msg)"
       />
       <ChangePriceField
-        :account="account"
         :pixelID="selectedPixel.id"
         @error="msg => $emit('error', msg)"
       />
@@ -29,6 +27,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import SidebarSection from "./SidebarSection.vue";
 import ChangeColorField from "./ChangeColorField.vue";
 import ChangePriceField from "./ChangePriceField.vue";
@@ -54,7 +53,7 @@ const pixelQuery = gql`
 
 export default {
   name: "MyPixelsSection",
-  props: ["account", "canvasSelectedPixel"],
+  props: ["canvasSelectedPixel"],
 
   components: {
     SidebarSection,
@@ -85,6 +84,7 @@ export default {
       const idBig = ethers.BigNumber.from(this.selectedPixel.id);
       return idToPixelCoords(idBig, gridSize[0]);
     },
+    ...mapState(["account"]),
   },
 
   watch: {

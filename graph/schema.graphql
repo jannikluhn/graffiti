@@ -10,3 +10,10 @@ type Pixel @entity {
   color: Int!
   earmarkedReceiver: Bytes!
 }
+
+type Account @entity {
+  id: ID!
+  recordedBalance: BigInt!
+  lastTaxPayment: Int!
+  taxBase: BigInt!
+}

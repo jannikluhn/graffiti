@@ -4,8 +4,6 @@
       <Sidebar
         :selectedPixel="selectedPixel"
         :cursorPixel="cursorPixel"
-        :wrongNetwork="wrongNetwork"
-        :account="account"
         :balance="balance"
         :taxBase="taxBase"
       />
@@ -25,6 +23,7 @@ import Canvas from "./components/Canvas.vue";
 import Sidebar from "./components/Sidebar.vue";
 import { balancePollInterval } from "./config.js";
 import { gWeiToWei } from "./utils.js";
+import { mapState } from "vuex";
 import { ethers } from "ethers";
 
 export default {
@@ -39,7 +38,6 @@ export default {
       selectedPixel: null,
       cursorPixel: null,
       network: null,
-      account: null,
       balance: null,
       taxBase: null,
     };
@@ -47,7 +45,7 @@ export default {
 
   created() {
     if (this.$provider !== null) {
-      this.loadNetwork();
+      this.loadChain();
       this.loadAccount();
     }
 
@@ -66,13 +64,7 @@ export default {
   },
 
   computed: {
-    wrongNetwork() {
-      if (!this.network) {
-        return null;
-      }
-      return this.network.chainId != 100; // xDai
-      // return this.network.chainId != 5 // goerli
-    },
+    ...mapState(["account"]),
   },
 
   methods: {
@@ -86,19 +78,30 @@ export default {
       this.balance = null;
       this.taxBase = null;
       if (accounts.length == 0) {
-        this.account = null;
+        this.$store.commit("changeAccount", null);
       } else {
-        this.account = ethers.utils.getAddress(accounts[0]);
+        this.$store.commit(
+          "changeAccount",
+          ethers.utils.getAddress(accounts[0])
+        );
         this.pollBalance();
         this.loadTaxBase();
       }
     },
 
-    loadNetwork() {
+    loadChain() {
+      const onChainChanged = chainID => {
+        this.$store.commit(
+          "changeChain",
+          ethers.BigNumber.from(chainID).toNumber()
+        );
+      };
       this.$provider.getNetwork().then(network => {
-        this.network = network;
+        onChainChanged(network.chainId);
+        window.ethereum.on("chainChanged", onChainChanged);
       });
     },
+
     loadAccount() {
       this.$provider
         .listAccounts()

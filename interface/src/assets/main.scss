@@ -1,24 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Mono:wght@400;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Mono:wght@400;600&display=swap");
 
 // TYPOGRAPHY
+<<<<<<< HEAD
 $roboto: 'Roboto Mono', monospace;
 $pixel-type: 'Press Start 2P', monospace;
 $font-s: 11px;
 $font-m: 12px;
 $font-l: 13px;
 $font-xl: 16px;
+=======
+$pixel-type: "Press Start 2P", monospace;
+>>>>>>> 4edc292c754459fd9992755345cbb19cb0a1de1c
 
 // LAYOUT
 $sidebar-width: 300px;
 $mobile-max-width: 700px;
 
 // COLORS
+<<<<<<< HEAD
 $red: #FF5F5F;
 $blue: #4050E0;
+=======
+$red: #ff5f5f;
+>>>>>>> 4edc292c754459fd9992755345cbb19cb0a1de1c
 $modal-background-color: rgba(0, 0, 0, 0.5);
-$ui-background-color: #F5F5F5;
-$rainbow-gradient: linear-gradient(89.71deg, #3FC500 0.22%, #DEBF1F 33.65%, #FF5F5F 70.25%, #4050E0 102.08%);
-$dark-grey: #4B4B4B;
+$ui-background-color: #f5f5f5;
+$rainbow-gradient: linear-gradient(
+  89.71deg,
+  #3fc500 0.22%,
+  #debf1f 33.65%,
+  #ff5f5f 70.25%,
+  #4050e0 102.08%
+);
+$dark-grey: #4b4b4b;
 $dark-border: 2px solid $dark-grey;
 $rainbow-border: 2px solid $rainbow-gradient;
 $section-border: 4px solid $dark-grey;
@@ -31,8 +45,12 @@ body {
   margin: 0;
   height: 100%;
   color: $dark-grey;
+<<<<<<< HEAD
   font-family: $roboto;
   font-size: $font-m;
+=======
+  font-family: "Roboto Mono", monospace;
+>>>>>>> 4edc292c754459fd9992755345cbb19cb0a1de1c
 }
 
 .sidebar-container {
@@ -57,7 +75,8 @@ body {
   margin-top: 40px;
 }
 
-h1, button:not(.input-btn) {
+h1,
+button:not(.input-btn) {
   font-family: $pixel-type;
   text-transform: uppercase;
   font-size: $font-xl;
@@ -130,6 +149,7 @@ section {
   margin-top: 2em;
   border-top: $section-border;
 }
+<<<<<<< HEAD
 
 table {
   text-align: left;
@@ -146,3 +166,5 @@ table {
   }
 }
 
+=======
+>>>>>>> 4edc292c754459fd9992755345cbb19cb0a1de1c

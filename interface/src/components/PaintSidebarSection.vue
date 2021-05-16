@@ -49,6 +49,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import SidebarSection from "./SidebarSection.vue";
 import AddressLink from "./AddressLink.vue";
 import BuyModal from "./BuyModal.vue";
@@ -58,7 +59,7 @@ import { ethers } from "ethers";
 
 export default {
   name: "PaintSidebarSection",
-  props: ["selectedPixel", "account", "balance", "taxBase"],
+  props: ["selectedPixel", "balance", "taxBase"],
 
   components: {
     SidebarSection,
@@ -94,6 +95,7 @@ export default {
     priceStr() {
       return formatXDai(this.price);
     },
+    ...mapState(["account"]),
   },
 
   watch: {
