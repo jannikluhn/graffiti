@@ -26,7 +26,7 @@
       </table>
 
       <div>
-        <button @click="onBuyClick" :disabled="!account || selfOwned">
+        <button class="rainbow" @click="onBuyClick" :disabled="!account || selfOwned">
           Buy
         </button>
       </div>

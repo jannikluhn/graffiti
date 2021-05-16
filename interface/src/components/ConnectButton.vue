@@ -1,5 +1,5 @@
 <template>
-  <button @click="connect" :disabled="waiting">Connect</button>
+  <button @click="connect" :disabled="waiting" class="rainbow">Connect</button>
 </template>
 
 <script>

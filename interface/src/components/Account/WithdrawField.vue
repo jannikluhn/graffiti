@@ -1,19 +1,17 @@
 <template>
-  <div>
+  <div class="input">
     <div>
       <input type="text" placeholder="xDai" v-model="amountInput" />
       <p v-if="amountInput && amountInvalid">Invalid withdraw amount</p>
     </div>
-    <div>
-      <button
-        class="input-btn"
-        :class="{ 'is-loading': waitingForTx }"
-        :disabled="amountInvalid"
-        @click="withdraw"
-      >
-        Withdraw
-      </button>
-    </div>
+    <button
+      class="input-btn"
+      :class="{ 'is-loading': waitingForTx }"
+      :disabled="amountInvalid"
+      @click="withdraw"
+    >
+      Withdraw
+    </button>
   </div>
 </template>
 

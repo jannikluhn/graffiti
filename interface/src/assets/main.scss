@@ -1,19 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Mono:wght@400;600&display=swap');
 
 // TYPOGRAPHY
+$roboto: 'Roboto Mono', monospace;
 $pixel-type: 'Press Start 2P', monospace;
+$font-s: 11px;
+$font-m: 12px;
+$font-l: 13px;
+$font-xl: 16px;
 
 // LAYOUT
-$sidebar-width: 350px;
+$sidebar-width: 300px;
 $mobile-max-width: 700px;
 
 // COLORS
 $red: #FF5F5F;
+$blue: #4050E0;
 $modal-background-color: rgba(0, 0, 0, 0.5);
 $ui-background-color: #F5F5F5;
 $rainbow-gradient: linear-gradient(89.71deg, #3FC500 0.22%, #DEBF1F 33.65%, #FF5F5F 70.25%, #4050E0 102.08%);
 $dark-grey: #4B4B4B;
 $dark-border: 2px solid $dark-grey;
+$rainbow-border: 2px solid $rainbow-gradient;
 $section-border: 4px solid $dark-grey;
 
 html {
@@ -24,12 +31,13 @@ body {
   margin: 0;
   height: 100%;
   color: $dark-grey;
-  font-family: 'Roboto Mono', monospace;
+  font-family: $roboto;
+  font-size: $font-m;
 }
 
 .sidebar-container {
   background-color: $ui-background-color;
-  padding: 1em 2.5em;
+  padding: 2em 2.5em;
   text-align: center;
   height: 100%;
 }
@@ -38,13 +46,21 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 95%;
+  height: 80%;
+}
+
+.logo {
+  margin: 0 auto;
+}
+
+.help-section > div:first-of-type {
+  margin-top: 40px;
 }
 
 h1, button:not(.input-btn) {
   font-family: $pixel-type;
   text-transform: uppercase;
-  font-size: 18px;
+  font-size: $font-xl;
   text-align: center;
 }
 
@@ -56,12 +72,55 @@ button:not(.input-btn) {
   margin: 5px auto;
 }
 
+button.rainbow {
+  border: 3px solid;
+  border-image-slice: 1;
+  border-image-source: $rainbow-gradient;
+}
+
+.input {
+  display: flex;
+  justify-content: center;
+  border: 1px solid $dark-grey;
+  width: 80%;
+  height: 30px;
+  margin: 8px auto 0 auto;
+  > div {
+    width: 60%;
+    height: 100%;
+    input {
+      font-size: $font-m;
+      font-family: $roboto;
+      padding-left: 10px;
+      width: 100%;
+      height: 100%;
+      padding: 0 0 0 10px;
+      border: none;
+      background-color:#FFF;
+    }
+
+  }
+  .input-btn {
+    width: 40%;
+    font-size: $font-m;
+    font-family: $roboto;
+    border: none;
+    padding: 0;
+    text-align: center;
+    color: $dark-grey;
+    border-left: 1px solid $dark-grey;
+  }
+}
+
 #disclaimer {
   color: $red;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .small-text {
-  font-size: 11px;
+  font-size: $font-s;
   font-weight: 600;
   text-align: left;
   margin-top: 14px;
@@ -71,3 +130,19 @@ section {
   margin-top: 2em;
   border-top: $section-border;
 }
+
+table {
+  text-align: left;
+  margin: 0 auto 12px auto;
+  th {
+    font-size: $font-l;
+    padding-right: 28px; 
+  }
+  td {
+    font-size: $font-m;
+    a {
+      color: $blue;
+    }
+  }
+}
+

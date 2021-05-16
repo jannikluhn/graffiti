@@ -35,8 +35,8 @@
       </div>
 
       <div>
-        <button @click="onBuyClick" :disabled="!account || selfOwned">
-          Buy
+        <button class="rainbow" @click="onBuyClick" :disabled="!account || selfOwned">
+          Buy it
         </button>
       </div>
     </div>
