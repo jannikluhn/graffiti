@@ -252,3 +252,16 @@ table {
     }
   }
 }
+
+/* class applies to select element itself, not a wrapper element */
+select {
+  padding: .6em 1.4em .5em .8em;
+  width: 75%;
+  max-width: 75%; /* useful when width is set to anything other than 100% */
+  margin: 0;
+  border: 2px solid $dark-grey;
+  border-radius: 0;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
