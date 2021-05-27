@@ -55,6 +55,10 @@ body {
   height: 80%;
 }
 
+button, a, select {
+  cursor: pointer;
+}
+
 .logo {
   margin: 30px auto 30px;
 }
