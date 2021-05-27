@@ -1,28 +1,20 @@
 @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Mono:wght@400;600&display=swap");
 
 // TYPOGRAPHY
-<<<<<<< HEAD
 $roboto: 'Roboto Mono', monospace;
 $pixel-type: 'Press Start 2P', monospace;
 $font-s: 11px;
 $font-m: 12px;
 $font-l: 13px;
 $font-xl: 16px;
-=======
-$pixel-type: "Press Start 2P", monospace;
->>>>>>> 4edc292c754459fd9992755345cbb19cb0a1de1c
 
 // LAYOUT
 $sidebar-width: 300px;
 $mobile-max-width: 700px;
 
 // COLORS
-<<<<<<< HEAD
 $red: #FF5F5F;
 $blue: #4050E0;
-=======
-$red: #ff5f5f;
->>>>>>> 4edc292c754459fd9992755345cbb19cb0a1de1c
 $modal-background-color: rgba(0, 0, 0, 0.5);
 $ui-background-color: #f5f5f5;
 $rainbow-gradient: linear-gradient(
@@ -45,12 +37,8 @@ body {
   margin: 0;
   height: 100%;
   color: $dark-grey;
-<<<<<<< HEAD
   font-family: $roboto;
   font-size: $font-m;
-=======
-  font-family: "Roboto Mono", monospace;
->>>>>>> 4edc292c754459fd9992755345cbb19cb0a1de1c
 }
 
 .sidebar-container {
@@ -63,12 +51,12 @@ body {
 .sidebar-container > div {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: start;
   height: 80%;
 }
 
 .logo {
-  margin: 0 auto;
+  margin: 30px auto 30px;
 }
 
 .help-section > div:first-of-type {
@@ -149,7 +137,6 @@ section {
   margin-top: 2em;
   border-top: $section-border;
 }
-<<<<<<< HEAD
 
 table {
   text-align: left;
@@ -166,5 +153,54 @@ table {
   }
 }
 
-=======
->>>>>>> 4edc292c754459fd9992755345cbb19cb0a1de1c
+.swatch {
+  width: 35px;
+  height: 15px;
+  border-radius: 3px;
+}
+
+.info-modal {
+  position: absolute;
+  margin: 0;
+  width: 100vw;
+  min-height: 100vh;
+  left: 0;
+  top: 0;
+  background: #EEE;
+  .close {
+    display: flex;
+    justify-content: end;
+    padding: 30px;
+  }
+  section {
+    border: none;
+    width: 45vw;
+    margin: 30px auto 100px;
+  }
+  nav {
+    display: flex;
+    justify-content: space-evenly;
+    font-family: $pixel-type;
+    text-transform: uppercase;
+    font-size: 24px;
+    margin: 65px;
+    a {
+      padding: 6px 0;
+    }
+    .is-active {
+      border-bottom: $dark-grey solid 5px;
+    }
+  }
+  .content {
+    text-align: left;
+    font-size: 16px;
+    line-height: 1.6;
+    label {
+      font-weight: 600;
+      font-size: 21px;
+    }
+    > div {
+      margin-bottom: 45px;
+    }
+  }
+}

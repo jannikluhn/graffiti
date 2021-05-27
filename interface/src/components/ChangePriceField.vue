@@ -19,18 +19,15 @@
 <script>
 import { ethers } from "ethers";
 import { weiToGWei } from "../utils";
-
 export default {
   name: "ChangePriceField",
   props: ["account", "pixelID"],
-
   data() {
     return {
       priceInput: null,
       waitingForTx: false,
     };
   },
-
   computed: {
     price() {
       try {
@@ -43,13 +40,11 @@ export default {
       return this.price === null || this.price < 0 || this.price % 1e9 != 0;
     },
   },
-
   methods: {
     async changePrice() {
       if (this.priceInvalid) {
         return;
       }
-
       this.waitingForTx = true;
       try {
         let signer = this.$provider.getSigner(this.account);

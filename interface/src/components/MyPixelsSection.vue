@@ -40,7 +40,6 @@ import {
 import { gridSize } from "../config.js";
 import { ethers } from "ethers";
 import gql from "graphql-tag";
-
 const pixelQuery = gql`
   query pixelsOf($address: Bytes, $lastID: String) {
     pixels(first: 100, where: { owner: $address, id_gt: $lastID }) {
@@ -50,11 +49,9 @@ const pixelQuery = gql`
     }
   }
 `;
-
 export default {
   name: "MyPixelsSection",
   props: ["canvasSelectedPixel"],
-
   components: {
     SidebarSection,
     ChangeColorField,
@@ -66,7 +63,6 @@ export default {
       selectedPixel: null,
     };
   },
-
   computed: {
     price() {
       if (!this.selectedPixel) {
@@ -86,7 +82,6 @@ export default {
     },
     ...mapState(["account"]),
   },
-
   watch: {
     account: {
       handler: function(newAddress, oldAddress) {
@@ -107,7 +102,6 @@ export default {
       if (!this.canvasSelectedPixel) {
         return;
       }
-
       const id = pixelCoordsToID(this.canvasSelectedPixel, gridSize[0]);
       for (let p of this.pixels) {
         const pIdBig = ethers.BigNumber.from(p.id);
@@ -118,7 +112,6 @@ export default {
       }
     },
   },
-
   methods: {
     async queryPixels() {
       this.pixels = [];
@@ -150,7 +143,6 @@ export default {
         }
       }
     },
-
     onChange(event) {
       const id = event.target.value;
       for (let pixel of this.pixels) {
@@ -160,7 +152,6 @@ export default {
         }
       }
     },
-
     hexToIntStr(n) {
       return ethers.BigNumber.from(n).toString();
     },

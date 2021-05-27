@@ -11,29 +11,31 @@
       knows.
     </div>
 
-    <Modal
+    <AboutModal
       v-if="aboutModalActive"
       title="About"
       @close="aboutModalActive = false"
+      class="info-modal"
     />
-    <Modal
+    <AboutModal
       v-else-if="howtoModalActive"
       title="How-To"
       @close="howtoModalActive = false"
+      class="info-modal"
     />
   </SidebarSection>
 </template>
 
 <script>
 import SidebarSection from "./SidebarSection.vue";
-import Modal from "./Modal.vue";
+import AboutModal from "./AboutModal";
 
 export default {
   name: "HelpSection",
 
   components: {
     SidebarSection,
-    Modal,
+    AboutModal
   },
 
   data() {

@@ -27,15 +27,12 @@
 <script>
 import VSwatches from "vue-swatches";
 import { colorHexIndices, colorsHex } from "../utils";
-
 export default {
   name: "ChangeColorField",
   components: {
     VSwatches,
   },
-
   props: ["account", "pixelID", "currentColor"],
-
   data() {
     return {
       waitingForTx: false,
@@ -43,7 +40,6 @@ export default {
       swatches: colorsHex,
     };
   },
-
   watch: {
     currentColor: {
       handler() {
@@ -52,19 +48,16 @@ export default {
       immediate: true,
     },
   },
-
   computed: {
     colorChanged() {
       return colorHexIndices[this.colorHex] != this.currentColor;
     },
   },
-
   methods: {
     async changeColor() {
       if (!this.colorChanged) {
         return;
       }
-
       this.waitingForTx = true;
       try {
         let signer = this.$provider.getSigner(this.account);

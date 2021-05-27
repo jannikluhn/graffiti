@@ -1,31 +1,28 @@
 <template>
   <div :class="{ 'is-active': active }">
-    <div></div>
     <div>
       <header>
-        <button aria-label="close" @click="close()"></button>
+        <a aria-label="close" class="close" @click="close()"><img src="../assets/close.svg" alt=""></a>
       </header>
       <section>
         <div>
-          <img src="../assets/logoRainbow.svg" width="387px" alt="GraffitETH" />
+          <img src="../assets/logoBlack.svg" width="550px" alt="GraffitETH" />
         </div>
-        <div>
-          <ul>
-            <li
-              :class="{ 'is-active': selectedTab == 0 }"
-              @click="selectedTab = 0"
-            >
-              <a><strong>About</strong></a>
-            </li>
-            <li
-              :class="{ 'is-active': selectedTab == 1 }"
-              @click="selectedTab = 1"
-            >
-              <a><strong>How to</strong></a>
-            </li>
-          </ul>
-        </div>
-        <div v-if="selectedTab == 0">
+        <nav>
+          <a 
+            :class="{ 'is-active': selectedTab == 0 }"
+            @click="selectedTab = 0"
+          >
+            About
+          </a>
+          <a 
+          :class="{ 'is-active': selectedTab == 1 }"
+          @click="selectedTab = 1"
+          >
+            How to
+          </a>
+        </nav>
+        <div  class="content" v-if="selectedTab == 0">
           <div>
             <label>
               What it is
@@ -223,7 +220,7 @@
             </p>
           </div>
         </div>
-        <div v-if="selectedTab == 1">
+        <div class="content" v-if="selectedTab == 1">
           <div>
             <label>
               Web3 Setup
