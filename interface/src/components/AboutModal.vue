@@ -8,7 +8,7 @@
         <div>
           <img src="../assets/logoBlack.svg" width="550px" alt="GraffitETH" />
         </div>
-        <nav>
+        <nav class="header-type">
           <a 
             :class="{ 'is-active': selectedTab == 0 }"
             @click="selectedTab = 0"

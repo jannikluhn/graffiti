@@ -2,68 +2,75 @@
   <Modal title="Paint Pixel" @close="close">
     <div>
       <table>
-        <thead>
-          <th>Pixel ID</th>
-          <th>Coordinates</th>
-          <th>Price</th>
-        </thead>
         <tbody>
-          <tr>
-            <td>{{ pixelID }}</td>
-            <td>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</td>
-            <td>{{ formatDAI(price) }}</td>
-          </tr>
+        <tr>
+          <th>Pixel ID</th>
+          <td>{{ pixelID }}</td>
+        </tr>
+        <tr>
+          <th>Coordinates</th>
+          <td>{{ selectedPixel[0] }}, {{ selectedPixel[1] }}</td>
+        </tr>
+        <tr>
+          <th>Price</th>
+          <td>{{ formatDAI(price) }}</td>
+        </tr>
         </tbody>
       </table>
     </div>
-    <div>
+    <div class="modal-item">
       <label>
-        New Color
+        Choose a color
       </label>
       <div>
         <v-swatches
           v-model="colorSwatch"
           :swatches="swatches"
-          show-border
+          inline
         ></v-swatches>
       </div>
     </div>
-    <div>
+    <div class="modal-item modal-input">
       <label>
-        New Price (xDai)
+        Set a Price
       </label>
-      <input type="text" placeholder="xDai" v-model="newPriceInput" />
+      <div>
+        <input type="text" placeholder="xDai" v-model="newPriceInput" />
+        <span> xDai</span>
+      </div>
     </div>
-    <div>
+    <div class="modal-item">
       <div>
         <label>
           Added Monthly Tax
         </label>
         <p>{{ formatDAI(addedTax) }}</p>
       </div>
+      <div v-if="totalTax !== null && !newPriceInvalid && newPrice.gt(0)">
+        Your monthly tax will <br>increase to {{ formatDAI(totalTax) }}.
+      </div>
+      <div v-if="totalTax !== null && !newPriceInvalid && newPrice.eq(0)">
+        Your monthly tax will remain unchanged at {{ formatDAI(totalTax) }}.
+      </div>
     </div>
-    <div v-if="totalTax !== null && !newPriceInvalid && newPrice.gt(0)">
-      Your monthly tax will increase to {{ formatDAI(totalTax) }}.
-    </div>
-    <div v-if="totalTax !== null && !newPriceInvalid && newPrice.eq(0)">
-      Your monthly tax will remain unchanged at {{ formatDAI(totalTax) }}.
-    </div>
-    <div>
+    
+    <div class="modal-item modal-input">
+      <label>
+        Deposit
+      </label>
       <div>
-        <label>
-          Amount to Deposit (xDai)
-        </label>
         <input type="text" placeholder="xDai" v-model="depositInput" />
+        <span> xDai</span>
       </div>
-      <div>
-        <label>
-          Current balance
-        </label>
-        <p>{{ formatDAI(balance) }}</p>
-      </div>
+    </div>
+    <div class="modal-item">
+      <label>
+        Current balance
+      </label>
+      <p>{{ formatDAI(balance) }}</p>
     </div>
 
-    <div>
+    <div class="modal-item">
       <p
         v-if="
           (newPriceInput != '' && newPriceInvalid) ||
@@ -113,8 +120,8 @@
         or more to be on the safe side.
       </p>
     </div>
-    <div>
-      <button :disabled="buyButtonDisabled" @click="buy()">
+    <div class="modal-item">
+      <button class="rainbow" :disabled="buyButtonDisabled" @click="buy()">
         Buy
       </button>
       <button @click="close()">Cancel</button>

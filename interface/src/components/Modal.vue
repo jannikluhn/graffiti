@@ -1,7 +1,7 @@
 <template>
   <div @click="onBackgroundClick" class="modal">
     <div @click="onBodyClick" class="modal-body">
-      <h1>{{ title }}</h1>
+      <header class="header-type">{{ title }}</header>
       <slot></slot>
     </div>
   </div>
@@ -41,7 +41,17 @@ export default {
   position: absolute;
   top: 50%;
   left: 50%;
+  padding-bottom: 15px;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
+  background: $ui-background-color;
+  width: 35vw;
+  header {
+    background: $rainbow-gradient;
+    font-size: 21px;
+    color: #FFF;
+    padding: 30px 0;
+    margin-bottom: 45px;
+  }
 }
 </style>

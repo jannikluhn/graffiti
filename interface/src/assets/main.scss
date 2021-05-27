@@ -184,8 +184,6 @@ table {
   nav {
     display: flex;
     justify-content: space-evenly;
-    font-family: $pixel-type;
-    text-transform: uppercase;
     font-size: 24px;
     margin: 65px;
     a {
@@ -205,6 +203,52 @@ table {
     }
     > div {
       margin-bottom: 45px;
+    }
+  }
+}
+
+.header-type {
+  font-family: $pixel-type;
+  text-transform: uppercase;
+}
+
+.modal table, .modal-item {
+  width: 50%;
+}
+
+.modal-item {
+  margin: 25px auto;
+  text-align: left;
+  label {
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .vue-swatches__container {
+    background: none !important;
+    margin-top: 12px;
+  }
+  .vue-swatches__swatch {
+    margin: 4px !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 5px !important;
+  }
+  button {
+    width: 100%;
+  }
+}
+
+.modal-input {
+  display: flex;
+  justify-content: space-between;
+  div {
+    margin-right: 18px;
+    input {
+      border: none;
+      height: 24px;
+      text-align: right;
+      padding: 0 8px;
+      width: 115px;
     }
   }
 }
